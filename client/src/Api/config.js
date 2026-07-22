@@ -1,7 +1,15 @@
 import axios from "axios";
 
-const rawBackendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-const backendUrl = rawBackendUrl.replace(/\/$/, "");
+const getBackendUrl = () => {
+  const envUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.BACKEND_URL;
+  if (envUrl) return envUrl;
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return window.location.origin;
+  }
+  return 'http://localhost:5000';
+};
+
+const backendUrl = getBackendUrl().replace(/\/$/, "");
 
 // Create axios instance
 const api = axios.create({
