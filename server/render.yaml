@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: lms-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_TOKEN
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: CLOUDINARY_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_SECRET_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
