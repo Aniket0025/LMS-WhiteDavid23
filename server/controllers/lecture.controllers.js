@@ -3,6 +3,8 @@ import Chapter from "../model/chapter.model.js";
 import Lecture from "../model/lecture.model.js";
 import User from "../model/user.model.js";
 import { uploadVideoToCloudinary, uploadImageToCloudinary, uploadRawFileToCloudinary } from "../config/multer.js";
+import { cloudinary } from "../config/cloudnary.js";
+import AdmZip from "adm-zip";
 
 
 export const createLecture = async (req, res) => {
@@ -330,5 +332,97 @@ export const getLectureWithAccess = async (req, res) => {
       success: false,
       message: error.message
     });
+  }
+};
+
+// Proxy document content from Cloudinary (bypasses free-tier PDF delivery restriction)
+export const proxyDocument = async (req, res) => {
+  try {
+    const { lectureId } = req.params;
+    const { userId } = req.user;
+
+    // Find the lecture
+    const lecture = await Lecture.findById(lectureId).populate({
+      path: 'chapter',
+      populate: { path: 'course', model: 'Course' }
+    });
+
+    if (!lecture) {
+      return res.status(404).json({ success: false, message: "Lecture not found" });
+    }
+
+    // Check access
+    const courseId = lecture.chapter.course._id;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const isEnrolled = user.enrolledCourse.includes(courseId);
+    const isEducator = lecture.chapter.course.educator.toString() === userId.toString();
+    if (!isEnrolled && !isEducator) {
+      return res.status(403).json({ success: false, message: "Access denied" });
+    }
+
+    if (lecture.lectureType !== 'file' || !lecture.videoUrl) {
+      return res.status(400).json({ success: false, message: "Not a document lecture" });
+    }
+
+    // Extract public_id from the Cloudinary URL
+    // URL format: https://res.cloudinary.com/<cloud>/raw/upload/v<version>/<public_id>
+    const urlParts = lecture.videoUrl.split('/raw/upload/');
+    if (urlParts.length < 2) {
+      return res.status(400).json({ success: false, message: "Invalid document URL" });
+    }
+    // Remove version prefix (v123456/) to get the public_id
+    const afterUpload = urlParts[1];
+    const publicId = afterUpload.replace(/^v\d+\//, '');
+
+    // Use Cloudinary's generate_archive API to download the file as a zip
+    // This API is NOT blocked by the free-tier PDF delivery restriction
+    const archiveUrl = cloudinary.utils.download_zip_url({
+      public_ids: [publicId],
+      resource_type: 'raw',
+      flatten_folders: true
+    });
+
+    // Fetch the zip from Cloudinary
+    const archiveResponse = await fetch(archiveUrl);
+    if (!archiveResponse.ok) {
+      console.error('Cloudinary archive download failed:', archiveResponse.status, archiveResponse.statusText);
+      return res.status(502).json({ success: false, message: "Failed to fetch document from storage" });
+    }
+
+    const zipBuffer = Buffer.from(await archiveResponse.arrayBuffer());
+
+    // Extract the PDF from the zip
+    const zip = new AdmZip(zipBuffer);
+    const entries = zip.getEntries();
+
+    if (entries.length === 0) {
+      return res.status(404).json({ success: false, message: "No document found in archive" });
+    }
+
+    const fileEntry = entries[0];
+    const fileBuffer = fileEntry.getData();
+
+    // Determine content type from file extension
+    const fileName = publicId.split('/').pop() || 'document';
+    let contentType = 'application/octet-stream';
+    if (fileName.endsWith('.pdf')) contentType = 'application/pdf';
+    else if (fileName.endsWith('.doc')) contentType = 'application/msword';
+    else if (fileName.endsWith('.docx')) contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    else if (fileName.endsWith('.ppt')) contentType = 'application/vnd.ms-powerpoint';
+    else if (fileName.endsWith('.pptx')) contentType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Length', fileBuffer.length);
+    res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+    res.setHeader('Cache-Control', 'private, max-age=3600');
+    res.send(fileBuffer);
+
+  } catch (error) {
+    console.error('Proxy document error:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };

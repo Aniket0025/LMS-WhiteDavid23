@@ -8,7 +8,8 @@ import {
   getLectureById,
   deleteLecture,
   reorderLectures,
-  getLectureWithAccess
+  getLectureWithAccess,
+  proxyDocument
 } from '../controllers/lecture.controllers.js';
 
 const lectureRouter = express.Router();
@@ -20,6 +21,7 @@ lectureRouter.get('/:lectureId', getLectureById);
 
 // Protected routes for accessing lecture content (requires enrollment)
 lectureRouter.get('/access/:lectureId', authenticate, getLectureWithAccess);
+lectureRouter.get('/document/:lectureId', authenticate, proxyDocument);
 
 // Protected routes (educators only)
 lectureRouter.post('/:courseId/:chapterId', authenticate, authorize('educator'), upload.single('video'), createLecture); 

@@ -21,7 +21,8 @@ import {
   CheckCircle2,
   ImageIcon,
   ExternalLink,
-  Download
+  Download,
+  Maximize2
 } from 'lucide-react';
 import { getCourseById } from '../../Api/courseApi';
 import { checkCoursePurchase, getCourseProgress, updateCourseProgress } from '../../Api/userApi';
@@ -36,22 +37,48 @@ const CourseLearn = () => {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   
-  const getDownloadUrl = (url) => {
+  // Build the server-side proxy URL for a document lecture
+  const getDocumentProxyUrl = (lectureId) => {
+    if (!lectureId) return '';
+    const backendUrl = (import.meta.env.VITE_BACKEND_URL || import.meta.env.BACKEND_URL || 'http://localhost:5000').replace(/\/$/, '');
+    const token = localStorage.getItem('token');
+    return `${backendUrl}/api/lecture/document/${lectureId}?token=${encodeURIComponent(token || '')}`;
+  };
+
+  const getViewerSrc = (url, mode, lectureId) => {
     if (!url) return '';
-    if (url.includes('res.cloudinary.com') && !url.includes('fl_attachment')) {
-      if (url.includes('/raw/upload/')) {
-        return url.replace('/raw/upload/', '/raw/upload/fl_attachment/');
-      }
-      if (url.includes('/image/upload/')) {
-        return url.replace('/image/upload/', '/image/upload/fl_attachment/');
-      }
-      if (url.includes('/upload/')) {
-        return url.replace('/upload/', '/upload/fl_attachment/');
-      }
+    // For direct mode, use our server proxy to bypass Cloudinary's 401
+    if (mode === 'direct' && lectureId) {
+      return getDocumentProxyUrl(lectureId);
+    }
+    if (mode === 'google') {
+      return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
     }
     return url;
   };
-  
+
+  // Download document via proxy (fetch as blob and trigger save)
+  const handleDocumentDownload = async (lectureId, fileName) => {
+    try {
+      const proxyUrl = getDocumentProxyUrl(lectureId);
+      const response = await fetch(proxyUrl);
+      if (!response.ok) throw new Error('Download failed');
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName || 'document.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Document download error:', err);
+      // Fallback: open in new tab
+      window.open(getDocumentProxyUrl(lectureId), '_blank');
+    }
+  };
+
   // Course and content state
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -67,14 +94,44 @@ const CourseLearn = () => {
   const [videoLoading, setVideoLoading] = useState(false);
   
   // UI state
-  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024); // Start closed on tablets and mobile
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [videoSize, setVideoSize] = useState('normal'); // 'small', 'normal', 'large'
+  const [videoSize, setVideoSize] = useState('large');
   const [previewDocUrl, setPreviewDocUrl] = useState(null);
+  const [modalViewerMode, setModalViewerMode] = useState('direct');
+  const [inlineViewerMode, setInlineViewerMode] = useState('direct');
+  const [notesText, setNotesText] = useState('');
+  const [savedNotesStatus, setSavedNotesStatus] = useState('');
+
+  // Load notes from localStorage when current lecture changes
+  useEffect(() => {
+    if (courseId && currentVideoData?._id) {
+      const saved = localStorage.getItem(`lms_notes_${courseId}_${currentVideoData._id}`);
+      setNotesText(saved || '');
+    }
+  }, [courseId, currentVideoData]);
+
+  const handleSaveNotes = () => {
+    if (!courseId || !currentVideoData?._id) return;
+    localStorage.setItem(`lms_notes_${courseId}_${currentVideoData._id}`, notesText);
+    setSavedNotesStatus('Notes saved!');
+    setTimeout(() => setSavedNotesStatus(''), 3000);
+  };
+
+  const handleDownloadNotes = () => {
+    if (!notesText.trim()) return;
+    const blob = new Blob([notesText], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${currentVideoData?.title || 'lecture'}_notes.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   // Handle window resize
   useEffect(() => {
@@ -971,30 +1028,69 @@ const CourseLearn = () => {
                         />
                       </div>
                     ) : currentVideoData.lectureType === 'file' ? (
-                      <div className="w-full h-full flex flex-col items-center justify-center bg-slate-950 p-8 text-center min-h-[50vh] pb-24 space-y-5">
-                        <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-2 animate-pulse">
-                          <FileText className="w-8 h-8 text-blue-400" />
+                      <div className="w-full h-full flex flex-col bg-slate-950 rounded-lg overflow-hidden border border-slate-800">
+                        {/* Main Document Viewer Header Toolbar */}
+                        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 bg-slate-900 border-b border-slate-800 text-xs">
+                          <div className="flex items-center space-x-2">
+                            <span className="flex items-center font-medium text-green-400 bg-green-950/60 border border-green-800/40 px-2 py-0.5 rounded text-[11px]">
+                              <FileText className="w-3.5 h-3.5 mr-1" />
+                              Document / PDF Notes
+                            </span>
+                          </div>
+
+                          {/* Viewer Label */}
+                          <div className="flex items-center space-x-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                            <span className="px-2.5 py-1 rounded text-[11px] font-medium bg-blue-600 text-white">
+                              PDF Viewer
+                            </span>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => setPreviewDocUrl(currentVideoData.videoUrl)}
+                              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium flex items-center space-x-1.5 shadow-sm text-xs"
+                            >
+                              <Maximize2 className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">Expand Modal</span>
+                            </button>
+                            <button
+                              onClick={() => handleDocumentDownload(currentVideoData._id, currentVideoData.title + '.pdf')}
+                              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition-colors font-medium flex items-center space-x-1.5 border border-slate-700 text-xs"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">Download</span>
+                            </button>
+                          </div>
                         </div>
-                        <h3 className="text-lg font-semibold text-white">{currentVideoData.title}</h3>
-                        <p className="text-slate-400 text-xs max-w-sm">
-                          This lecture contains a document file (PDF, Word, or PowerPoint presentation). You can download or view it below.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                          <button
-                            onClick={() => setPreviewDocUrl(currentVideoData.videoUrl)}
-                            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-xs font-medium flex items-center justify-center space-x-2 shadow-lg shadow-blue-600/20"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                            <span>View Document</span>
-                          </button>
-                          <a
-                            href={getDownloadUrl(currentVideoData.videoUrl)}
-                            download
-                            className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition-colors text-xs font-medium flex items-center justify-center space-x-2 border border-slate-700"
-                          >
-                            <Download className="w-3.5 h-3.5" />
-                            <span>Download File</span>
-                          </a>
+
+                        {/* Document Viewer Frame */}
+                        <div className="flex-1 w-full bg-slate-900 relative min-h-[400px] flex flex-col">
+                          <iframe
+                            key={`${currentVideoData._id}-${inlineViewerMode}`}
+                            src={getViewerSrc(currentVideoData.videoUrl, inlineViewerMode, currentVideoData._id)}
+                            title={currentVideoData.title}
+                            className="w-full h-full border-0 absolute inset-0 bg-slate-950"
+                            allow="fullscreen"
+                          />
+                        </div>
+
+                        {/* Helper Bar */}
+                        <div className="px-4 py-2 bg-slate-900/80 border-t border-slate-800 flex flex-wrap items-center justify-between text-[11px] text-slate-400 gap-2">
+                          <span>
+                            Having trouble viewing? Switch engine tabs above or open/download the file directly.
+                          </span>
+                          <div className="flex items-center space-x-3 font-medium">
+                            <a
+                              href={currentVideoData.videoUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-blue-400 hover:underline flex items-center space-x-1"
+                            >
+                              <span>Open in new tab</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          </div>
                         </div>
                       </div>
                     ) : (
@@ -1020,21 +1116,23 @@ const CourseLearn = () => {
                     )}
 
                     {/* Video Overlay Information */}
-                    <motion.div 
-                      initial={{ opacity: 0, y: -20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className=""
-                    >
-                      <h3 className="font-semibold text-base md:text-lg mb-1">{currentVideoData.title}</h3>
-                      <p className="text-xs md:text-sm text-slate-300">
-                        <span className="hidden sm:inline">Chapter {currentChapter + 1}, Lecture {currentLecture + 1}</span>
-                        <span className="sm:hidden">Ch {currentChapter + 1}, L {currentLecture + 1}</span>
-                        {currentVideoData.duration && ` • ${currentVideoData.duration}`}
-                      </p>
-                    </motion.div>
+                    {currentVideoData.lectureType !== 'file' && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className=""
+                      >
+                        <h3 className="font-semibold text-base md:text-lg mb-1">{currentVideoData.title}</h3>
+                        <p className="text-xs md:text-sm text-slate-300">
+                          <span className="hidden sm:inline">Chapter {currentChapter + 1}, Lecture {currentLecture + 1}</span>
+                          <span className="sm:hidden">Ch {currentChapter + 1}, L {currentLecture + 1}</span>
+                          {currentVideoData.duration && ` • ${currentVideoData.duration}`}
+                        </p>
+                      </motion.div>
+                    )}
 
                     {/* Enhanced Mark Complete Button */}
-                    {!isLectureCompleted(currentChapter, currentLecture) && (
+                    {currentVideoData.lectureType !== 'file' && !isLectureCompleted(currentChapter, currentLecture) && (
                       <motion.div 
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -1053,7 +1151,7 @@ const CourseLearn = () => {
                     )}
 
                     {/* Completed Indicator */}
-                    {isLectureCompleted(currentChapter, currentLecture) && (
+                    {currentVideoData.lectureType !== 'file' && isLectureCompleted(currentChapter, currentLecture) && (
                       <motion.div 
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -1071,26 +1169,28 @@ const CourseLearn = () => {
                     )}
 
                     {/* Video Controls Enhancement */}
-                    <div className="absolute bottom-12 md:bottom-16 left-2 md:left-4 flex items-center space-x-2">
-                      {canGoPrevious() && (
-                        <button
-                          onClick={goToPreviousLecture}
-                          className="p-1.5 md:p-2 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm transition-colors"
-                          title="Previous Lecture"
-                        >
-                          <SkipBack className="w-3 h-3 md:w-4 md:h-4" />
-                        </button>
-                      )}
-                      {canGoNext() && (
-                        <button
-                          onClick={goToNextLecture}
-                          className="p-1.5 md:p-2 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm transition-colors"
-                          title="Next Lecture"
-                        >
-                          <SkipForward className="w-3 h-3 md:w-4 md:h-4" />
-                        </button>
-                      )}
-                    </div>
+                    {currentVideoData.lectureType !== 'file' && (
+                      <div className="absolute bottom-12 md:bottom-16 left-2 md:left-4 flex items-center space-x-2">
+                        {canGoPrevious() && (
+                          <button
+                            onClick={goToPreviousLecture}
+                            className="p-1.5 md:p-2 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm transition-colors"
+                            title="Previous Lecture"
+                          >
+                            <SkipBack className="w-3 h-3 md:w-4 md:h-4" />
+                          </button>
+                        )}
+                        {canGoNext() && (
+                          <button
+                            onClick={goToNextLecture}
+                            className="p-1.5 md:p-2 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm transition-colors"
+                            title="Next Lecture"
+                          >
+                            <SkipForward className="w-3 h-3 md:w-4 md:h-4" />
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   /* Fallback for lectures without video */
@@ -1142,103 +1242,134 @@ const CourseLearn = () => {
           </div>
         </div>
 
-        {/* Notes Panel - Only visible on larger screens */}
+        {/* Notes Panel - Responsive Drawer */}
         {showNotes && (
           <motion.div 
             initial={{ x: 300, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 300, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="hidden lg:flex w-80 bg-slate-900 border-l border-slate-800 p-6 flex-col"
+            className="fixed lg:relative inset-y-0 right-0 z-50 w-full sm:w-96 lg:w-80 bg-slate-900 border-l border-slate-800 p-5 flex flex-col shadow-2xl"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white font-semibold">Notes</h3>
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+              <div className="flex items-center space-x-2">
+                <FileText className="w-5 h-5 text-blue-400" />
+                <div>
+                  <h3 className="text-white font-semibold text-sm">Personal Notes</h3>
+                  <p className="text-[11px] text-slate-400 truncate max-w-[200px]">
+                    {currentVideoData?.title || 'Current Lecture'}
+                  </p>
+                </div>
+              </div>
               <button
                 onClick={() => setShowNotes(false)}
-                className="text-slate-400 hover:text-white transition-colors"
+                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="space-y-4 flex-1">
+            <div className="space-y-4 flex-1 flex flex-col">
               <textarea
-                className="w-full h-32 bg-slate-800 border border-slate-700 rounded-lg p-3 text-white placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
-                placeholder="Take notes while learning..."
+                value={notesText}
+                onChange={(e) => setNotesText(e.target.value)}
+                className="w-full flex-1 bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white placeholder-slate-500 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm leading-relaxed"
+                placeholder="Type your notes for this lecture here... Notes are saved automatically per lecture."
               />
-              <button className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm">
-                Save Notes
-              </button>
+              {savedNotesStatus && (
+                <div className="text-xs text-green-400 font-medium px-1 animate-pulse">
+                  {savedNotesStatus}
+                </div>
+              )}
+              <div className="flex space-x-2">
+                <button 
+                  onClick={handleSaveNotes}
+                  className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-medium text-xs flex items-center justify-center space-x-1.5 shadow-lg shadow-blue-600/20"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Save Notes</span>
+                </button>
+                <button 
+                  onClick={handleDownloadNotes}
+                  disabled={!notesText.trim()}
+                  className="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-300 rounded-xl transition-colors text-xs font-medium flex items-center justify-center border border-slate-700"
+                  title="Download notes as text file"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
 
         {/* Sub Window Document Viewer Modal */}
         {previewDocUrl && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 md:p-8">
-            <div className="bg-[#0f172a] border border-slate-800 rounded-3xl w-full h-[85vh] max-w-6xl overflow-hidden shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-200">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-2 sm:p-4 md:p-8">
+            <div className="bg-[#0f172a] border border-slate-800 rounded-2xl md:rounded-3xl w-full h-[90vh] max-w-6xl overflow-hidden shadow-2xl flex flex-col animate-in fade-in zoom-in-95 duration-200">
               {/* Modal Header */}
-              <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800 bg-slate-900/50">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-5 h-5 text-blue-400" />
+              <div className="flex flex-wrap justify-between items-center px-4 md:px-6 py-3 border-b border-slate-800 bg-slate-900/90 gap-2">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                    <FileText className="w-5 h-5" />
+                  </div>
                   <div className="min-w-0">
-                    <h3 className="text-sm font-bold text-white font-sans truncate max-w-[200px] md:max-w-md">
+                    <h3 className="text-sm font-bold text-white truncate max-w-[180px] sm:max-w-xs md:max-w-md">
                       {currentVideoData?.title || 'Document Viewer'}
                     </h3>
-                    <p className="text-[10px] text-slate-500 font-mono truncate max-w-[200px] md:max-w-md select-all">
+                    <p className="text-[10px] text-slate-400 font-mono truncate max-w-[180px] sm:max-w-xs md:max-w-md select-all">
                       {previewDocUrl.split('/').pop()}
                     </p>
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-3">
-                  <a
-                    href={getDownloadUrl(previewDocUrl)}
-                    download
-                    className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors border border-slate-700"
+
+                {/* Viewer Label */}
+                <div className="flex items-center space-x-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                  <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-600 text-white">
+                    PDF Viewer
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleDocumentDownload(currentVideoData?._id, (currentVideoData?.title || 'document') + '.pdf')}
+                    className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors border border-slate-700"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Download</span>
-                  </a>
+                  </button>
                   <button 
                     onClick={() => setPreviewDocUrl(null)}
                     className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                    title="Close modal"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
-              {/* Modal Body / Iframe Viewer */}
-              <div className="flex-1 bg-slate-950 relative flex flex-col justify-center items-center">
-                {/* Fallback & Loading state note */}
-                <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-0 text-center text-xs text-slate-500 pointer-events-none">
-                  Loading Document Preview...
-                </div>
-                
+              {/* Modal Body / Viewer */}
+              <div className="flex-1 bg-slate-950 relative flex flex-col">
                 <iframe
-                  src={
-                    previewDocUrl.toLowerCase().endsWith('.pdf')
-                      ? previewDocUrl
-                      : `https://docs.google.com/viewer?url=${encodeURIComponent(previewDocUrl)}&embedded=true`
-                  }
+                  key={`${previewDocUrl}-${modalViewerMode}`}
+                  src={getViewerSrc(previewDocUrl, modalViewerMode, currentVideoData?._id)}
                   title="Document Preview Sub-Window"
-                  className="w-full h-full border-0 relative z-10 bg-transparent"
-                  allow="autoplay"
+                  className="w-full h-full border-0 bg-slate-950 relative z-10"
+                  allow="fullscreen"
                 />
               </div>
               
               {/* Modal Footer helper */}
-              <div className="px-6 py-3 border-t border-slate-800 bg-slate-900/30 text-center flex flex-col sm:flex-row justify-between items-center gap-2">
+              <div className="px-6 py-3 border-t border-slate-800 bg-slate-900/60 text-center flex flex-col sm:flex-row justify-between items-center gap-2">
                 <span className="text-[11px] text-slate-400">
-                  Preview not loading? Microsoft/Google viewers can take a moment to load some document formats.
+                  Preview not loading? Use engine buttons above or open directly in a new tab.
                 </span>
                 <a 
                   href={previewDocUrl}
                   target="_blank" 
                   rel="noreferrer" 
-                  className="text-[11px] text-blue-400 hover:underline hover:text-blue-300 font-semibold"
+                  className="text-[11px] text-blue-400 hover:underline hover:text-blue-300 font-semibold flex items-center space-x-1"
                 >
-                  Open directly in new window ➜
+                  <span>Open directly in new window</span>
+                  <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
             </div>
@@ -1250,3 +1381,4 @@ const CourseLearn = () => {
 };
 
 export default CourseLearn;
+

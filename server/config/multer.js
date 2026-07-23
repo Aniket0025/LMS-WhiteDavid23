@@ -146,9 +146,11 @@ export const uploadRawFileToCloudinary = async (fileBuffer, fileName) => {
       cloudinary.uploader
         .upload_stream(
           {
-            resource_type: "auto", // Automatically detect file type
+            resource_type: "raw",
             folder: "lms-documents",
             public_id: fileName,
+            type: "upload",
+            access_mode: "public",
           },
           (error, result) => {
             if (error) {

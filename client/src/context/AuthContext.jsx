@@ -44,16 +44,18 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     const tokenExpiry = localStorage.getItem('tokenExpiry');
     
-    if (token && tokenExpiry) {
+    if (token) {
       const now = new Date().getTime();
-      const expiryTime = parseInt(tokenExpiry);
+      const expiryTime = tokenExpiry ? parseInt(tokenExpiry) : 0;
       
-      // If token is still valid (check if not expired), restore session
-      if (expiryTime > now) { // Simply check if token hasn't expired
+      // If we have a token, try to use it regardless of expiry tracking
+      // The server will reject it if it's actually expired
+      if (!tokenExpiry || expiryTime > now) {
+        // Token exists and hasn't expired (or no expiry set) - restore session
         setIsLoggedIn(true);
         fetchUserProfile();
       } else {
-        // Token is expired, try to refresh it
+        // Token expiry has passed, try to refresh it
         refreshToken();
       }
     } else {
@@ -62,26 +64,24 @@ export const AuthProvider = ({ children }) => {
 
     // Set up automatic token refresh every 7 days (instead of 24 hours)
     const refreshInterval = setInterval(() => {
-      if (isLoggedIn) {
-        const tokenExpiry = localStorage.getItem('tokenExpiry');
-        if (tokenExpiry) {
-          const now = new Date().getTime();
-          const expiryTime = parseInt(tokenExpiry);
-          
-          // Refresh token if it expires within 7 days
-          if (expiryTime - now < (7 * 24 * 60 * 60 * 1000)) {
-            refreshToken();
-          }
+      const currentToken = localStorage.getItem('token');
+      const currentExpiry = localStorage.getItem('tokenExpiry');
+      if (currentToken && currentExpiry) {
+        const now = new Date().getTime();
+        const expiryTime = parseInt(currentExpiry);
+        
+        // Refresh token if it expires within 7 days
+        if (expiryTime - now < (7 * 24 * 60 * 60 * 1000)) {
+          refreshToken();
         }
       }
     }, 6 * 60 * 60 * 1000); // Check every 6 hours
 
     return () => {
       clearInterval(refreshInterval);
-      // Clean up force logout event listener
       window.removeEventListener('forceLogout', handleForceLogout);
     };
-  }, [isLoggedIn]);
+  }, []); // Empty dependency array - only run once on mount
 
   // Add force logout event listener
   useEffect(() => {
@@ -131,8 +131,10 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
-      // If user profile fetch fails, the token might be invalid
-      handleTokenExpiry();
+      // Only logout if it's an auth error (401), not network errors
+      if (error?.response?.status === 401 || error?.status === 401) {
+        handleTokenExpiry();
+      }
     } finally {
       setLoading(false);
     }
