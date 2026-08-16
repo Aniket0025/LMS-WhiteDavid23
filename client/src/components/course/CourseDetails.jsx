@@ -28,7 +28,7 @@ const CourseDetails = () => {
   const params = useParams();
   const { id: courseId } = params; // Extract 'id' parameter and rename it to 'courseId'
   const navigate = useNavigate();
-  const { user, isLoggedIn } = useAuth();
+  const { user, isLoggedIn, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [expandedSection, setExpandedSection] = useState(null);
   const [course, setCourse] = useState(null);
@@ -145,6 +145,7 @@ const CourseDetails = () => {
   }, [courseId]);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!isLoggedIn) {
       navigate('/login');
       return;
@@ -159,7 +160,7 @@ const CourseDetails = () => {
         window.location.href = "https://whitedavid23.org/courses";
       }
     }
-  }, [user, isLoggedIn, courseId, navigate]);
+  }, [user, isLoggedIn, authLoading, courseId, navigate]);
 
   useEffect(() => {
     checkPurchaseStatus();
@@ -264,6 +265,11 @@ const CourseDetails = () => {
       </div>
     );
   }
+
+  const isUserEnrolled = purchaseStatus.isEnrolled || (user && user.enrolledCourse && user.enrolledCourse.some(c => {
+    const id = c._id || c;
+    return courseId && id.toString() === courseId.toString();
+  }));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-16 md:pt-24">
@@ -618,7 +624,13 @@ const CourseDetails = () => {
                   </div>
                   
                   {/* Status Badge */}
-                  {course.isPublished ? (
+                  {isUserEnrolled ? (
+                    <div className="absolute top-2 md:top-3 right-2 md:right-3">
+                      <span className="px-2 md:px-3 py-1 bg-emerald-600/90 backdrop-blur-sm text-white text-xs font-medium rounded-full">
+                        Enrolled
+                      </span>
+                    </div>
+                  ) : course.isPublished ? (
                     <div className="absolute top-2 md:top-3 right-2 md:right-3">
                       <span className="px-2 md:px-3 py-1 bg-green-600/90 backdrop-blur-sm text-white text-xs font-medium rounded-full">
                         Available
@@ -633,30 +645,43 @@ const CourseDetails = () => {
                   )}
                 </div>
 
-                {/* Purchase Section */}
+                {/* Purchase / Course Info Section */}
                 <div className="p-4 md:p-6">
-                  {/* Price */}
-                  <div className="mb-4 md:mb-6">
-                    <div className="flex items-baseline space-x-2 md:space-x-3 mb-2">
-                      <span className="text-2xl md:text-3xl font-bold text-white">₹{course.price || '0'}</span>
-                      {course.originalPrice && course.originalPrice > course.price && (
-                        <>
-                          <span className="text-base md:text-lg text-slate-400 line-through">₹{course.originalPrice}</span>
-                          <span className="px-2 py-1 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-semibold rounded-full">
-                            {Math.round(((course.originalPrice - course.price) / course.originalPrice) * 100)}% OFF
-                          </span>
-                        </>
-                      )}
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="flex text-yellow-400">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className={`w-3 h-3 md:w-4 md:h-4 ${i < Math.floor(calculateAverageRating()) ? 'fill-current' : ''}`} />
-                        ))}
+                  {/* Price (Hidden if enrolled) */}
+                  {!isUserEnrolled ? (
+                    <div className="mb-4 md:mb-6">
+                      <div className="flex items-baseline space-x-2 md:space-x-3 mb-2">
+                        <span className="text-2xl md:text-3xl font-bold text-white">₹{course.price || '0'}</span>
+                        {course.originalPrice && course.originalPrice > course.price && (
+                          <>
+                            <span className="text-base md:text-lg text-slate-400 line-through">₹{course.originalPrice}</span>
+                            <span className="px-2 py-1 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-semibold rounded-full">
+                              {Math.round(((course.originalPrice - course.price) / course.originalPrice) * 100)}% OFF
+                            </span>
+                          </>
+                        )}
                       </div>
-                      <span className="text-slate-300 text-xs md:text-sm">({course.ratings?.length || 0} reviews)</span>
+                      <div className="flex items-center space-x-2">
+                        <div className="flex text-yellow-400">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-3 h-3 md:w-4 md:h-4 ${i < Math.floor(calculateAverageRating()) ? 'fill-current' : ''}`} />
+                          ))}
+                        </div>
+                        <span className="text-slate-300 text-xs md:text-sm">({course.ratings?.length || 0} reviews)</span>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="mb-4 md:mb-6">
+                      <div className="flex items-center space-x-2">
+                        <div className="flex text-yellow-400">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-3 h-3 md:w-4 md:h-4 ${i < Math.floor(calculateAverageRating()) ? 'fill-current' : ''}`} />
+                          ))}
+                        </div>
+                        <span className="text-slate-300 text-xs md:text-sm">({course.ratings?.length || 0} reviews)</span>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Action Buttons */}
                   <div className="space-y-2 md:space-y-3 mb-4 md:mb-6">
@@ -667,7 +692,7 @@ const CourseDetails = () => {
                       >
                         Login to Enroll
                       </button>
-                    ) : purchaseStatus.loading ? (
+                    ) : purchaseStatus.loading && !isUserEnrolled ? (
                       <button
                         disabled
                         className="w-full py-3 md:py-4 font-semibold rounded-lg md:rounded-xl bg-slate-700 text-slate-400 cursor-not-allowed text-sm md:text-base"
@@ -677,12 +702,12 @@ const CourseDetails = () => {
                           <span>Checking...</span>
                         </div>
                       </button>
-                    ) : purchaseStatus.isEnrolled ? (
+                    ) : isUserEnrolled ? (
                       <button
                         onClick={handleExplore}
                         className="w-full py-3 md:py-4 font-semibold rounded-lg md:rounded-xl bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-green-500/25 text-sm md:text-base flex items-center justify-center space-x-2"
                       >
-                        <Play className="w-4 h-4" />
+                        <Play className="w-4 h-4 fill-current" />
                         <span>Continue Learning</span>
                       </button>
                     ) : (

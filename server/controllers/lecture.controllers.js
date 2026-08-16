@@ -310,9 +310,8 @@ export const getLectureWithAccess = async (req, res) => {
       });
     }
 
-    const isEnrolled = user.enrolledCourse.includes(courseId);
+    const isEnrolled = user.enrolledCourse && user.enrolledCourse.some(id => (id._id || id).toString() === courseId.toString());
     const isEducator = lecture.chapter.course.educator.toString() === userId.toString();
-
 
     if (!isEnrolled && !isEducator) {
       return res.status(403).json({
@@ -358,7 +357,7 @@ export const proxyDocument = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    const isEnrolled = user.enrolledCourse.includes(courseId);
+    const isEnrolled = user.enrolledCourse && user.enrolledCourse.some(id => (id._id || id).toString() === courseId.toString());
     const isEducator = lecture.chapter.course.educator.toString() === userId.toString();
     if (!isEnrolled && !isEducator) {
       return res.status(403).json({ success: false, message: "Access denied" });

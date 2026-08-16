@@ -15,8 +15,8 @@ const EducatorLayout = () => {
   const { isLoggedIn, user, loading } = useAuth();
   const location = useLocation();
 
-  // Show loading spinner while checking authentication
-  if (loading) {
+  // Show loading spinner while checking authentication or loading user data
+  if (loading || (isLoggedIn && !user)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 flex items-center justify-center">
         <div className="text-center">

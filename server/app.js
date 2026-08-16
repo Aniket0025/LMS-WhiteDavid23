@@ -28,6 +28,7 @@ app.use(morgan('dev'));
 // CORS configuration supporting dynamic Vercel domains and local dev
 const allowedOrigins = [
   'http://localhost:5173',
+  'http://localhost:5174',
   'http://localhost:3000',
   process.env.CLIENT_URL
 ].filter(Boolean);
@@ -35,10 +36,10 @@ const allowedOrigins = [
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin)) {
-      return callback(null, true);
+    if (allowedOrigins.includes(origin) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) || /\.vercel\.app$/.test(origin)) {
+      return callback(null, origin);
     }
-    return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
   },
   credentials: true
 }));

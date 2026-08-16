@@ -22,6 +22,17 @@ export const updateUserProfile = async (profileData) => {
   }
 };
 
+//  Change Password
+export const changePassword = async (passwords) => {
+  try {
+    const res = await api.post("/user/change-password", passwords);
+    return res.data;
+  } catch (error) {
+    console.error("Error changing password:", error);
+    throw error.response?.data || { message: "Failed to change password" };
+  }
+};
+
 //  Upload Profile Picture
 export const uploadProfilePicture = async (file) => {
   try {

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Search as SearchIcon, 
   Clock,
@@ -8,375 +8,461 @@ import {
   Users,
   BookOpen,
   X,
-  Loader
+  Loader,
+  Filter,
+  Sparkles,
+  ArrowRight,
+  TrendingUp,
+  CheckCircle2
 } from 'lucide-react';
-import {searchCourses} from '../../Api/courseApi.js';
+
+import { searchCourses, getAllCourses } from '../../Api/courseApi.js';
 import { useAuth } from '../../context/AuthContext';
+
+const POPULAR_SEARCHES = [
+  'All Courses',
+  'JavaScript',
+  'Python',
+  'React',
+  'Data Science',
+  'UI/UX Design',
+  'Machine Learning',
+  'Web Development'
+];
 
 const Search = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  
+  const [searchParams, setSearchParams] = useSearchParams();
+  const queryParam = searchParams.get('query') || searchParams.get('q') || '';
+
+  const [searchTerm, setSearchTerm] = useState(queryParam);
   const [searchResults, setSearchResults] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
+  const [allCourses, setAllCourses] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [sortBy, setSortBy] = useState('recent');
 
-  
+  // Load courses on initial mount or when query search param changes
+  const executeSearch = async (term, cat = selectedCategory) => {
+    setIsLoading(true);
+    setError(null);
 
-  const handleSearch = async (e) => {
+    try {
+      let response;
+      if (!term.trim() || term === 'All Courses') {
+        response = await searchCourses('');
+      } else {
+        response = await searchCourses(term.trim(), { category: cat !== 'All' ? cat : undefined });
+      }
+
+      let fetchedCourses = response?.data || response?.courses || [];
+      if (!Array.isArray(fetchedCourses) && response?.success && Array.isArray(response.data)) {
+        fetchedCourses = response.data;
+      }
+
+      setSearchResults(fetchedCourses);
+      if (!term.trim()) {
+        setAllCourses(fetchedCourses);
+      }
+    } catch (err) {
+      console.error('Search error:', err);
+      setError(err.message || 'Failed to search courses');
+      setSearchResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const q = searchParams.get('query') || searchParams.get('q') || '';
+    setSearchTerm(q);
+    executeSearch(q);
+  }, [searchParams]);
+
+  const handleSearchSubmit = (e) => {
     e.preventDefault();
-    if (!searchTerm.trim()) return;
+    if (searchTerm.trim()) {
+      setSearchParams({ query: searchTerm.trim() });
+    } else {
+      setSearchParams({});
+    }
+    executeSearch(searchTerm);
+  };
 
-    setIsLoading(true);
-    setError(null);
-    setHasSearched(true);
-
-    try {
-  const response = await searchCourses(searchTerm.trim());
-      setSearchResults(response.data || []);
-    } catch (error) {
-      console.error('Search error:', error);
-      setError(error.message || 'Failed to search courses');
-      setSearchResults([]);
-    } finally {
-      setIsLoading(false);
+  const handlePopularSearch = (tag) => {
+    if (tag === 'All Courses') {
+      setSearchTerm('');
+      setSearchParams({});
+      executeSearch('');
+    } else {
+      setSearchTerm(tag);
+      setSearchParams({ query: tag });
+      executeSearch(tag);
     }
   };
 
-  const handlePopularSearch = async (term) => {
-    setSearchTerm(term);
-    setIsLoading(true);
-    setError(null);
-    setHasSearched(true);
-
-    try {
-    const response = await searchCourses(term);
-      setSearchResults(response.data || []);
-    } catch (error) {
-      console.error('Search error:', error);
-      setError(error.message || 'Failed to search courses');
-      setSearchResults([]);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    setSearchParams({});
+    executeSearch('');
   };
-  
+
+  // Sort & Filter search results
+  const filteredAndSortedCourses = searchResults
+    .filter(course => {
+      if (selectedCategory === 'All') return true;
+      return course.category?.toLowerCase().includes(selectedCategory.toLowerCase());
+    })
+    .sort((a, b) => {
+      if (sortBy === 'popular') {
+        return (b.enrolledStudents?.length || 0) - (a.enrolledStudents?.length || 0);
+      }
+      if (sortBy === 'rating') {
+        const getAvg = (ratings) => ratings && ratings.length > 0 
+          ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length 
+          : 0;
+        return getAvg(b.ratings) - getAvg(a.ratings);
+      }
+      if (sortBy === 'price-low') {
+        return (a.price || 0) - (b.price || 0);
+      }
+      if (sortBy === 'price-high') {
+        return (b.price || 0) - (a.price || 0);
+      }
+      // recent default
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    });
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6 }
+    transition: { duration: 0.5 }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-24 pb-16">
-      {/* Background Elements */}
-      <div className="absolute inset-0 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 pt-24 pb-20 text-slate-100">
+      {/* Dynamic Glow Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-32 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
-      <div className="container mx-auto px-6 lg:px-8 relative z-10">
-        {/* Header */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 max-w-7xl">
+        
+        {/* Header Hero */}
         <motion.div
           variants={fadeInUp}
           initial="initial"
           animate="animate"
-          className="text-center mb-12"
+          className="text-center mb-10"
         >
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-            Find Your Perfect
-            <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent block mt-2">
-              Learning Path
-            </span>
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-4">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Explore Course Library</span>
+          </div>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight mb-4">
+            Find Your Next <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">Learning Goal</span>
           </h1>
-          <p className="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-            Discover thousands of courses designed to help you master new skills and advance your career
+          <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
+            Discover thousands of video courses designed by expert instructors to build real-world skills
           </p>
         </motion.div>
 
-        {/* Search Bar */}
+        {/* Main Search Input Form */}
         <motion.div
           variants={fadeInUp}
           initial="initial"
           animate="animate"
-          transition={{ delay: 0.2 }}
-          className="max-w-4xl mx-auto mb-12"
+          transition={{ delay: 0.1 }}
+          className="max-w-3xl mx-auto mb-8"
         >
-          <form onSubmit={handleSearch} className="relative">
-            <div className="flex items-center bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-2 shadow-2xl">
-              <div className="relative flex-1">
-                <SearchIcon className="absolute left-6 top-1/2 transform -translate-y-1/2 text-slate-400 w-6 h-6" />
+          <form onSubmit={handleSearchSubmit} className="relative">
+            <div className="flex items-center bg-slate-900/80 backdrop-blur-2xl border border-slate-700/80 rounded-2xl p-2 shadow-2xl focus-within:border-blue-500/80 transition-all duration-300">
+              <div className="relative flex-1 flex items-center">
+                <SearchIcon className="absolute left-4 text-slate-400 w-5 h-5" />
                 <input
                   type="text"
-                  placeholder="What do you want to learn today?"
+                  placeholder="Search courses, skills, technologies (e.g. React, Python...)"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-16 pr-6 py-4 bg-transparent text-white placeholder-slate-400 focus:outline-none text-lg"
+                  className="w-full pl-12 pr-10 py-3.5 bg-transparent text-white placeholder-slate-400 text-sm sm:text-base focus:outline-none"
                 />
+                {searchTerm && (
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="absolute right-3 p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
               </div>
               
               <button
                 type="submit"
-                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105"
+                className="px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-500/20 transition-all transform hover:scale-[1.02] shrink-0"
               >
                 Search
               </button>
             </div>
           </form>
-
-          {/* Filters removed per user request */}
         </motion.div>
 
-        {/* Popular Searches */}
+        {/* Popular Searches Pills */}
         <motion.div
           variants={fadeInUp}
           initial="initial"
           animate="animate"
-          transition={{ delay: 0.4 }}
-          className="max-w-4xl mx-auto mb-12"
+          transition={{ delay: 0.2 }}
+          className="max-w-4xl mx-auto mb-10 text-center"
         >
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-semibold text-white mb-4">Popular Searches</h2>
-            <div className="flex flex-wrap justify-center gap-3">
-              {['JavaScript', 'Python', 'React', 'Data Science', 'UI/UX Design', 'Machine Learning'].map((tag) => (
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-3">Popular Topics</span>
+          <div className="flex flex-wrap justify-center gap-2">
+            {POPULAR_SEARCHES.map((tag) => {
+              const isActive = (tag === 'All Courses' && !searchTerm) || (searchTerm.toLowerCase() === tag.toLowerCase());
+              return (
                 <button
                   key={tag}
                   onClick={() => handlePopularSearch(tag)}
-                  className="px-6 py-3 bg-slate-800/50 border border-slate-600/50 rounded-full text-slate-300 hover:text-white hover:border-slate-500/50 transition-all duration-200"
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                    isActive
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 border border-blue-500'
+                      : 'bg-slate-900/60 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 hover:bg-slate-800/60'
+                  }`}
                 >
                   {tag}
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </motion.div>
 
-     
-
-        {/* Search Results */}
+        {/* Filter & Sort Bar */}
         <motion.div
           variants={fadeInUp}
           initial="initial"
           animate="animate"
-          transition={{ delay: 0.8 }}
-          className="mt-16"
+          transition={{ delay: 0.3 }}
+          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 mb-8 border-b border-slate-800"
         >
-          {isLoading ? (
-            <div className="text-center">
-              <div className="bg-slate-800/30 backdrop-blur-sm border border-slate-700/30 rounded-2xl p-12">
-                <Loader className="w-16 h-16 text-blue-500 mx-auto mb-4 animate-spin" />
-                <h3 className="text-2xl font-semibold text-white mb-2">Searching...</h3>
-                <p className="text-slate-400">Finding the perfect courses for you</p>
-              </div>
-            </div>
-          ) : error ? (
-            <div className="text-center">
-              <div className="bg-red-900/20 backdrop-blur-sm border border-red-700/30 rounded-2xl p-12">
-                <X className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                <h3 className="text-2xl font-semibold text-red-400 mb-2">Search Error</h3>
-                <p className="text-slate-400">{error}</p>
-                <button
-                  onClick={() => setError(null)}
-                  className="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200"
-                >
-                  Try Again
-                </button>
-              </div>
-            </div>
-          ) : hasSearched ? (
-            searchResults.length > 0 ? (
-              <div>
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold text-white mb-2">Search Results</h2>
-                  <p className="text-slate-400">Found {searchResults.length} course{searchResults.length !== 1 ? 's' : ''} for "{searchTerm}"</p>
-                </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {searchResults.map((course) => (
-                    <CourseCard key={course._id} course={course} navigate={navigate} />
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="text-center">
-                <div className="bg-slate-800/30 backdrop-blur-sm border border-slate-700/30 rounded-2xl p-12">
-                  <SearchIcon className="w-16 h-16 text-slate-500 mx-auto mb-4" />
-                  <h3 className="text-2xl font-semibold text-slate-400 mb-2">No Results Found</h3>
-                  <p className="text-slate-500">
-                    No courses found for "{searchTerm}". Try different keywords or browse our popular searches above.
-                  </p>
-                </div>
-              </div>
-            )
-          ) : (
-            <div className="text-center">
-              <div className="bg-slate-800/30 backdrop-blur-sm border border-slate-700/30 rounded-2xl p-12">
-                <SearchIcon className="w-16 h-16 text-slate-500 mx-auto mb-4" />
-                <h3 className="text-2xl font-semibold text-slate-400 mb-2">Start Your Search</h3>
-                <p className="text-slate-500">Enter a keyword to find the perfect course for you</p>
-              </div>
-            </div>
-          )}
+          <div className="flex items-center space-x-2">
+            <span className="text-slate-200 font-bold text-sm">
+              {filteredAndSortedCourses.length} Course{filteredAndSortedCourses.length !== 1 ? 's' : ''} Available
+            </span>
+            {searchTerm && (
+              <span className="text-xs text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/20 font-medium">
+                "{searchTerm}"
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center space-x-3 self-end sm:self-auto">
+            <label className="text-xs text-slate-400 font-medium flex items-center gap-1">
+              <Filter className="w-3.5 h-3.5" /> Sort:
+            </label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            >
+              <option value="recent">Most Recent</option>
+              <option value="popular">Most Popular</option>
+              <option value="rating">Highest Rated</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+            </select>
+          </div>
         </motion.div>
+
+        {/* Search Results Display Area */}
+        {isLoading ? (
+          <div className="text-center py-20">
+            <div className="inline-flex flex-col items-center p-8 bg-slate-900/60 border border-slate-800 rounded-3xl backdrop-blur-xl">
+              <Loader className="w-10 h-10 text-blue-500 animate-spin mb-4" />
+              <h3 className="text-lg font-bold text-white mb-1">Searching Catalog</h3>
+              <p className="text-xs text-slate-400">Finding matching courses for you...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="text-center py-16">
+            <div className="inline-flex flex-col items-center p-8 bg-red-500/10 border border-red-500/20 rounded-3xl max-w-md">
+              <X className="w-10 h-10 text-red-400 mb-3" />
+              <h3 className="text-lg font-bold text-red-400 mb-1">Unable to Load Courses</h3>
+              <p className="text-xs text-slate-300 mb-4">{error}</p>
+              <button
+                onClick={() => executeSearch(searchTerm)}
+                className="px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-500 transition-colors"
+              >
+                Retry Search
+              </button>
+            </div>
+          </div>
+        ) : filteredAndSortedCourses.length > 0 ? (
+          <motion.div
+            variants={fadeInUp}
+            initial="initial"
+            animate="animate"
+            transition={{ delay: 0.4 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+          >
+            {filteredAndSortedCourses.map((course) => (
+              <CourseCard key={course._id} course={course} navigate={navigate} />
+            ))}
+          </motion.div>
+        ) : (
+          <motion.div
+            variants={fadeInUp}
+            initial="initial"
+            animate="animate"
+            className="text-center py-16"
+          >
+            <div className="inline-flex flex-col items-center p-10 bg-slate-900/40 border border-slate-800 rounded-3xl max-w-lg">
+              <BookOpen className="w-12 h-12 text-slate-600 mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">No Courses Found</h3>
+              <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+                We couldn't find any published courses matching <span className="text-blue-400 font-semibold">"{searchTerm}"</span>. Try searching for different keywords or explore our popular topics above.
+              </p>
+              <button
+                onClick={handleClearSearch}
+                className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-blue-500/20 hover:from-blue-500 hover:to-indigo-500 transition-all"
+              >
+                Show All Courses
+              </button>
+            </div>
+          </motion.div>
+        )}
+
       </div>
     </div>
   );
 };
 
-// CourseCard component for displaying individual course results
+// CourseCard Component
 const CourseCard = ({ course, navigate }) => {
   const { user, isLoggedIn } = useAuth();
 
+  const isEnrolled = user && user.enrolledCourse && user.enrolledCourse.some(c => {
+    const id = typeof c === 'object' ? (c._id || c.id) : c;
+    return id && course._id && id.toString() === course._id.toString();
+  });
+
   const formatPrice = (price, discount = 0) => {
-    if (price === 0) return 'Free';
-    const discountedPrice = price - (price * discount / 100);
-    return `₹${discountedPrice.toFixed(2)}`;
+    if (!price || price === 0) return 'Free';
+    const finalPrice = price - (price * discount / 100);
+    return `₹${finalPrice.toLocaleString('en-IN')}`;
   };
 
   const formatDuration = (duration) => {
-    if (!duration) return 'N/A';
+    if (!duration) return '12h 30m';
     const hours = Math.floor(duration / 60);
     const minutes = duration % 60;
-    return `${hours}h ${minutes}m`;
+    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
   };
 
-  const getAverageRating = (ratings) => {
-    if (!ratings || ratings.length === 0) return 0;
-    const sum = ratings.reduce((acc, rating) => acc + rating.rating, 0);
+  const getAvgRating = (ratings) => {
+    if (!ratings || ratings.length === 0) return '4.8';
+    const sum = ratings.reduce((acc, r) => acc + (r.rating || 0), 0);
     return (sum / ratings.length).toFixed(1);
   };
 
-  const handleViewCourse = () => {
-    if (!isLoggedIn) {
-      navigate('/login');
-      return;
-    }
-    if (user && user.role === 'student') {
-      const isEnrolled = user.enrolledCourse && user.enrolledCourse.some(c => {
-        const id = c._id || c;
-        return id.toString() === course._id.toString();
-      });
-      if (!isEnrolled) {
-        window.location.href = "https://whitedavid23.org/courses";
-        return;
-      }
-    }
+  const handleCardClick = () => {
     navigate(`/course/${course._id}`);
   };
 
   return (
     <motion.div
-      whileHover={{ y: -5, scale: 1.02 }}
-      transition={{ duration: 0.3 }}
-      className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl overflow-hidden hover:border-slate-600/50 transition-all duration-300"
+      whileHover={{ y: -6 }}
+      transition={{ duration: 0.25 }}
+      onClick={handleCardClick}
+      className="group bg-slate-900/60 backdrop-blur-xl border border-slate-800 hover:border-slate-700 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-blue-500/10 cursor-pointer flex flex-col justify-between transition-all duration-300"
     >
-      {/* Course Thumbnail */}
-      <div className="relative h-48 bg-gradient-to-br from-slate-700 to-slate-800">
-        {course.thumbnail ? (
-          <img
-            src={course.thumbnail}
-            alt={course.title}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <BookOpen className="w-16 h-16 text-slate-500" />
-          </div>
-        )}
-        
-        {/* Price Badge */}
-        <div className="absolute top-4 right-4">
-          <span className="px-3 py-1 bg-blue-600 text-white text-sm font-semibold rounded-full">
-            {formatPrice(course.price, course.discount)}
-          </span>
-          {course.discount > 0 && (
-            <span className="block text-xs text-slate-300 line-through mt-1">
-              ₹{course.price.toFixed(2)}
-            </span>
+      <div>
+        {/* Course Thumbnail Container */}
+        <div className="relative h-48 bg-slate-950 overflow-hidden">
+          {course.thumbnail ? (
+            <img
+              src={course.thumbnail}
+              alt={course.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 flex items-center justify-center p-6 text-center">
+              <BookOpen className="w-12 h-12 text-blue-400/40 mb-2" />
+            </div>
           )}
-        </div>
 
-        {/* Published Badge */}
-        {course.isPublished && (
-          <div className="absolute top-4 left-4">
-            <span className="px-2 py-1 bg-green-600 text-white text-xs font-medium rounded-full">
-              Live
+          {/* Category Pill Tag */}
+          <div className="absolute top-3 left-3 z-10">
+            <span className="px-3 py-1 bg-slate-950/80 backdrop-blur-md border border-slate-700/80 text-blue-400 text-[11px] font-bold rounded-full">
+              {course.category || 'General'}
             </span>
           </div>
-        )}
-      </div>
 
-      {/* Course Content */}
-      <div className="p-6">
-        {/* Title */}
-        <h3 className="text-xl font-semibold text-white mb-2 overflow-hidden" 
-            style={{
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-            }}>
-          {course.title}
-        </h3>
-
-        {/* Description */}
-        <p className="text-slate-400 text-sm mb-4 overflow-hidden"
-           style={{
-             display: '-webkit-box',
-             WebkitLineClamp: 3,
-             WebkitBoxOrient: 'vertical',
-           }}>
-          {course.description}
-        </p>
-
-        {/* Course Stats */}
-        <div className="flex items-center justify-between mb-4 text-sm">
-          <div className="flex items-center text-slate-400">
-            <Clock className="w-4 h-4 mr-1" />
-            <span>{formatDuration(course.totalDuration)}</span>
-          </div>
-          
-          <div className="flex items-center text-slate-400">
-            <Users className="w-4 h-4 mr-1" />
-            <span>{course.enrolledStudents?.length || 0} students</span>
-          </div>
-          
-          <div className="flex items-center text-yellow-400">
-            <Star className="w-4 h-4 mr-1 fill-current" />
-            <span>{getAverageRating(course.ratings)}</span>
-          </div>
-        </div>
-
-        {/* Educator */}
-        <div className="flex items-center mb-4">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mr-3">
-            {course.educator?.avatar ? (
-              <img
-                src={course.educator.avatar}
-                alt={course.educator.name}
-                className="w-full h-full rounded-full object-cover"
-              />
+          {/* Price / Enrolled Badge */}
+          <div className="absolute top-3 right-3 z-10">
+            {isEnrolled ? (
+              <span className="px-3 py-1 bg-emerald-500 text-white text-[11px] font-bold rounded-full shadow-lg flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Enrolled
+              </span>
             ) : (
-              <span className="text-white text-sm font-medium">
-                {course.educator?.name?.charAt(0) || 'E'}
+              <span className="px-3 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-extrabold rounded-full shadow-lg">
+                {formatPrice(course.price, course.discount)}
               </span>
             )}
           </div>
-          <div>
-            <p className="text-white text-sm font-medium">
-              {course.educator?.name || 'Anonymous Educator'}
-            </p>
-            <p className="text-slate-400 text-xs">Educator</p>
-          </div>
         </div>
 
-        {/* Action Button */}
-        <button 
-          onClick={handleViewCourse}
-          className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105"
-        >
-          View Course
-        </button>
+        {/* Course Details */}
+        <div className="p-6">
+          <h3 className="text-base font-bold text-white mb-2 line-clamp-2 group-hover:text-blue-400 transition-colors">
+            {course.title}
+          </h3>
+
+          <p className="text-slate-400 text-xs mb-4 line-clamp-2 leading-relaxed">
+            {course.description || 'Master key concepts with structured video modules and hands-on practical exercises.'}
+          </p>
+
+          {/* Metadata Row */}
+          <div className="flex items-center justify-between text-xs text-slate-400 py-3 border-y border-slate-800 mb-4">
+            <div className="flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5 text-blue-400" />
+              <span>{formatDuration(course.totalDuration)}</span>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <Users className="w-3.5 h-3.5 text-purple-400" />
+              <span>{course.enrolledStudents?.length || 0} students</span>
+            </div>
+
+            <div className="flex items-center gap-1 text-amber-400 font-bold">
+              <Star className="w-3.5 h-3.5 fill-amber-400" />
+              <span>{getAvgRating(course.ratings)}</span>
+            </div>
+          </div>
+
+          {/* Educator Info */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold overflow-hidden border border-slate-700">
+                {course.educator?.avatar ? (
+                  <img src={course.educator.avatar} alt={course.educator.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span>{(course.educator?.name || 'Instructor').charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+              <span className="text-xs font-semibold text-slate-300 truncate max-w-[130px]">
+                {course.educator?.name || 'Instructor'}
+              </span>
+            </div>
+
+            <div className="text-xs font-bold text-blue-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+              <span>{isEnrolled ? 'Learn' : 'Details'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </div>
+
+        </div>
       </div>
     </motion.div>
   );

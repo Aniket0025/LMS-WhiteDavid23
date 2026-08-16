@@ -264,8 +264,8 @@ export const checkPurchaseStatus = async (req, res) => {
       course: courseId
     });
 
-    const isEnrolled = user.enrolledCourse.includes(courseId);
-    const hasPurchased = existingPurchase !== null;
+    const isEnrolled = user.enrolledCourse && user.enrolledCourse.some(id => (id._id || id).toString() === courseId.toString());
+    const hasPurchased = existingPurchase !== null || isEnrolled;
 
     res.status(200).json({
       success: true,

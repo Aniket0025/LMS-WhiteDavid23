@@ -299,12 +299,6 @@ const Login = () => {
                   Remember me
                 </label>
               </div>
-              <a
-                href="/forgot-password"
-                className="text-xs text-blue-400 hover:text-blue-300 transition-colors duration-200"
-              >
-                Forgot password?
-              </a>
             </div>
 
             {/* Submit Button */}

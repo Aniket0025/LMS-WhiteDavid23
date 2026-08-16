@@ -55,6 +55,10 @@ export default function EducatorAddCourse() {
   // Image upload state
   const [imageUploading, setImageUploading] = useState(false);
 
+  // Custom Category state
+  const [customCategory, setCustomCategory] = useState('');
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
+
   // Chapters and lectures state
   const [chapters, setChapters] = useState([]);
   const [editingLecture, setEditingLecture] = useState(null);
@@ -98,7 +102,11 @@ export default function EducatorAddCourse() {
     if (step === 1) {
       if (!courseData.title.trim()) newErrors.title = 'Course title is required';
       if (!courseData.description.trim()) newErrors.description = 'Course description is required';
-      if (!courseData.category) newErrors.category = 'Category is required';
+      if (!courseData.category) {
+        newErrors.category = 'Category is required';
+      } else if ((isCustomCategory || courseData.category === 'custom') && !customCategory.trim()) {
+        newErrors.category = 'Please specify your custom category name';
+      }
       if (!courseData.level) newErrors.level = 'Level is required';
       if (courseData.price < 0) newErrors.price = 'Price cannot be negative';
     }
@@ -334,10 +342,15 @@ export default function EducatorAddCourse() {
         });
       });
 
+      const finalCategory = (isCustomCategory || courseData.category === 'custom')
+        ? (customCategory.trim() || 'Custom Category')
+        : courseData.category;
+
       // Step 1: Create the basic course
       const coursePayload = {
         title: courseData.title,
         description: courseData.description,
+        category: finalCategory,
         price: courseData.price || 0,
         discount: 0,
         thumbnail: courseData.thumbnail || '',
@@ -792,21 +805,46 @@ export default function EducatorAddCourse() {
                         </label>
                         <select
                           value={courseData.category}
-                          onChange={(e) => setCourseData({...courseData, category: e.target.value})}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === 'custom') {
+                              setIsCustomCategory(true);
+                              setCourseData({ ...courseData, category: 'custom' });
+                            } else {
+                              setIsCustomCategory(false);
+                              setCourseData({ ...courseData, category: val });
+                            }
+                            if (errors.category) setErrors(prev => ({ ...prev, category: '' }));
+                          }}
                           className="w-full px-4 py-3 bg-slate-900/70 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
                         >
                           <option value="">Select Category</option>
-                          <option value="programming">Programming & Development</option>
-                          <option value="design">Design</option>
-                          <option value="business">Business</option>
-                          <option value="marketing">Marketing</option>
-                          <option value="data-science">Data Science</option>
-                          <option value="photography">Photography</option>
-                          <option value="music">Music</option>
-                          <option value="fitness">Health & Fitness</option>
-                          <option value="language">Language</option>
-                          <option value="other">Other</option>
+                          <option value="web-development">Web & Software Development</option>
+                          <option value="cybersecurity">Cybersecurity & Ethical Hacking</option>
+                          <option value="ai-data-science">Artificial Intelligence & Data Science</option>
+                          <option value="cloud-devops">Cloud Computing & DevOps</option>
+                          <option value="programming">Programming Languages</option>
+                          <option value="mobile-dev">Mobile App Development</option>
+                          <option value="design">UI/UX & Graphic Design</option>
+                          <option value="business">Business & Management</option>
+                          <option value="marketing">Digital Marketing</option>
+                          <option value="custom">✨ Custom Category (Type Your Own)</option>
                         </select>
+
+                        {(isCustomCategory || courseData.category === 'custom') && (
+                          <div className="mt-3">
+                            <input
+                              type="text"
+                              value={customCategory}
+                              onChange={(e) => {
+                                setCustomCategory(e.target.value);
+                                if (errors.category) setErrors(prev => ({ ...prev, category: '' }));
+                              }}
+                              placeholder="Enter custom category name (e.g., Robotics, Blockchain...)"
+                              className="w-full px-4 py-2.5 bg-slate-900/90 border border-blue-500 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm transition-all duration-200"
+                            />
+                          </div>
+                        )}
                         {errors.category && <p className="text-red-400 text-sm mt-1">{errors.category}</p>}
                       </div>
 
@@ -923,6 +961,16 @@ export default function EducatorAddCourse() {
                             </>
                           )}
                         </div>
+                      </div>
+
+                      <div className="mt-3">
+                        <input
+                          type="text"
+                          value={courseData.thumbnail}
+                          onChange={(e) => setCourseData({...courseData, thumbnail: e.target.value})}
+                          placeholder="Or paste thumbnail Image URL (e.g., https://images.unsplash.com/...)"
+                          className="w-full px-4 py-2.5 bg-slate-900/70 border border-slate-600 rounded-lg text-white text-xs placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-all duration-200"
+                        />
                       </div>
                     </div>
 
@@ -1396,7 +1444,7 @@ export default function EducatorAddCourse() {
                       <div className="space-y-3">
                         {chapters.map((chapter, index) => (
                           <div key={chapter.id} className="border-l-4 border-blue-500 pl-4">
-                            <h5 className="text-white font-medium">{index + 1}. {chapter.title || `Chapter ${index + 1}`}</h5>
+                            <h5 className="text-white font-medium">{index + 1}. {chapter.chapterTitle || chapter.title || `Chapter ${index + 1}`}</h5>
                             <p className="text-slate-400 text-sm">{chapter.lectures.length} lectures</p>
                           </div>
                         ))}

@@ -94,7 +94,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-0">
-            <img src="/login.png" alt="whitedavid23 Logo" className="h-40 w-40 object-contain -mr-11 -ml-6" />
+            <img src="/login.png" alt="whitedavid23 Logo" className="h-48 w-48 object-contain -mr-13 -ml-7" />
             <span className="text-2xl font-bold text-white">
               whitedavid<span className="text-blue-400">23</span>
             </span>

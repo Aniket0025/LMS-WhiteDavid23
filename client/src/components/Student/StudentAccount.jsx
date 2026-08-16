@@ -14,9 +14,13 @@ import {
   Bell,
   Globe,
   Loader,
-  Upload
+  Upload,
+  Eye,
+  EyeOff,
+  KeyRound,
+  AlertCircle
 } from 'lucide-react';
-import { getUserProfile, updateUserProfile, uploadProfilePicture } from '../../Api/userApi.js';
+import { getUserProfile, updateUserProfile, uploadProfilePicture, changePassword } from '../../Api/userApi.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { toast } from 'react-hot-toast';
 
@@ -38,6 +42,80 @@ const StudentAccount = () => {
   });
   const [originalData, setOriginalData] = useState({});
   const fileInputRef = useRef(null);
+
+  // Change Password state
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+
+  const handlePasswordInputChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    if (passwordError) setPasswordError('');
+  };
+
+  const handleChangePasswordSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!passwordData.currentPassword) {
+      toast.error('Current password is required');
+      return;
+    }
+    if (!passwordData.newPassword) {
+      toast.error('New password is required');
+      return;
+    }
+    if (passwordData.newPassword.length < 6) {
+      toast.error('New password must be at least 6 characters');
+      return;
+    }
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    if (passwordData.currentPassword === passwordData.newPassword) {
+      toast.error('New password must be different from current password');
+      return;
+    }
+
+    try {
+      setChangingPassword(true);
+      setPasswordError('');
+      const res = await changePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
+
+      if (res.success) {
+        toast.success(res.message || 'Password changed successfully!');
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+      } else {
+        toast.error(res.message || 'Failed to change password');
+        setPasswordError(res.message);
+      }
+    } catch (error) {
+      console.error('Error changing password:', error);
+      const msg = error.message || 'Failed to change password. Please check your current password.';
+      toast.error(msg);
+      setPasswordError(msg);
+    } finally {
+      setChangingPassword(false);
+    }
+  };
 
   // Load user profile data on component mount
   useEffect(() => {
@@ -323,7 +401,7 @@ const StudentAccount = () => {
               <nav className="flex space-x-8">
                 {[
                   { id: 'profile', label: 'Profile Details', icon: User },
-                 
+                  { id: 'security', label: 'Security & Password', icon: Lock },
                 ].map((tab) => {
                   const IconComponent = tab.icon;
                   return (
@@ -498,9 +576,116 @@ const StudentAccount = () => {
               </div>
             )}
 
-            
+            {activeTab === 'security' && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-2xl font-semibold text-white mb-2">Change Password</h3>
+                  <p className="text-slate-400 text-sm">Update your password to keep your account secure.</p>
+                </div>
 
-           
+                <form onSubmit={handleChangePasswordSubmit} className="space-y-6 max-w-lg">
+                  {passwordError && (
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center space-x-3 text-red-400 text-sm">
+                      <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                      <span>{passwordError}</span>
+                    </div>
+                  )}
+
+                  {/* Current Password */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-slate-300">
+                      Current Password
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                      <input
+                        type={showCurrentPassword ? "text" : "password"}
+                        name="currentPassword"
+                        value={passwordData.currentPassword}
+                        onChange={handlePasswordInputChange}
+                        placeholder="Enter current password"
+                        className="w-full pl-12 pr-12 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white"
+                      >
+                        {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* New Password */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-slate-300">
+                      New Password
+                    </label>
+                    <div className="relative">
+                      <KeyRound className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                      <input
+                        type={showNewPassword ? "text" : "password"}
+                        name="newPassword"
+                        value={passwordData.newPassword}
+                        onChange={handlePasswordInputChange}
+                        placeholder="Enter new password (min. 6 characters)"
+                        className="w-full pl-12 pr-12 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white"
+                      >
+                        {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Confirm New Password */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-slate-300">
+                      Confirm New Password
+                    </label>
+                    <div className="relative">
+                      <KeyRound className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        name="confirmPassword"
+                        value={passwordData.confirmPassword}
+                        onChange={handlePasswordInputChange}
+                        placeholder="Confirm new password"
+                        className="w-full pl-12 pr-12 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white"
+                      >
+                        {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={changingPassword}
+                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                  >
+                    {changingPassword ? (
+                      <>
+                        <Loader className="w-4 h-4 animate-spin" />
+                        <span>Updating Password...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-4 h-4" />
+                        <span>Update Password</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            )}
           </motion.div>
         </div>
       </div>

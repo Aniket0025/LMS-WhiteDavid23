@@ -16,7 +16,10 @@ import {
   X,
   ChevronDown,
   Edit,
-  Trash2
+  Trash2,
+  Check,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import { 
   getAllStudentsAndEducators, 
@@ -187,18 +190,20 @@ const EducatorStudents = () => {
   // fetch and normalize data
   const fetchData = async () => {
     try {
-      const res = await getAllStudentsAndEducators();
-      const payload = res?.data ?? res;
-      // try common response shapes
-      let rawStudents = [];
-      let rawCourses = [];
+      const [res, coursesRes] = await Promise.all([
+        getAllStudentsAndEducators(),
+        getEducatorCourses().catch(() => null)
+      ]);
 
-      if (Array.isArray(payload)) {
-        rawStudents = payload;
-      } else {
-        rawStudents = payload.students ?? payload.users ?? payload.data ?? [];
-        rawCourses = payload.courses ?? [];
-      }
+      const payload = res?.data ?? res;
+      let rawStudents = Array.isArray(payload) ? payload : (payload.students ?? payload.users ?? payload.data ?? []);
+      let rawEducatorCourses = coursesRes?.courses || [];
+
+      // Create lookup map: courseId -> courseTitle
+      const courseMap = {};
+      rawEducatorCourses.forEach(c => {
+        if (c._id) courseMap[c._id.toString()] = c.title || c.name || 'Untitled Course';
+      });
 
       const normalizeStudent = (s) => {
         const name = s.name || `${s.firstName || ''} ${s.lastName || ''}`.trim() || s.fullName || s.email || 'Unknown';
@@ -210,7 +215,18 @@ const EducatorStudents = () => {
           coursesArray = [s.enrolledCourse];
         }
         
-        const courseNames = coursesArray.map(c => c.title || c.name || c).filter(Boolean).join(', ');
+        const resolvedTitles = coursesArray.map(c => {
+          if (c && typeof c === 'object') {
+            if (c.title) return c.title;
+            if (c.name) return c.name;
+            if (c._id && courseMap[c._id.toString()]) return courseMap[c._id.toString()];
+          }
+          const idStr = String(c);
+          if (courseMap[idStr]) return courseMap[idStr];
+          return /^[0-9a-fA-F]{24}$/.test(idStr) ? (courseMap[idStr] || null) : idStr;
+        }).filter(Boolean);
+        
+        const courseNames = [...new Set(resolvedTitles)].join(', ');
         
         return {
           id: s._id || s.id || s.userId || Math.random().toString(36).slice(2, 9),
@@ -218,7 +234,7 @@ const EducatorStudents = () => {
           email: s.email || s.contactEmail || '',
           avatar: s.avatar || s.avatarUrl || s.photo || s.profilePic || s.image || null,
           status: s.status || (s.isActive ? 'active' : 'inactive') || 'active',
-          courses: coursesArray.map(c => c._id || c.id || c),
+          courses: coursesArray.map(c => typeof c === 'object' ? (c._id || c.id) : c),
           courseName: courseNames || 'Unassigned',
           progress: typeof s.progress === 'number' ? s.progress : s.completion ?? s.progressPercent ?? 0,
           lessonsCompleted: s.lessonsCompleted ?? s.completedLessons ?? 0,
@@ -230,26 +246,10 @@ const EducatorStudents = () => {
 
       const studentsList = (Array.isArray(rawStudents) ? rawStudents : []).map(normalizeStudent);
 
-      // derive courses either from payload.courses or from students
-      let coursesList = [];
-      if (Array.isArray(rawCourses) && rawCourses.length > 0) {
-        coursesList = rawCourses.map(c => ({
-          id: c._id || c.id || c.courseId,
-          title: c.title || c.name || 'Untitled Course'
-        }));
-      } else {
-        // build unique list from students
-        const map = {};
-        studentsList.forEach(s => {
-          if (s.courseId && !map[s.courseId]) {
-            map[s.courseId] = { id: s.courseId, title: s.courseName || 'Untitled Course' };
-          }
-        });
-        coursesList = Object.values(map);
-      }
-
       setStudents(studentsList);
-      setCourses(coursesList);
+      if (rawEducatorCourses.length > 0) {
+        setCourses(rawEducatorCourses.map(c => ({ id: c._id, title: c.title })));
+      }
     } catch (error) {
       console.error('Failed to fetch students/courses:', error);
     }
@@ -594,7 +594,21 @@ const EducatorStudents = () => {
                       </td>
                       <td className="py-3 px-3 align-middle text-white">{student.name}</td>
                       <td className="py-3 px-3 align-middle text-slate-400 text-sm">{student.email}</td>
-                      <td className="py-3 px-3 align-middle text-slate-300 text-sm">{student.courseName || '—'}</td>
+                      <td className="py-3 px-3 align-middle text-slate-300 text-sm">
+                        {student.courseName && student.courseName !== 'Unassigned' ? (
+                          <div className="flex flex-wrap gap-1.5 max-w-xs">
+                            {student.courseName.split(', ').map((cName, idx) => (
+                              <span key={idx} className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-500/10 border border-purple-500/20 text-purple-300">
+                                {cName}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-500 border border-slate-700">
+                            Unassigned
+                          </span>
+                        )}
+                      </td>
                       <td className="py-3 px-3 align-middle text-right">
                         <div className="flex items-center justify-end space-x-2">
                           <button
@@ -645,118 +659,134 @@ const EducatorStudents = () => {
 
               <form onSubmit={handleAddStudentSubmit} className="p-6 space-y-4">
                 {addError && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-sm flex items-center gap-2">
-                    <span>⚠️</span>
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>{addError}</span>
                   </div>
                 )}
                 {addSuccess && (
-                  <div className="p-3 bg-green-500/10 border border-green-500/20 text-green-400 rounded-xl text-sm flex items-center gap-2">
-                    <span>✅</span>
+                  <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-xs flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
                     <span>{addSuccess}</span>
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Student Name *</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Student Full Name *</label>
                   <input 
                     type="text"
                     required
                     value={newStudentData.name}
                     onChange={e => setNewStudentData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Enter student's full name"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors text-sm"
+                    placeholder="e.g. Aniket Yadav"
+                    className="w-full bg-slate-950/80 border border-slate-700/70 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all text-xs"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Email Address *</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Email Address *</label>
                     <input 
                       type="email"
                       required
                       value={newStudentData.email}
                       onChange={e => setNewStudentData(prev => ({ ...prev, email: e.target.value }))}
                       placeholder="student@example.com"
-                      className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors text-sm"
+                      className="w-full bg-slate-950/80 border border-slate-700/70 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all text-xs"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Password *</label>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Password *</label>
                     <input 
                       type="password"
                       required
                       value={newStudentData.password}
                       onChange={e => setNewStudentData(prev => ({ ...prev, password: e.target.value }))}
                       placeholder="Min 6 characters"
-                      className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors text-sm"
+                      className="w-full bg-slate-950/80 border border-slate-700/70 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all text-xs"
                     />
                   </div>
                 </div>
 
-                <div className="relative">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                    Assign Courses
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setShowCourseDropdown(!showCourseDropdown)}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-white flex justify-between items-center text-sm focus:outline-none focus:border-blue-500 transition-colors"
-                  >
-                    <span className={newStudentData.enrolledCourses.length > 0 ? "text-white font-medium" : "text-slate-500"}>
-                      {newStudentData.enrolledCourses.length > 0 
-                        ? `${newStudentData.enrolledCourses.length} Course(s) Selected` 
-                        : "Select Courses (0 selected)"}
-                    </span>
-                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showCourseDropdown ? 'rotate-180' : ''}`} />
-                  </button>
-                  
-                  {showCourseDropdown && (
-                    <>
-                      <div className="fixed inset-0 z-10" onClick={() => setShowCourseDropdown(false)}></div>
-                      <div className="absolute left-0 right-0 mt-2 bg-slate-950 border border-slate-850 rounded-xl p-3 max-h-[180px] overflow-y-auto space-y-2 shadow-2xl z-20">
-                        {educatorCourses.length === 0 ? (
-                          <p className="text-xs text-slate-500 italic p-1">No courses created yet. Create a course first to assign it.</p>
-                        ) : (
-                          educatorCourses.map(course => {
-                            const isChecked = newStudentData.enrolledCourses.includes(course._id);
-                            return (
-                              <label 
-                                key={course._id}
-                                className={`flex items-start gap-3 cursor-pointer p-2 rounded-lg transition-colors select-none text-xs ${
-                                  isChecked ? 'bg-purple-600/15 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
-                                }`}
-                              >
-                                <input 
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={() => handleCourseCheckboxChange(course._id)}
-                                  className="mt-0.5 rounded border-slate-700 text-purple-600 bg-slate-900 focus:ring-purple-500/50"
-                                />
-                                <span className="flex-1 leading-normal font-medium">{course.title}</span>
-                              </label>
-                            );
-                          })
-                        )}
-                      </div>
-                    </>
-                  )}
+                {/* Course Selector for New Student */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                      <BookOpen className="w-3.5 h-3.5 text-purple-400" />
+                      Assign Initial Courses ({newStudentData.enrolledCourses.length}/{educatorCourses.length})
+                    </label>
+
+                    <div className="flex items-center space-x-2 text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => setNewStudentData(prev => ({ ...prev, enrolledCourses: educatorCourses.map(c => c._id) }))}
+                        className="text-purple-400 hover:text-purple-300 font-semibold transition-colors"
+                      >
+                        Select All
+                      </button>
+                      <span className="text-slate-600">•</span>
+                      <button
+                        type="button"
+                        onClick={() => setNewStudentData(prev => ({ ...prev, enrolledCourses: [] }))}
+                        className="text-slate-400 hover:text-slate-300 transition-colors"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-3 max-h-[190px] overflow-y-auto space-y-2">
+                    {educatorCourses.length === 0 ? (
+                      <p className="text-xs text-slate-500 italic py-2 text-center">No courses created yet. Create a course first to assign it.</p>
+                    ) : (
+                      educatorCourses.map(course => {
+                        const isChecked = newStudentData.enrolledCourses.includes(course._id);
+                        return (
+                          <div 
+                            key={course._id}
+                            onClick={() => handleCourseCheckboxChange(course._id)}
+                            className={`flex items-center justify-between p-3 rounded-xl border transition-all duration-200 cursor-pointer select-none ${
+                              isChecked
+                                ? 'bg-purple-600/15 border-purple-500/50 text-white'
+                                : 'bg-slate-900/60 border-slate-800/80 text-slate-400 hover:border-slate-700 hover:bg-slate-900'
+                            }`}
+                          >
+                            <div className="flex items-center space-x-3 min-w-0 pr-2">
+                              <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
+                                isChecked
+                                  ? 'bg-purple-600 border-purple-500 text-white'
+                                  : 'border-slate-700 bg-slate-800 text-transparent'
+                              }`}>
+                                <Check className="w-3 h-3 stroke-[3]" />
+                              </div>
+                              <span className="text-xs font-semibold truncate">{course.title}</span>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                              isChecked ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-slate-800 text-slate-500 border-slate-700'
+                            }`}>
+                              {isChecked ? 'Selected' : 'Optional'}
+                            </span>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex gap-3 justify-end pt-4 border-t border-slate-800 mt-6">
                   <button 
                     type="button"
                     onClick={() => setShowAddModal(false)}
-                    className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-semibold transition-colors"
+                    className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition-colors border border-slate-700"
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit"
                     disabled={addLoading}
-                    className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl text-sm font-semibold hover:from-purple-700 hover:to-pink-700 transition-colors flex items-center gap-2 shadow-lg shadow-purple-600/20 disabled:opacity-50"
+                    className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl text-xs font-bold hover:from-purple-700 hover:to-pink-700 transition-colors flex items-center gap-2 shadow-lg shadow-purple-600/20 disabled:opacity-50"
                   >
-                    {addLoading ? 'Creating...' : 'Assign & Save'}
+                    {addLoading ? 'Creating...' : 'Create & Assign Student'}
                   </button>
                 </div>
               </form>
@@ -764,113 +794,173 @@ const EducatorStudents = () => {
           </div>
         )}
 
-        {/* Edit Student Modal */}
+        {/* Edit Student Access Modal */}
         {showEditModal && selectedStudent && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-fadeIn">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0f172a] border border-slate-800 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl"
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-slate-900/95 border border-slate-700/80 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl shadow-blue-500/10 backdrop-blur-2xl"
             >
-              <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800 bg-slate-900/30">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2 font-sans">
-                  <Edit className="w-5 h-5 text-blue-400" />
-                  <span>Manage Student Access</span>
-                </h3>
+              {/* Header */}
+              <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800 bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                    <Edit className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white tracking-tight">Manage Student Access</h3>
+                    <p className="text-xs text-slate-400">Assign or revoke course access for this student</p>
+                  </div>
+                </div>
                 <button 
                   onClick={() => setShowEditModal(false)}
-                  className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                  className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/80 rounded-xl transition-all"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleEditStudentCoursesSubmit} className="p-6 space-y-4">
+              <form onSubmit={handleEditStudentCoursesSubmit} className="p-6 space-y-5">
+                {/* Alert Notifications */}
                 {editError && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-sm flex items-center gap-2">
-                    <span>⚠️</span>
+                  <div className="p-3.5 bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl text-xs flex items-center gap-2.5">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
                     <span>{editError}</span>
                   </div>
                 )}
                 {editSuccess && (
-                  <div className="p-3 bg-green-500/10 border border-green-500/20 text-green-400 rounded-xl text-sm flex items-center gap-2">
-                    <span>✅</span>
+                  <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl text-xs flex items-center gap-2.5">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
                     <span>{editSuccess}</span>
                   </div>
                 )}
 
+                {/* Student Details Card */}
+                <div className="bg-slate-800/40 border border-slate-700/60 rounded-2xl p-4 flex items-center justify-between">
+                  <div className="flex items-center space-x-3.5">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-base shadow-md">
+                      {selectedStudent.name ? selectedStudent.name.charAt(0).toUpperCase() : 'S'}
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white">{selectedStudent.name}</h4>
+                      <p className="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
+                        <Mail className="w-3 h-3 text-slate-500" />
+                        {selectedStudent.email}
+                      </p>
+                    </div>
+                  </div>
+
+                  <span className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
+                    {editStudentCourses.length} Assigned
+                  </span>
+                </div>
+
+                {/* Visual Course Selector */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Student Details</label>
-                  <div className="bg-slate-900 border border-slate-800/80 rounded-xl p-3.5 space-y-1">
-                    <p className="text-sm font-semibold text-white">{selectedStudent.name}</p>
-                    <p className="text-xs text-slate-400">{selectedStudent.email}</p>
+                  <div className="flex items-center justify-between mb-2.5">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                      <BookOpen className="w-3.5 h-3.5 text-purple-400" />
+                      Assigned Courses ({editStudentCourses.length}/{educatorCourses.length})
+                    </label>
+
+                    {/* Bulk Action Controls */}
+                    <div className="flex items-center space-x-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setEditStudentCourses(educatorCourses.map(c => c._id))}
+                        className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
+                      >
+                        Select All
+                      </button>
+                      <span className="text-slate-600">•</span>
+                      <button
+                        type="button"
+                        onClick={() => setEditStudentCourses([])}
+                        className="text-slate-400 hover:text-slate-300 transition-colors"
+                      >
+                        Deselect All
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Course Cards Container */}
+                  <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-3 max-h-[260px] overflow-y-auto space-y-2">
+                    {educatorCourses.length === 0 ? (
+                      <div className="text-center py-6 text-slate-500 text-xs">
+                        No courses created yet. Create a course first to assign it.
+                      </div>
+                    ) : (
+                      educatorCourses.map(course => {
+                        const isChecked = editStudentCourses.includes(course._id);
+                        return (
+                          <div
+                            key={course._id}
+                            onClick={() => handleEditCourseCheckboxChange(course._id)}
+                            className={`flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 cursor-pointer select-none ${
+                              isChecked
+                                ? 'bg-purple-600/15 border-purple-500/50 shadow-md shadow-purple-500/5'
+                                : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900'
+                            }`}
+                          >
+                            <div className="flex items-center space-x-3 min-w-0 pr-3">
+                              <div className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-all ${
+                                isChecked
+                                  ? 'bg-purple-600 border-purple-500 text-white'
+                                  : 'border-slate-700 bg-slate-800 text-transparent'
+                              }`}>
+                                <Check className="w-3.5 h-3.5 stroke-[3]" />
+                              </div>
+
+                              <div className="min-w-0">
+                                <p className={`text-xs font-semibold truncate ${isChecked ? 'text-white' : 'text-slate-300'}`}>
+                                  {course.title}
+                                </p>
+                                <div className="flex items-center space-x-2 text-[11px] text-slate-400 mt-0.5">
+                                  <span>{course.totalDuration || 1}h duration</span>
+                                  <span>•</span>
+                                  <span className="font-semibold text-slate-300">₹{course.price || 0}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold shrink-0 border ${
+                              isChecked
+                                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                                : 'bg-slate-800 text-slate-400 border-slate-700'
+                            }`}>
+                              {isChecked ? 'Assigned' : 'Not Enrolled'}
+                            </span>
+                          </div>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
 
-                <div className="relative">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                    Assign/Remove Courses
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setShowEditCourseDropdown(!showEditCourseDropdown)}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-white flex justify-between items-center text-sm focus:outline-none focus:border-blue-500 transition-colors"
-                  >
-                    <span className={editStudentCourses.length > 0 ? "text-white font-medium" : "text-slate-500"}>
-                      {editStudentCourses.length > 0 
-                        ? `${editStudentCourses.length} Course(s) Assigned` 
-                        : "No Courses Assigned (0 selected)"}
-                    </span>
-                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${showEditCourseDropdown ? 'rotate-180' : ''}`} />
-                  </button>
-                  
-                  {showEditCourseDropdown && (
-                    <>
-                      <div className="fixed inset-0 z-10" onClick={() => setShowEditCourseDropdown(false)}></div>
-                      <div className="absolute left-0 right-0 mt-2 bg-slate-950 border border-slate-850 rounded-xl p-3 max-h-[180px] overflow-y-auto space-y-2 shadow-2xl z-20">
-                        {educatorCourses.length === 0 ? (
-                          <p className="text-xs text-slate-500 italic p-1">No courses created yet. Create a course first to assign it.</p>
-                        ) : (
-                          educatorCourses.map(course => {
-                            const isChecked = editStudentCourses.includes(course._id);
-                            return (
-                              <label 
-                                key={course._id}
-                                className={`flex items-start gap-3 cursor-pointer p-2 rounded-lg transition-colors select-none text-xs ${
-                                  isChecked ? 'bg-purple-600/15 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-900/50'
-                                }`}
-                              >
-                                <input 
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={() => handleEditCourseCheckboxChange(course._id)}
-                                  className="mt-0.5 rounded border-slate-700 text-purple-600 bg-slate-900 focus:ring-purple-500/50"
-                                />
-                                <span className="flex-1 leading-normal font-medium">{course.title}</span>
-                              </label>
-                            );
-                          })
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                <div className="flex gap-3 justify-end pt-4 border-t border-slate-800 mt-6">
+                {/* Actions */}
+                <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-800">
                   <button 
                     type="button"
                     onClick={() => setShowEditModal(false)}
-                    className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-sm font-semibold transition-colors"
+                    className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition-colors border border-slate-700"
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit"
                     disabled={editLoading}
-                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl text-sm font-semibold hover:from-blue-700 hover:to-purple-700 transition-colors flex items-center gap-2 shadow-lg shadow-blue-600/20 disabled:opacity-50"
+                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-blue-500/25 flex items-center space-x-2 transition-all disabled:opacity-50"
                   >
-                    {editLoading ? 'Saving...' : 'Save Changes'}
+                    {editLoading ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <span>Save Access Changes</span>
+                    )}
                   </button>
                 </div>
               </form>

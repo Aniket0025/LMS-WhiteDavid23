@@ -23,13 +23,25 @@ const getBackendUrl = () => {
 const backendUrl = getBackendUrl().replace(/\/$/, "");
 
 export const AuthProvider = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return !!localStorage.getItem('token');
+  });
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+  const [loading, setLoading] = useState(() => {
+    return !!localStorage.getItem('token');
+  });
 
   const handleTokenExpiry = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('tokenExpiry');
+    localStorage.removeItem('user');
     setIsLoggedIn(false);
     setUser(null);
     setLoading(false);
@@ -79,7 +91,6 @@ export const AuthProvider = ({ children }) => {
 
     return () => {
       clearInterval(refreshInterval);
-      window.removeEventListener('forceLogout', handleForceLogout);
     };
   }, []); // Empty dependency array - only run once on mount
 
@@ -109,7 +120,10 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', data.token);
         localStorage.setItem('tokenExpiry', expiryTime.toString());
         setIsLoggedIn(true);
-        if (!user) {
+        if (data.user) {
+          setUser(data.user);
+          localStorage.setItem('user', JSON.stringify(data.user));
+        } else {
           fetchUserProfile();
         }
       } else {
@@ -126,8 +140,9 @@ export const AuthProvider = ({ children }) => {
   const fetchUserProfile = async () => {
     try {
       const response = await getUserProfile();
-      if (response.success) {
+      if (response.success && response.user) {
         setUser(response.user);
+        localStorage.setItem('user', JSON.stringify(response.user));
       }
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
@@ -142,19 +157,23 @@ export const AuthProvider = ({ children }) => {
 
   const updateUserProfile = (updatedUser) => {
     if (updatedUser && typeof updatedUser === 'object') {
-      setUser(prevUser => ({
-        ...prevUser,
-        ...updatedUser
-      }));
+      setUser(prevUser => {
+        const newObj = { ...prevUser, ...updatedUser };
+        localStorage.setItem('user', JSON.stringify(newObj));
+        return newObj;
+      });
     }
   };
 
-  const login = (token) => {
+  const login = (token, userData = null) => {
     const expiryTime = new Date().getTime() + (30 * 24 * 60 * 60 * 1000); // 30 days
     localStorage.setItem('token', token);
     localStorage.setItem('tokenExpiry', expiryTime.toString());
+    if (userData) {
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+    }
     setIsLoggedIn(true);
-    // Fetch user profile after login
     fetchUserProfile();
   };
 
@@ -174,8 +193,10 @@ export const AuthProvider = ({ children }) => {
       // Clear client-side data regardless of API call result
       localStorage.removeItem('token');
       localStorage.removeItem('tokenExpiry');
+      localStorage.removeItem('user');
       setUser(null);
       setIsLoggedIn(false);
+      setLoading(false);
     }
   };
 

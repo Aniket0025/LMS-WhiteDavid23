@@ -30,6 +30,7 @@ const EducatorEditAndDeleteCourse = () => {
     description: '',
     content: '',
     videoFile: null,
+    videoUrl: '',
     duration: 0,
     order: 1
   });
@@ -212,8 +213,8 @@ const EducatorEditAndDeleteCourse = () => {
       return;
     }
 
-    if (!newLecture.videoFile) {
-      setError('File is required');
+    if (!newLecture.videoFile && !newLecture.videoUrl.trim()) {
+      setError('Please provide a Google Drive link or upload a file');
       return;
     }
 
@@ -221,23 +222,19 @@ const EducatorEditAndDeleteCourse = () => {
       setUploadingVideo(true);
       const chapter = chapters.find(ch => ch._id === chapterId);
       
-      // Create FormData for file upload
       const lectureFormData = new FormData();
       lectureFormData.append('title', newLecture.title.trim());
       lectureFormData.append('description', newLecture.description || '');
       lectureFormData.append('content', newLecture.content || '');
-      lectureFormData.append('video', newLecture.videoFile);
       lectureFormData.append('lectureType', newLecture.lectureType);
       lectureFormData.append('duration', newLecture.duration || 0);
       lectureFormData.append('order', chapter ? chapter.lectures.length + 1 : 1);
       
-      // Debug logging
-      console.log('Sending lecture data:');
-      console.log('- Title:', newLecture.title.trim());
-      console.log('- Description:', newLecture.description || '');
-      console.log('- File:', newLecture.videoFile);
-      console.log('- Type:', newLecture.lectureType);
-      console.log('- Duration:', newLecture.duration || 0);
+      if (newLecture.videoFile) {
+        lectureFormData.append('video', newLecture.videoFile);
+      } else {
+        lectureFormData.append('videoUrl', newLecture.videoUrl.trim());
+      }
       
       const res = await createLecture(courseId, chapterId, lectureFormData);
       
@@ -247,15 +244,15 @@ const EducatorEditAndDeleteCourse = () => {
             ? { ...ch, lectures: [...ch.lectures, res.lecture] }
             : ch
         ));
-        setNewLecture({ title: '', lectureType: 'video', description: '', content: '', videoFile: null, duration: 0, order: 1 });
+        setNewLecture({ title: '', lectureType: 'video', description: '', content: '', videoFile: null, videoUrl: '', duration: 0, order: 1 });
         setShowAddLecture(null);
-        setSuccess('Lecture uploaded successfully!');
+        setSuccess('Lecture added successfully!');
         setTimeout(() => setSuccess(''), 3000);
       } else {
         throw new Error(res?.message || 'Failed to create lecture');
       }
     } catch (err) {
-      setError(err?.message || 'Failed to upload lecture');
+      setError(err?.message || 'Failed to add lecture');
       setTimeout(() => setError(''), 3000);
     } finally {
       setUploadingVideo(false);
@@ -677,8 +674,8 @@ const EducatorEditAndDeleteCourse = () => {
                             {chapterIndex + 1}
                           </span>
                           <div>
-                            <h3 className="text-white font-medium">{chapter.title}</h3>
-                            <p className="text-slate-400 text-sm">
+                            <h3 className="text-white font-semibold text-base">{chapter.chapterTitle || chapter.title || `Chapter ${chapterIndex + 1}`}</h3>
+                            <p className="text-slate-400 text-xs">
                               {chapter.lectures?.length || 0} lecture{chapter.lectures?.length !== 1 ? 's' : ''}
                             </p>
                           </div>
@@ -694,7 +691,7 @@ const EducatorEditAndDeleteCourse = () => {
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleDeleteChapter(chapter._id, chapter.title)}
+                            onClick={() => handleDeleteChapter(chapter._id, chapter.chapterTitle || chapter.title || `Chapter ${chapterIndex + 1}`)}
                             className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                             title="Delete Chapter"
                           >
@@ -905,28 +902,90 @@ const EducatorEditAndDeleteCourse = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    {newLecture.lectureType === 'video' ? 'Video File' : newLecture.lectureType === 'image' ? 'Image File' : 'Document File'}
+                  <label className="block text-sm font-semibold text-slate-200 mb-2">
+                    {newLecture.lectureType === 'video'
+                      ? '📹 Video Source'
+                      : newLecture.lectureType === 'image'
+                      ? '🖼️ Image Source'
+                      : '📄 Document Source'}
                   </label>
-                  <div className="relative">
-                    <input
-                      type="file"
-                      accept={
-                        newLecture.lectureType === 'video'
-                          ? 'video/*'
-                          : newLecture.lectureType === 'image'
-                          ? 'image/*'
-                          : '.pdf,.doc,.docx,.ppt,.pptx'
-                      }
-                      onChange={(e) => setNewLecture(prev => ({...prev, videoFile: e.target.files[0]}))}
-                      className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
-                    />
-                    {newLecture.videoFile && (
-                      <div className="mt-2 flex items-center gap-2 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl text-sm">
-                        <CheckCircle className="w-4 h-4 shrink-0" />
-                        <span className="truncate font-mono text-xs">{newLecture.videoFile.name} ({(newLecture.videoFile.size / (1024 * 1024)).toFixed(2)} MB)</span>
-                      </div>
-                    )}
+
+                  {/* Single clean combined box */}
+                  <div className="rounded-xl border border-slate-600/70 bg-slate-900/60 overflow-hidden">
+
+                    {/* URL input */}
+                    <div className="p-3 border-b border-slate-700/60">
+                      <p className="text-xs text-blue-400 font-semibold mb-1.5">
+                        🔗 {newLecture.lectureType === 'video' ? 'Google Drive / YouTube Link' : newLecture.lectureType === 'image' ? 'Image URL' : 'Document URL'}
+                      </p>
+                      <input
+                        type="url"
+                        value={newLecture.videoUrl}
+                        onChange={(e) => setNewLecture(prev => ({...prev, videoUrl: e.target.value, videoFile: null}))}
+                        className="w-full px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 text-sm"
+                        placeholder={
+                          newLecture.lectureType === 'video'
+                            ? 'https://drive.google.com/file/d/.../view?usp=sharing'
+                            : newLecture.lectureType === 'image'
+                            ? 'https://example.com/image.jpg'
+                            : 'https://example.com/document.pdf'
+                        }
+                      />
+                      {newLecture.lectureType === 'video' && (
+                        <p className="text-[11px] text-slate-400 mt-1.5">
+                          💡 Set Google Drive sharing to <span className="text-blue-400 font-medium">"Anyone with the link can view"</span>
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Divider */}
+                    <div className="flex items-center gap-2 px-3 py-2 bg-slate-800/30">
+                      <div className="flex-1 h-px bg-slate-700/60"></div>
+                      <span className="text-[11px] text-slate-500 font-bold tracking-widest">OR</span>
+                      <div className="flex-1 h-px bg-slate-700/60"></div>
+                    </div>
+
+                    {/* File Upload */}
+                    <div className="p-3">
+                      <p className="text-xs text-slate-400 font-semibold mb-1.5">⬆️ Upload from Computer</p>
+                      <input
+                        type="file"
+                        accept={
+                          newLecture.lectureType === 'video'
+                            ? 'video/*'
+                            : newLecture.lectureType === 'image'
+                            ? 'image/*'
+                            : '.pdf,.doc,.docx,.ppt,.pptx'
+                        }
+                        onChange={(e) => setNewLecture(prev => ({...prev, videoFile: e.target.files[0], videoUrl: ''}))}
+                        className="hidden"
+                        id="add-lecture-file-edit"
+                      />
+                      <label
+                        htmlFor="add-lecture-file-edit"
+                        className="cursor-pointer flex items-center justify-center gap-2 w-full py-2 px-4 rounded-lg border border-slate-600 bg-slate-800 hover:bg-slate-700 hover:border-slate-500 text-slate-300 hover:text-white transition-all duration-200 text-sm font-medium"
+                      >
+                        {newLecture.videoFile ? (
+                          <>
+                            <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                            <span className="truncate text-emerald-400 text-xs font-mono">
+                              {newLecture.videoFile.name} &nbsp;·&nbsp; {(newLecture.videoFile.size / (1024 * 1024)).toFixed(2)} MB
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4 shrink-0" />
+                            <span>
+                              {newLecture.lectureType === 'video'
+                                ? 'Choose Video File'
+                                : newLecture.lectureType === 'image'
+                                ? 'Choose Image File'
+                                : 'Choose Document File'}
+                            </span>
+                          </>
+                        )}
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -934,7 +993,7 @@ const EducatorEditAndDeleteCourse = () => {
                 <button
                   onClick={() => {
                     setShowAddLecture(null);
-                    setNewLecture({ title: '', description: '', content: '', videoFile: null, duration: 0, order: 1 });
+                    setNewLecture({ title: '', lectureType: 'video', description: '', content: '', videoFile: null, videoUrl: '', duration: 0, order: 1 });
                   }}
                   className="flex-1 px-4 py-2 bg-slate-700 text-slate-300 rounded-lg"
                 >
@@ -942,7 +1001,7 @@ const EducatorEditAndDeleteCourse = () => {
                 </button>
                 <button
                   onClick={() => handleAddLecture(showAddLecture)}
-                  disabled={uploadingVideo || !newLecture.title.trim() || !newLecture.videoFile}
+                  disabled={uploadingVideo || !newLecture.title.trim() || (!newLecture.videoFile && !newLecture.videoUrl.trim())}
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
                 >
                   {uploadingVideo ? (

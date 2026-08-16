@@ -13,7 +13,8 @@ import {
   getAllStudentsAndEducators,
   educatorAddStudent,
   educatorUpdateStudentCourses,
-  educatorDeleteStudent
+  educatorDeleteStudent,
+  changePassword
 } from "../controllers/user.controllers.js";
 import express from 'express';
 import { authenticate, authorize } from "../middleware/authMiddleaare.js";
@@ -25,6 +26,7 @@ const userRouter = express.Router();
 userRouter.get('/profile', authenticate, getUserData); 
 userRouter.put('/profile', authenticate, updateUserData);
 userRouter.post('/profile/upload-avatar', authenticate, upload.single('avatar'), uploadProfilePicture); 
+userRouter.post('/change-password', authenticate, changePassword); 
 
 // Get enrolled courses with progress
 userRouter.get('/enrolled-courses', authenticate, authorize('student', 'educator'), getEnrolledCourses);

@@ -227,7 +227,8 @@ export const userEnrollCourse = async (req, res) => {
     }
 
     // Check if already enrolled
-    if (user.enrolledCourse.includes(courseId)) {
+    const isEnrolledCheck = user.enrolledCourse && user.enrolledCourse.some(id => (id._id || id).toString() === courseId.toString());
+    if (isEnrolledCheck) {
       return res.status(400).json({
         success: false,
         message: "Already enrolled in this course"
@@ -318,7 +319,9 @@ export const userPurchaseCourse = async (req, res) => {
       course: courseId
     });
 
-    if (existingPurchase || user.enrolledCourse.includes(courseId)) {
+    const isEnrolledCheck = user.enrolledCourse && user.enrolledCourse.some(id => (id._id || id).toString() === courseId.toString());
+
+    if (existingPurchase || isEnrolledCheck) {
       console.log('User already purchased this course, but payment was processed - handling gracefully');
       
       // Since payment was already processed, return success with existing purchase info
@@ -402,7 +405,8 @@ export const updateUserCourseProgress = async (req, res) =>{
 
     // Check if user is enrolled in the course
     const user = await User.findById(userId);
-    if (!user || !user.enrolledCourse.includes(courseId)) {
+    const isEnrolledCheck = user && user.enrolledCourse && user.enrolledCourse.some(id => (id._id || id).toString() === courseId.toString());
+    if (!user || !isEnrolledCheck) {
       return res.status(403).json({
         success: false,
         message: "Not enrolled in this course"
@@ -522,7 +526,8 @@ export const getUserCourseProgress = async(req,res)=>{
 
     // Check if user is enrolled in the course
     const user = await User.findById(userId);
-    if (!user || !user.enrolledCourse.includes(courseId)) {
+    const isEnrolledCheck = user && user.enrolledCourse && user.enrolledCourse.some(id => (id._id || id).toString() === courseId.toString());
+    if (!user || !isEnrolledCheck) {
       return res.status(403).json({
         success: false,
         message: "Not enrolled in this course"
@@ -585,7 +590,8 @@ export const userRating = async(req,res) =>{
 
     // Check if user is enrolled in the course
     const user = await User.findById(userId);
-    if (!user || !user.enrolledCourse.includes(courseId)) {
+    const isEnrolledCheck = user && user.enrolledCourse && user.enrolledCourse.some(id => (id._id || id).toString() === courseId.toString());
+    if (!user || !isEnrolledCheck) {
       return res.status(403).json({
         success: false,
         message: "You must be enrolled in this course to rate it"
@@ -658,7 +664,7 @@ export const checkCoursePurchase = async (req, res) => {
     }
 
     // Check if user is enrolled
-    const isEnrolled = user.enrolledCourse.includes(courseId);
+    const isEnrolled = user.enrolledCourse && user.enrolledCourse.some(id => (id._id || id).toString() === courseId.toString());
     
     // Check if there's a purchase record
     const purchase = await Purchase.findOne({
@@ -820,7 +826,7 @@ export const getUserStats = async (req, res) => {
 // get all students and educators
 export const getAllStudentsAndEducators = async (req, res) => {
   try {
-    const users = await User.find({ role: { $in: ['student', 'educator'] } });
+    const users = await User.find({ role: { $in: ['student', 'educator'] } }).populate('enrolledCourse', 'title');
     res.status(200).json({
       success: true,
       data: users
@@ -988,4 +994,57 @@ export const educatorDeleteStudent = async (req, res) => {
     });
   }
 };
+
+export const changePassword = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password and new password are required"
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 6 characters long"
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: "Incorrect current password"
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully"
+    });
+  } catch (error) {
+    console.error("Change password error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Failed to change password"
+    });
+  }
+};
+
 

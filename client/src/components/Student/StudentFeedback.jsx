@@ -7,28 +7,58 @@ const StudentFeedback = () => {
   const feedbacks = [
     {
       name: "Aarav Sharma",
+      role: "Software Developer",
       feedback:
         "This platform completely transformed my learning experience! The interactive dashboard and expert guidance made complex topics easy to understand.",
-      image: "https://randomuser.me/api/portraits/men/32.jpg",
     },
     {
       name: "Priya Das",
+      role: "Frontend Engineer",
       feedback:
         "The flexibility and practical projects were exactly what I needed. The certificate I earned has already helped me land job interviews!",
-      image: "https://randomuser.me/api/portraits/women/44.jpg",
     },
     {
       name: "Rohan Gupta",
+      role: "Full Stack Developer",
       feedback:
         "I loved the course content and the friendly mentors. The real-world assignments helped me build a portfolio that stands out.",
-      image: "https://randomuser.me/api/portraits/men/65.jpg",
     },
     {
-      name: "Sara Johnson",
+      name: "Ananya Patel",
+      role: "Cloud Specialist",
       feedback:
-        "The AWS and DevOps training helped me land my first cloud engineer role. The mentors were incredibly helpful.",
-      image: "https://randomuser.me/api/portraits/women/32.jpg",
+        "The AWS and DevOps training helped me land my first cloud engineer role. The mentors were incredibly helpful throughout.",
     },
+    {
+      name: "Vikram Singh",
+      role: "Data Engineer",
+      feedback:
+        "The practical coding projects and industry-relevant curriculum gave me the confidence to excel in technical interviews.",
+    },
+    {
+      name: "Kavya Verma",
+      role: "UI/UX Student",
+      feedback:
+        "The self-paced learning schedule fit perfectly into my schedule. I gained practical skills that helped me clear campus placement.",
+    },
+  ];
+
+  const getInitials = (name) => {
+    if (!name) return "S";
+    const parts = name.trim().split(" ").filter(Boolean);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return parts[0][0].toUpperCase();
+  };
+
+  const avatarGradients = [
+    "from-blue-600 to-indigo-600 border-blue-400/60 text-white shadow-blue-500/20",
+    "from-purple-600 to-pink-600 border-purple-400/60 text-white shadow-purple-500/20",
+    "from-emerald-600 to-teal-600 border-emerald-400/60 text-white shadow-emerald-500/20",
+    "from-amber-500 to-orange-600 border-amber-400/60 text-white shadow-amber-500/20",
+    "from-cyan-600 to-blue-600 border-cyan-400/60 text-white shadow-cyan-500/20",
+    "from-rose-600 to-pink-600 border-rose-400/60 text-white shadow-rose-500/20",
   ];
 
   const sliderSettings = {
@@ -52,26 +82,31 @@ const StudentFeedback = () => {
           </h2>
         </div>
 
-    <div className="h-9"></div>
-        {/* Feedback Section */}
+        <div className="h-9"></div>
+
+        {/* Feedback Section - Desktop Marquee */}
         <div className="hidden md:block relative overflow-hidden">
           <div className="flex gap-6 animate-scrollX">
             {[...feedbacks, ...feedbacks].map((fb, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 w-80 p-6 rounded-xl bg-gradient-to-br from-black/10 via-black/5 to-transparent border border-gray-700 hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
+                className="flex-shrink-0 w-80 p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800 hover:border-slate-700 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between"
               >
-                <div className="flex items-center gap-4 mb-4">
-                  <img
-                    src={fb.image}
-                    alt={fb.name}
-                    className="w-14 h-14 rounded-full border-2 border-blue-500 object-cover"
-                  />
-                  <h3 className="text-lg font-bold text-white">{fb.name}</h3>
+                <div>
+                  <div className="flex items-center gap-4 mb-4">
+                    {/* Character Letter Avatar */}
+                    <div className={`w-13 h-13 min-w-[3.25rem] min-h-[3.25rem] rounded-2xl bg-gradient-to-br ${avatarGradients[index % avatarGradients.length]} border-2 flex items-center justify-center font-black text-base shadow-lg tracking-wider`}>
+                      {getInitials(fb.name)}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">{fb.name}</h3>
+                      {fb.role && <p className="text-xs text-blue-400 font-medium">{fb.role}</p>}
+                    </div>
+                  </div>
+                  <p className="text-slate-300 text-sm leading-relaxed italic">
+                    “{fb.feedback}”
+                  </p>
                 </div>
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  “{fb.feedback}”
-                </p>
               </div>
             ))}
           </div>
@@ -83,17 +118,18 @@ const StudentFeedback = () => {
             {feedbacks.map((fb, index) => (
               <div
                 key={index}
-                className="p-6 rounded-xl bg-gradient-to-br from-black/10 via-black/5 to-transparent border border-gray-700"
+                className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800"
               >
                 <div className="flex items-center gap-4 mb-4">
-                  <img
-                    src={fb.image}
-                    alt={fb.name}
-                    className="w-14 h-14 rounded-full border-2 border-blue-500 object-cover"
-                  />
-                  <h3 className="text-lg font-bold text-white">{fb.name}</h3>
+                  <div className={`w-13 h-13 min-w-[3.25rem] min-h-[3.25rem] rounded-2xl bg-gradient-to-br ${avatarGradients[index % avatarGradients.length]} border-2 flex items-center justify-center font-black text-base shadow-lg tracking-wider`}>
+                    {getInitials(fb.name)}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">{fb.name}</h3>
+                    {fb.role && <p className="text-xs text-blue-400 font-medium">{fb.role}</p>}
+                  </div>
                 </div>
-                <p className="text-gray-300 text-sm leading-relaxed">
+                <p className="text-slate-300 text-sm leading-relaxed italic">
                   “{fb.feedback}”
                 </p>
               </div>
@@ -111,7 +147,7 @@ const StudentFeedback = () => {
           }
           .animate-scrollX {
             display: flex;
-            animation: scrollX 15s linear infinite; /* Desktop speed */
+            animation: scrollX 15s linear infinite;
           }
         `}
       </style>

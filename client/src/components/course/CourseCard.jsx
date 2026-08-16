@@ -8,20 +8,23 @@ const CourseCard = ({ course }) => {
   const navigate = useNavigate();
   const { user, isLoggedIn } = useAuth();
 
+  const isEnrolled = isLoggedIn && user && user.enrolledCourse && user.enrolledCourse.some(c => {
+    const id = c._id || c;
+    return course._id && id.toString() === course._id.toString();
+  });
+
   const handleCourseClick = () => {
     if (!isLoggedIn) {
       navigate('/login');
       return;
     }
+    if (isEnrolled) {
+      navigate(`/course/${course._id}/learn`);
+      return;
+    }
     if (user && user.role === 'student') {
-      const isEnrolled = user.enrolledCourse && user.enrolledCourse.some(c => {
-        const id = c._id || c;
-        return id.toString() === course._id.toString();
-      });
-      if (!isEnrolled) {
-        window.location.href = "https://whitedavid23.org/courses";
-        return;
-      }
+      window.location.href = "https://whitedavid23.org/courses";
+      return;
     }
     navigate(`/course/${course._id}`);
   };
@@ -42,7 +45,6 @@ const CourseCard = ({ course }) => {
     >
       {/* Course Thumbnail */}
       <div className="relative h-36 bg-gradient-to-r from-blue-600 to-purple-600 overflow-hidden"> 
-        {/* // h-36 instead of h-48 */}
         {course.thumbnail ? (
           <img
             src={course.thumbnail}
@@ -55,7 +57,7 @@ const CourseCard = ({ course }) => {
         
         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-300" />
         
-        {/* Course Badge */}
+        {/* Course Category Badge */}
         <div className="absolute top-2 left-2">
           <span className="px-2 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-xs font-medium">
             {course.category || 'General'}
@@ -70,16 +72,22 @@ const CourseCard = ({ course }) => {
           </div>
         </div>
 
-        {/* Price */}
+        {/* Price / Enrolled Badge */}
         <div className="absolute bottom-2 right-2">
-          <div className="px-2 py-0.5 bg-green-500/20 backdrop-blur-sm border border-green-500/30 rounded-full text-green-400 text-xs font-semibold">
-            ₹{course.price || '0'}
-          </div>
+          {isEnrolled ? (
+            <div className="px-2.5 py-0.5 bg-emerald-600 text-white rounded-full text-xs font-semibold shadow-sm">
+              Enrolled
+            </div>
+          ) : (
+            <div className="px-2.5 py-0.5 bg-blue-600 text-white rounded-full text-xs font-semibold shadow-sm">
+              ₹{course.price || '0'}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Course Info */}
-      <div className="p-4 flex-grow flex flex-col"> {/* // reduced from p-6 and added flex properties */}
+      <div className="p-4 flex-grow flex flex-col">
         <h3 className="text-base font-semibold text-white mb-1 group-hover:text-blue-400 transition-colors duration-200 line-clamp-2">
           {course.title}
         </h3>
@@ -108,7 +116,7 @@ const CourseCard = ({ course }) => {
           </div>
         </div>
 
-        {/* Difficulty Badge */}
+        {/* Difficulty Badge & Action Button */}
         <div className="flex items-center justify-between mt-auto pt-2">
           <span
             className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
@@ -129,9 +137,13 @@ const CourseCard = ({ course }) => {
             }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="px-3 py-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs font-medium rounded-md hover:from-blue-700 hover:to-purple-700 transition-all duration-200 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0"
+            className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 shadow-md ${
+              isEnrolled
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white'
+                : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white'
+            }`}
           >
-            View
+            {isEnrolled ? 'Continue' : `₹${course.price || 0}`}
           </motion.button>
         </div>
       </div>
