@@ -72,18 +72,14 @@ const CourseCard = ({ course }) => {
           </div>
         </div>
 
-        {/* Price / Enrolled Badge */}
-        <div className="absolute bottom-2 right-2">
-          {isEnrolled ? (
+        {/* Enrolled Badge */}
+        {isEnrolled && (
+          <div className="absolute bottom-2 right-2">
             <div className="px-2.5 py-0.5 bg-emerald-600 text-white rounded-full text-xs font-semibold shadow-sm">
               Enrolled
             </div>
-          ) : (
-            <div className="px-2.5 py-0.5 bg-blue-600 text-white rounded-full text-xs font-semibold shadow-sm">
-              ₹{course.price || '0'}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Course Info */}
