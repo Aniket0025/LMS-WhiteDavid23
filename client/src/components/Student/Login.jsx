@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { loginUser } from "../../Api/authApi.js";
+import { executeRecaptcha } from "../../utils/recaptcha.js";
+import ReCaptchaBox from "../common/ReCaptchaBox.jsx";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -22,6 +24,8 @@ const Login = () => {
     rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [isRobotChecked, setIsRobotChecked] = useState(false);
+  const [recaptchaTokenState, setRecaptchaTokenState] = useState("");
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState("");
@@ -44,6 +48,11 @@ const Login = () => {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
+    }
+
+    // Robot Checkbox validation
+    if (!isRobotChecked) {
+      newErrors.recaptcha = "Please check 'I'm not a robot' to continue";
     }
 
     setErrors(newErrors);
@@ -74,10 +83,14 @@ const Login = () => {
     setIsLoading(true);
 
     try {
+      // Execute Google reCAPTCHA v3 or use v2 token from box
+      const token = recaptchaTokenState || (await executeRecaptcha("login"));
+
       // Call the real login API
       const response = await loginUser({
         email: formData.email,
         password: formData.password,
+        recaptchaToken: token,
       });
 
       if (response.success) {
@@ -281,7 +294,7 @@ const Login = () => {
               )}
             </div>
 
-            {/* Remember Me & Forgot Password */}
+            {/* Remember Me */}
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
@@ -300,6 +313,17 @@ const Login = () => {
                 </label>
               </div>
             </div>
+
+            {/* Google reCAPTCHA "I'm not a robot" Checkbox Box */}
+            <ReCaptchaBox
+              checked={isRobotChecked}
+              onChange={(status, token) => {
+                setIsRobotChecked(status);
+                if (token) setRecaptchaTokenState(token);
+                setErrors((prev) => ({ ...prev, recaptcha: "" }));
+              }}
+              error={errors.recaptcha}
+            />
 
             {/* Submit Button */}
             <motion.button

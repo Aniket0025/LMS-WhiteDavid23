@@ -215,29 +215,29 @@ const EducatorAnalytics = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 text-slate-100 pt-24">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-20 max-w-7xl">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 pt-2 sm:pt-4 pb-16 overflow-x-hidden text-slate-100">
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8 max-w-7xl w-full">
         
         {/* Header Navigation & Actions */}
         <motion.div
           variants={fadeInUp}
           initial="initial"
           animate="animate"
-          className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8"
+          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 sm:mb-8 w-full max-w-full"
         >
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 min-w-0">
             <Link
               to="/educator/dashboard"
-              className="p-2.5 bg-slate-800/60 border border-slate-700/60 hover:bg-slate-800 hover:border-slate-600 rounded-xl text-slate-300 hover:text-white transition-all duration-200"
+              className="p-2 sm:p-2.5 bg-slate-800/60 border border-slate-700/60 hover:bg-slate-800 hover:border-slate-600 rounded-xl text-slate-300 hover:text-white transition-all duration-200 shrink-0"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <div>
-              <div className="flex items-center space-x-2">
-                <h1 className="text-3xl font-black text-white tracking-tight">Analytics Dashboard</h1>
-                <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">Live Metrics</span>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight truncate">Analytics Dashboard</h1>
+                <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold shrink-0">Live Metrics</span>
               </div>
-              <p className="text-slate-400 text-xs sm:text-sm mt-1">Real-time revenue, enrollment, and student engagement insights</p>
+              <p className="text-slate-400 text-xs sm:text-sm mt-1 truncate">Real-time revenue, enrollment, and student engagement insights</p>
             </div>
           </div>
 

@@ -45,8 +45,8 @@ export default function EducatorAddCourse() {
     description: '',
     category: '',
     level: '',
-    price: 0,
-    duration: 0,
+    price: '',
+    duration: '',
     thumbnail: '',
     requirements: [''],
     whatYouWillLearn: ['']
@@ -351,10 +351,10 @@ export default function EducatorAddCourse() {
         title: courseData.title,
         description: courseData.description,
         category: finalCategory,
-        price: courseData.price || 0,
+        price: courseData.price === '' ? 0 : parseFloat(courseData.price) || 0,
         discount: 0,
         thumbnail: courseData.thumbnail || '',
-        totalDuration: courseData.duration || 1, // Default to 1 hour if not specified
+        totalDuration: courseData.duration === '' ? 1 : parseFloat(courseData.duration) || 1, // Default to 1 hour if not specified
       };
 
       console.log('Creating course with payload:', coursePayload);
@@ -555,39 +555,39 @@ export default function EducatorAddCourse() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="container mx-auto px-6 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 overflow-x-hidden">
+      <div className="container mx-auto px-3 sm:px-6 py-2 sm:py-4 max-w-7xl w-full">
         {/* Header */}
         <motion.div
           variants={fadeInUp}
           initial="initial"
           animate="animate"
-          className="flex items-center justify-between mb-8"
+          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 sm:mb-8 w-full max-w-full"
         >
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 min-w-0">
             <Link
               to="/educator/dashboard"
-              className="p-2 hover:bg-slate-800 rounded-lg transition-colors duration-200"
+              className="p-2 hover:bg-slate-800 rounded-lg transition-colors duration-200 shrink-0"
             >
-              <ArrowLeft className="w-6 h-6 text-slate-400" />
+              <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400" />
             </Link>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white">
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white truncate">
                 Create New Course
               </h1>
-              <p className="text-slate-300 mt-2">
+              <p className="text-xs sm:text-sm text-slate-300 mt-1 truncate">
                 Complete course creation with chapters and lectures
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto">
             {/* Step Indicator */}
-            <div className="hidden md:flex items-center space-x-2 mr-4">
+            <div className="hidden md:flex items-center space-x-2 mr-2">
               {[1, 2, 3].map((step) => (
                 <div
                   key={step}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium ${
                     activeStep >= step
                       ? 'bg-blue-600 text-white'
                       : 'bg-slate-700 text-slate-400'
@@ -600,7 +600,7 @@ export default function EducatorAddCourse() {
 
             <button
               onClick={() => setPreviewMode(!previewMode)}
-              className="px-4 py-2 bg-slate-700 text-slate-300 font-medium rounded-lg hover:bg-slate-600 hover:text-white transition-all duration-200 flex items-center space-x-2"
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-slate-700 text-slate-300 text-xs sm:text-sm font-medium rounded-lg hover:bg-slate-600 hover:text-white transition-all duration-200 flex items-center justify-center space-x-1.5"
             >
               <Eye className="w-4 h-4" />
               <span>{previewMode ? 'Edit' : 'Preview'}</span>
@@ -609,7 +609,7 @@ export default function EducatorAddCourse() {
             <button
               onClick={() => handleSaveCourse(false)}
               disabled={isLoading}
-              className="px-4 py-2 border border-slate-600 text-slate-300 font-medium rounded-lg hover:border-slate-500 hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border border-slate-600 text-slate-300 text-xs sm:text-sm font-medium rounded-lg hover:border-slate-500 hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-center"
             >
               {isLoading ? 'Saving...' : 'Save Draft'}
             </button>
@@ -617,7 +617,7 @@ export default function EducatorAddCourse() {
             <button
               onClick={() => handleSaveCourse(true)}
               disabled={isLoading}
-              className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs sm:text-sm font-medium rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20"
             >
               <Save className="w-4 h-4" />
               <span>{isLoading ? 'Publishing...' : 'Publish Course'}</span>
@@ -630,38 +630,38 @@ export default function EducatorAddCourse() {
           variants={fadeInUp}
           initial="initial"
           animate="animate"
-          className="mb-8"
+          className="mb-6 sm:mb-8 w-full max-w-full overflow-hidden"
         >
-          <div className="flex items-center justify-center space-x-8">
-            <div className={`flex items-center space-x-2 ${activeStep >= 1 ? 'text-blue-400' : 'text-slate-500'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+          <div className="flex items-center justify-between sm:justify-center space-x-2 sm:space-x-8 overflow-x-auto pb-1 scrollbar-none max-w-full">
+            <div className={`flex items-center space-x-1.5 sm:space-x-2 shrink-0 ${activeStep >= 1 ? 'text-blue-400' : 'text-slate-500'}`}>
+              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm ${
                 activeStep >= 1 ? 'bg-blue-600' : 'bg-slate-700'
               }`}>
-                <BookOpen className="w-4 h-4 text-white" />
+                <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
               </div>
-              <span className="font-medium">Basic Info</span>
+              <span className="text-xs sm:text-base font-medium">Basic Info</span>
             </div>
             
-            <div className="w-16 h-0.5 bg-slate-700"></div>
+            <div className="w-6 sm:w-16 h-0.5 bg-slate-700 shrink-0"></div>
             
-            <div className={`flex items-center space-x-2 ${activeStep >= 2 ? 'text-blue-400' : 'text-slate-500'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+            <div className={`flex items-center space-x-1.5 sm:space-x-2 shrink-0 ${activeStep >= 2 ? 'text-blue-400' : 'text-slate-500'}`}>
+              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm ${
                 activeStep >= 2 ? 'bg-blue-600' : 'bg-slate-700'
               }`}>
-                <Video className="w-4 h-4 text-white" />
+                <Video className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
               </div>
-              <span className="font-medium">Content</span>
+              <span className="text-xs sm:text-base font-medium">Content</span>
             </div>
             
-            <div className="w-16 h-0.5 bg-slate-700"></div>
+            <div className="w-6 sm:w-16 h-0.5 bg-slate-700 shrink-0"></div>
             
-            <div className={`flex items-center space-x-2 ${activeStep >= 3 ? 'text-blue-400' : 'text-slate-500'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+            <div className={`flex items-center space-x-1.5 sm:space-x-2 shrink-0 ${activeStep >= 3 ? 'text-blue-400' : 'text-slate-500'}`}>
+              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm ${
                 activeStep >= 3 ? 'bg-blue-600' : 'bg-slate-700'
               }`}>
-                <CheckCircle className="w-4 h-4 text-white" />
+                <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
               </div>
-              <span className="font-medium">Review</span>
+              <span className="text-xs sm:text-base font-medium">Review</span>
             </div>
           </div>
         </motion.div>
@@ -882,8 +882,13 @@ export default function EducatorAddCourse() {
                             type="number"
                             min="0"
                             step="0.01"
-                            value={courseData.price}
-                            onChange={(e) => setCourseData({...courseData, price: parseFloat(e.target.value) || 0})}
+                            value={courseData.price === 0 || courseData.price === '0' ? '' : courseData.price}
+                            onChange={(e) => setCourseData({...courseData, price: e.target.value})}
+                            onFocus={(e) => {
+                              if (e.target.value === '0' || e.target.value === 0) {
+                                e.target.select();
+                              }
+                            }}
                             className="w-full pl-8 pr-4 py-3 bg-slate-900/70 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
                             placeholder="499"
                           />
@@ -900,8 +905,13 @@ export default function EducatorAddCourse() {
                           type="number"
                           min="0.5"
                           step="0.5"
-                          value={courseData.duration}
-                          onChange={(e) => setCourseData({...courseData, duration: parseFloat(e.target.value) || 0})}
+                          value={courseData.duration === 0 || courseData.duration === '0' ? '' : courseData.duration}
+                          onChange={(e) => setCourseData({...courseData, duration: e.target.value})}
+                          onFocus={(e) => {
+                            if (e.target.value === '0' || e.target.value === 0) {
+                              e.target.select();
+                            }
+                          }}
                           className="w-full px-4 py-3 bg-slate-900/70 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200"
                           placeholder="2.5"
                         />
@@ -1514,16 +1524,16 @@ export default function EducatorAddCourse() {
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6 min-w-0 w-full">
               {/* Course Progress */}
-              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Course Progress</h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center text-sm">
+              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-xl p-4 sm:p-6 w-full min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Course Progress</h3>
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex justify-between items-center text-xs sm:text-sm">
                     <span className="text-slate-400">Completion</span>
-                    <span className="text-white">{Math.round(((courseData.title ? 1 : 0) + (courseData.description ? 1 : 0) + (courseData.category ? 1 : 0) + (chapters.length > 0 ? 1 : 0)) / 4 * 100)}%</span>
+                    <span className="text-white font-semibold">{Math.round(((courseData.title ? 1 : 0) + (courseData.description ? 1 : 0) + (courseData.category ? 1 : 0) + (chapters.length > 0 ? 1 : 0)) / 4 * 100)}%</span>
                   </div>
-                  <div className="w-full bg-slate-700 rounded-full h-2">
+                  <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
                     <div 
                       className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${Math.round(((courseData.title ? 1 : 0) + (courseData.description ? 1 : 0) + (courseData.category ? 1 : 0) + (chapters.length > 0 ? 1 : 0)) / 4 * 100)}%` }}
@@ -1533,19 +1543,19 @@ export default function EducatorAddCourse() {
               </div>
 
               {/* Course Statistics */}
-              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Course Statistics</h3>
-                <div className="space-y-3">
+              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-xl p-4 sm:p-6 w-full min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Course Statistics</h3>
+                <div className="space-y-3 text-xs sm:text-sm">
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-400 text-sm">Total Chapters</span>
+                    <span className="text-slate-400">Total Chapters</span>
                     <span className="text-white font-medium">{chapters.length}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-400 text-sm">Total Lectures</span>
+                    <span className="text-slate-400">Total Lectures</span>
                     <span className="text-white font-medium">{chapters.reduce((acc, ch) => acc + ch.lectures.length, 0)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-400 text-sm">Estimated Duration</span>
+                    <span className="text-slate-400">Estimated Duration</span>
                     <span className="text-white font-medium">
                       {chapters.reduce((acc, ch) => 
                         acc + ch.lectures.reduce((lectureAcc, lecture) => lectureAcc + parseInt(lecture.duration || 0), 0), 0
@@ -1556,12 +1566,12 @@ export default function EducatorAddCourse() {
               </div>
 
               {/* Quick Actions */}
-              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
+              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-xl p-4 sm:p-6 w-full min-w-0">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Quick Actions</h3>
                 <div className="space-y-2">
                   <button
                     onClick={() => setPreviewMode(!previewMode)}
-                    className="w-full px-4 py-2 bg-slate-700 text-slate-300 font-medium rounded-lg hover:bg-slate-600 hover:text-white transition-all duration-200 flex items-center space-x-2"
+                    className="w-full px-4 py-2 bg-slate-700 text-slate-300 text-xs sm:text-sm font-medium rounded-lg hover:bg-slate-600 hover:text-white transition-all duration-200 flex items-center justify-center space-x-2"
                   >
                     <Eye className="w-4 h-4" />
                     <span>{previewMode ? 'Edit Mode' : 'Preview Mode'}</span>
@@ -1569,7 +1579,7 @@ export default function EducatorAddCourse() {
                   <button
                     onClick={() => handleSaveCourse(false)}
                     disabled={isLoading}
-                    className="w-full px-4 py-2 border border-slate-600 text-slate-300 font-medium rounded-lg hover:border-slate-500 hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                    className="w-full px-4 py-2 border border-slate-600 text-slate-300 text-xs sm:text-sm font-medium rounded-lg hover:border-slate-500 hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                   >
                     <Save className="w-4 h-4" />
                     <span>{isLoading ? 'Saving...' : 'Save Draft'}</span>

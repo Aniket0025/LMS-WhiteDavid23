@@ -408,8 +408,8 @@ const EducatorEditAndDeleteCourse = () => {
   const fadeInUp = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.4 } };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-24">
-      <div className="container mx-auto px-6 lg:px-8 pb-16 max-w-3xl">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-2 sm:pt-4 overflow-x-hidden">
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8 pb-16 max-w-3xl w-full">
 
         {success && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6 p-3 bg-green-600/10 rounded-md text-green-300">
@@ -419,26 +419,26 @@ const EducatorEditAndDeleteCourse = () => {
 
         {error && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6 p-3 bg-red-600/10 rounded-md text-red-300 flex items-center">
-            <AlertCircle className="w-4 h-4 mr-2" /> {error}
+            <AlertCircle className="w-4 h-4 mr-2 shrink-0" /> <span className="text-xs sm:text-sm">{error}</span>
           </motion.div>
         )}
 
-        <motion.div variants={fadeInUp} initial="initial" animate="animate" className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <Link to="/educator/dashboard" className="p-2 hover:bg-slate-800 rounded-lg">
-              <ArrowLeft className="w-6 h-6 text-slate-400" />
+        <motion.div variants={fadeInUp} initial="initial" animate="animate" className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div className="flex items-center space-x-3 min-w-0">
+            <Link to="/educator/dashboard" className="p-2 hover:bg-slate-800 rounded-lg shrink-0">
+              <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400" />
             </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-white">Edit Course</h1>
-              <p className="text-slate-300">Update your course details</p>
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white truncate">Edit Course</h1>
+              <p className="text-xs sm:text-sm text-slate-300 truncate">Update your course details</p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
-            <div className={`px-3 py-1 rounded-lg ${formData.isPublished ? 'bg-green-600/10 text-green-300' : 'bg-yellow-600/10 text-yellow-300'}`}>
+          <div className="flex items-center space-x-3 self-start sm:self-auto shrink-0">
+            <div className={`px-3 py-1 rounded-lg text-xs sm:text-sm ${formData.isPublished ? 'bg-green-600/10 text-green-300' : 'bg-yellow-600/10 text-yellow-300'}`}>
               {formData.isPublished ? <><Eye className="w-4 h-4 inline-block mr-1" /> Published</> : <><EyeOff className="w-4 h-4 inline-block mr-1" /> Draft</>}
             </div>
-            <button onClick={() => setShowDeleteConfirm(true)} className="px-3 py-1 bg-red-600/20 text-red-300 rounded-lg">
+            <button type="button" onClick={() => setShowDeleteConfirm(true)} className="px-3 py-1 bg-red-600/20 text-red-300 rounded-lg text-xs sm:text-sm">
               <Trash2 className="w-4 h-4 inline-block mr-1" /> Delete
             </button>
           </div>
@@ -537,12 +537,15 @@ const EducatorEditAndDeleteCourse = () => {
                   <input 
                     type="number" 
                     name="price" 
-                    value={formData.price} 
-                    onChange={handleInputChange} 
+                    value={formData.price === 0 || formData.price === '0' ? '' : formData.price} 
+                    onChange={handleInputChange}
+                    onFocus={(e) => {
+                      if (e.target.value === '0' || e.target.value === 0) e.target.select();
+                    }}
                     min="0" 
                     step="0.01"
                     className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50" 
-                    placeholder="0"
+                    placeholder="499"
                   />
                 </div>
                 <div>
@@ -550,8 +553,11 @@ const EducatorEditAndDeleteCourse = () => {
                   <input 
                     type="number" 
                     name="discount" 
-                    value={formData.discount} 
-                    onChange={handleInputChange} 
+                    value={formData.discount === 0 || formData.discount === '0' ? '' : formData.discount} 
+                    onChange={handleInputChange}
+                    onFocus={(e) => {
+                      if (e.target.value === '0' || e.target.value === 0) e.target.select();
+                    }}
                     min="0" 
                     max="100"
                     className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50" 
@@ -563,11 +569,14 @@ const EducatorEditAndDeleteCourse = () => {
                   <input 
                     type="number" 
                     name="estimatedDuration" 
-                    value={formData.estimatedDuration} 
-                    onChange={handleInputChange} 
+                    value={formData.estimatedDuration === 0 || formData.estimatedDuration === '0' ? '' : formData.estimatedDuration} 
+                    onChange={handleInputChange}
+                    onFocus={(e) => {
+                      if (e.target.value === '0' || e.target.value === 0) e.target.select();
+                    }}
                     min="0"
                     className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50" 
-                    placeholder="0"
+                    placeholder="120"
                   />
                 </div>
               </div>

@@ -62,7 +62,7 @@ const StudentLayout = () => {
 
   // Render nested routes for students and educators (educators can also be students)
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 w-full max-w-full overflow-x-hidden">
       {/* You can add student-specific navigation, sidebar, or header here */}
       <Outlet />
     </div>

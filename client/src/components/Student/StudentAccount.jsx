@@ -271,20 +271,20 @@ const StudentAccount = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-24">
-      <div className="container mx-auto px-6 lg:px-8 pb-16">
-        <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-20 sm:pt-24 overflow-x-hidden">
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8 pb-16 max-w-4xl w-full">
+        <div className="max-w-4xl mx-auto min-w-0 w-full">
           {/* Header */}
           <motion.div
             variants={fadeInUp}
             initial="initial"
             animate="animate"
-            className="text-center mb-12"
+            className="text-center mb-8 sm:mb-12"
           >
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3">
               My Account
             </h1>
-            <p className="text-xl text-slate-300">
+            <p className="text-base sm:text-xl text-slate-300">
               Manage your profile and account settings
             </p>
           </motion.div>
@@ -295,7 +295,7 @@ const StudentAccount = () => {
             initial="initial"
             animate="animate"
             transition={{ delay: 0.2 }}
-            className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-8 shadow-2xl mb-8"
+            className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-2xl mb-8 w-full min-w-0"
           >
             <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
               {/* Avatar */}

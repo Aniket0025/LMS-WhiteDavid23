@@ -189,8 +189,8 @@ const EducatorDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 text-slate-100 pt-24">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-20 max-w-7xl">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 pt-2 sm:pt-4 pb-16 overflow-x-hidden text-slate-100">
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8 max-w-7xl w-full">
         
         {/* Welcome Header Banner */}
         <motion.div

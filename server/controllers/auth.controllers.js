@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "../model/user.model.js";
 import { generateOTP, sendOTPEmail, generateResetToken, sendPasswordResetEmail, sendPasswordResetOTP } from "../utils/emailUtils.js";
+import { verifyRecaptchaToken } from "../utils/recaptchaUtils.js";
 
 // Step 1: Send OTP for registration
 export const sendRegistrationOTP = async (req, res) => {
@@ -266,7 +267,7 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, recaptchaToken } = req.body;
 
   if (!email || !password) {
     return res.json({
@@ -274,6 +275,16 @@ export const login = async (req, res) => {
       message: "Email and Password are required",
     });
   }
+
+  // Verify Google reCAPTCHA v3 Security Token
+  const captchaResult = await verifyRecaptchaToken(recaptchaToken, req.ip, "login");
+  if (!captchaResult.success) {
+    return res.json({
+      success: false,
+      message: captchaResult.message || "reCAPTCHA security verification failed.",
+    });
+  }
+
   try {
     const user = await User.findOne({ email });
     if (!user) {

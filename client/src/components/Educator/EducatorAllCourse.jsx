@@ -381,7 +381,7 @@ const EducatorAllCourse = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-24">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-2 sm:pt-4">
       <div className="container mx-auto px-6 lg:px-8 pb-16">
         {/* Error Message */}
         {error && (
@@ -406,20 +406,20 @@ const EducatorAllCourse = () => {
           variants={fadeInUp}
           initial="initial"
           animate="animate"
-          className="flex items-center justify-between mb-8"
+          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 sm:mb-8"
         >
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 min-w-0">
             <Link
               to="/educator/dashboard"
-              className="p-2 hover:bg-slate-800 rounded-lg transition-colors duration-200"
+              className="p-2 hover:bg-slate-800 rounded-lg transition-colors duration-200 shrink-0"
             >
-              <ArrowLeft className="w-6 h-6 text-slate-400" />
+              <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400" />
             </Link>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white">
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white truncate">
                 {viewType === 'mine' ? 'My Courses' : 'All Platform Courses'}
               </h1>
-              <p className="text-slate-300 mt-2">
+              <p className="text-xs sm:text-sm text-slate-300 mt-1 truncate">
                 {viewType === 'mine' 
                   ? 'Manage your courses (published and unpublished)'
                   : 'Browse all published courses on the platform'
@@ -428,12 +428,12 @@ const EducatorAllCourse = () => {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
             {/* View Type Toggle */}
-            <div className="flex bg-slate-800 border border-slate-600 rounded-lg overflow-hidden">
+            <div className="flex bg-slate-800 border border-slate-600 rounded-lg overflow-hidden shrink-0">
               <button
                 onClick={() => setViewType('mine')}
-                className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
                   viewType === 'mine' 
                     ? 'bg-blue-600 text-white' 
                     : 'text-slate-300 hover:text-white hover:bg-slate-700'
@@ -443,7 +443,7 @@ const EducatorAllCourse = () => {
               </button>
               <button
                 onClick={() => setViewType('platform')}
-                className={`px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-200 ${
                   viewType === 'platform' 
                     ? 'bg-blue-600 text-white' 
                     : 'text-slate-300 hover:text-white hover:bg-slate-700'
@@ -455,9 +455,9 @@ const EducatorAllCourse = () => {
 
             <Link
               to="/educator/add-course"
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center space-x-2"
+              className="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs sm:text-sm font-medium rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center justify-center space-x-2 shrink-0 ml-auto lg:ml-0"
             >
-              <BookOpen className="w-5 h-5" />
+              <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
               <span>Create Course</span>
             </Link>
           </div>

@@ -96,40 +96,9 @@ const EducatorLayout = () => {
 
   // Render nested routes for educators
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800">
-      {/* Quick Navigation for Educators */}
-      <div className="bg-slate-900/30 backdrop-blur-xl border-b border-slate-700/30">
-        <div className="container mx-auto px-6 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-6">
-              {navigationItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 text-sm ${
-                      isActiveRoute(item.href)
-                        ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="font-medium">{item.name}</span>
-                  </Link>
-                );
-              })}
-            </div>
-            
-            <div className="text-slate-400 text-sm">
-              Welcome back, <span className="text-white font-medium">{user?.name || 'Educator'}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 w-full max-w-full overflow-x-hidden pt-[70px] sm:pt-[76px]">
       {/* Page Content */}
-      <div className="pt-6">
+      <div className="w-full max-w-full overflow-x-hidden">
         <Outlet />
       </div>
     </div>

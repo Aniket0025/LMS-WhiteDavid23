@@ -90,12 +90,18 @@ const Navbar = () => {
       transition={{ duration: 0.6 }}
       className="fixed top-0 left-0 w-full bg-slate-950/95 backdrop-blur-lg border-b border-slate-800/50 z-50 shadow-lg"
     >
-      <div className="container mx-auto px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16 sm:h-18">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-0">
-            <img src="/login.png" alt="whitedavid23 Logo" className="h-48 w-48 object-contain -mr-13 -ml-7" />
-            <span className="text-2xl font-bold text-white">
+          <Link to="/" className="flex items-center space-x-2.5 sm:space-x-3.5 group shrink-0">
+            <div className="relative flex items-center justify-center w-10 h-10 sm:w-14 sm:h-14 md:w-16 md:h-16 overflow-hidden rounded-xl shrink-0">
+              <img 
+                src="/login.png" 
+                alt="whitedavid23 Logo" 
+                className="w-full h-full object-contain scale-[2.7] transition-transform duration-300 group-hover:scale-[3.0]" 
+              />
+            </div>
+            <span className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight shrink-0">
               whitedavid<span className="text-blue-400">23</span>
             </span>
           </Link>
@@ -108,7 +114,7 @@ const Navbar = () => {
               className="p-3 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl transition-all duration-200 group"
               title="Search Courses"
             >
-              <Search className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" />
+              <Search className="w-7 h-7 sm:w-8 sm:h-8 group-hover:scale-110 transition-transform duration-200" />
             </Link>
 
             {/* Auth Section */}
@@ -127,22 +133,22 @@ const Navbar = () => {
                         <img
                           src={user.avatar}
                           alt={user?.name || 'Profile'}
-                          className="w-8 h-8 rounded-full object-cover group-hover:scale-110 transition-transform duration-200 shadow-lg border-2 border-slate-700"
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover group-hover:scale-110 transition-transform duration-200 shadow-lg border-2 border-slate-700"
                         />
                       ) : (
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200 shadow-lg ${user?.role === 'educator'
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200 shadow-lg ${user?.role === 'educator'
                           ? 'bg-gradient-to-r from-purple-600 to-pink-600'
                           : 'bg-gradient-to-r from-blue-600 to-purple-600'
                           }`}>
-                          <User className="w-5 h-5 text-white" />
+                          <User className="w-6 h-6 text-white" />
                         </div>
                       )}
-                      <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-slate-950 ${user?.role === 'educator' ? 'bg-purple-500' : 'bg-green-500'
+                      <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-slate-950 ${user?.role === 'educator' ? 'bg-purple-500' : 'bg-green-500'
                         }`}></div>
                     </div>
 
                     <ChevronDown
-                      className={`w-4 h-4 transition-transform duration-300 ${showProfileDropdown ? "rotate-180" : ""
+                      className={`w-5 h-5 transition-transform duration-300 ${showProfileDropdown ? "rotate-180" : ""
                         }`}
                     />
                   </button>
@@ -199,7 +205,7 @@ const Navbar = () => {
                                 onClick={() => setShowProfileDropdown(false)}
                                 className="flex items-center space-x-3 p-4 text-slate-300 hover:text-purple-400 hover:bg-slate-800/50 rounded-xl transition-all duration-200 group"
                               >
-                                <BookOpen className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
+                                <BookOpen className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-purple-400" />
                                 <div>
                                   <span className="font-medium">Educator Dashboard</span>
                                   <p className="text-xs text-slate-500">Manage your courses</p>
@@ -211,7 +217,7 @@ const Navbar = () => {
                                 onClick={() => setShowProfileDropdown(false)}
                                 className="flex items-center space-x-3 p-4 text-slate-300 hover:text-blue-400 hover:bg-slate-800/50 rounded-xl transition-all duration-200 group"
                               >
-                                <BookOpen className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
+                                <BookOpen className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-blue-400" />
                                 <div>
                                   <span className="font-medium">Student Dashboard</span>
                                   <p className="text-xs text-slate-500">View enrolled courses</p>
@@ -225,7 +231,7 @@ const Navbar = () => {
                               onClick={() => setShowProfileDropdown(false)}
                               className="flex items-center space-x-3 p-4 text-slate-300 hover:text-blue-400 hover:bg-slate-800/50 rounded-xl transition-all duration-200 group"
                             >
-                              <BookOpen className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
+                              <BookOpen className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-blue-400" />
                               <div>
                                 <span className="font-medium">Student Dashboard</span>
                                 <p className="text-xs text-slate-500">View your courses</p>
@@ -238,7 +244,7 @@ const Navbar = () => {
                             onClick={() => setShowProfileDropdown(false)}
                             className="flex items-center space-x-3 p-4 text-slate-300 hover:text-blue-400 hover:bg-slate-800/50 rounded-xl transition-all duration-200 group"
                           >
-                            <Settings className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
+                            <Settings className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-slate-300" />
                             <div>
                               <span className="font-medium">Account Settings</span>
                               <p className="text-xs text-slate-500">Manage your profile</p>
@@ -253,7 +259,7 @@ const Navbar = () => {
                             onClick={handleLogout}
                             className="flex items-center space-x-3 p-4 text-slate-300 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-200 w-full text-left group"
                           >
-                            <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
+                            <LogOut className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-red-400" />
                             <div>
                               <span className="font-medium">Sign Out</span>
                               <p className="text-xs text-slate-500">Logout from account</p>
@@ -287,7 +293,7 @@ const Navbar = () => {
               animate={{ rotate: isMenuOpen ? 90 : 0 }}
               transition={{ duration: 0.2 }}
             >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isMenuOpen ? <X className="w-8 h-8 text-white" /> : <Menu className="w-8 h-8 text-white" />}
             </motion.div>
           </button>
         </div>
@@ -310,8 +316,8 @@ const Navbar = () => {
                   onClick={() => setIsMenuOpen(false)}
                   className="flex items-center space-x-3 p-4 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl transition-all duration-200 group"
                 >
-                  <Search className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
-                  <span className="font-medium">Search Courses</span>
+                  <Search className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" />
+                  <span className="font-medium text-base">Search Courses</span>
                 </Link>
 
                 {isLoggedIn ? (
@@ -323,15 +329,15 @@ const Navbar = () => {
                           <img
                             src={user.avatar}
                             alt={user?.name || 'Profile'}
-                            className="w-10 h-10 rounded-full object-cover border-2 border-slate-600 shadow-lg"
+                            className="w-12 h-12 rounded-full object-cover border-2 border-slate-600 shadow-lg"
                           />
                         ) : (
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${user?.role === 'educator' ? 'bg-gradient-to-r from-purple-600 to-pink-600' : 'bg-gradient-to-r from-blue-600 to-purple-600'}`}>
-                            <User className="w-5 h-5 text-white" />
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${user?.role === 'educator' ? 'bg-gradient-to-r from-purple-600 to-pink-600' : 'bg-gradient-to-r from-blue-600 to-purple-600'}`}>
+                            <User className="w-6 h-6 text-white" />
                           </div>
                         )}
                         <div className="flex-1">
-                          <p className="text-white font-medium">{user?.name || "User"}</p>
+                          <p className="text-white font-medium text-base">{user?.name || "User"}</p>
                           <p className="text-slate-400 text-sm">{user?.email}</p>
                           <div className="flex items-center space-x-1 mt-1">
                             <div className={`w-2 h-2 rounded-full ${user?.role === 'educator' ? 'bg-purple-500' : 'bg-blue-500'}`}></div>
@@ -353,8 +359,8 @@ const Navbar = () => {
                             onClick={() => setIsMenuOpen(false)}
                             className="flex items-center space-x-3 p-4 text-slate-300 hover:text-purple-400 hover:bg-slate-800/50 rounded-xl transition-all duration-200 group"
                           >
-                            <BookOpen className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
-                            <span className="font-medium">Educator Dashboard</span>
+                            <BookOpen className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-purple-400" />
+                            <span className="font-medium text-base">Educator Dashboard</span>
                           </Link>
 
                           <Link
@@ -362,8 +368,8 @@ const Navbar = () => {
                             onClick={() => setIsMenuOpen(false)}
                             className="flex items-center space-x-3 p-4 text-slate-300 hover:text-blue-400 hover:bg-slate-800/50 rounded-xl transition-all duration-200 group"
                           >
-                            <BookOpen className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
-                            <span className="font-medium">Student Dashboard</span>
+                            <BookOpen className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-blue-400" />
+                            <span className="font-medium text-base">Student Dashboard</span>
                           </Link>
                         </>
                       ) : (
@@ -373,8 +379,8 @@ const Navbar = () => {
                           onClick={() => setIsMenuOpen(false)}
                           className="flex items-center space-x-3 p-4 text-slate-300 hover:text-blue-400 hover:bg-slate-800/50 rounded-xl transition-all duration-200 group"
                         >
-                          <BookOpen className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
-                          <span className="font-medium">Student Dashboard</span>
+                          <BookOpen className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-blue-400" />
+                          <span className="font-medium text-base">Student Dashboard</span>
                         </Link>
                       )}
 
@@ -383,8 +389,8 @@ const Navbar = () => {
                         onClick={() => setIsMenuOpen(false)}
                         className="flex items-center space-x-3 p-4 text-slate-300 hover:text-blue-400 hover:bg-slate-800/50 rounded-xl transition-all duration-200 group"
                       >
-                        <Settings className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
-                        <span className="font-medium">Account Settings</span>
+                        <Settings className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-slate-300" />
+                        <span className="font-medium text-base">Account Settings</span>
                       </Link>
 
                       <hr className="border-slate-700/50 my-4" />
@@ -393,8 +399,8 @@ const Navbar = () => {
                         onClick={handleLogout}
                         className="flex items-center space-x-3 p-4 text-slate-300 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-200 w-full text-left group"
                       >
-                        <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
-                        <span className="font-medium">Sign Out</span>
+                        <LogOut className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-red-400" />
+                        <span className="font-medium text-base">Sign Out</span>
                       </button>
                     </div>
                   </>

@@ -388,40 +388,40 @@ const EducatorStudents = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-24">
-      <div className="container mx-auto px-6 lg:px-8 pb-16">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-2 sm:pt-4 overflow-x-hidden text-slate-100">
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8 pb-16 max-w-7xl w-full">
         {/* Header */}
         <motion.div
           variants={fadeInUp}
           initial="initial"
           animate="animate"
-          className="flex items-center justify-between mb-8"
+          className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 sm:mb-8 w-full max-w-full"
         >
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3 min-w-0">
             <Link
               to="/educator/dashboard"
-              className="p-2 hover:bg-slate-800 rounded-lg transition-colors duration-200"
+              className="p-2 hover:bg-slate-800 rounded-lg transition-colors duration-200 shrink-0"
             >
-              <ArrowLeft className="w-6 h-6 text-slate-400" />
+              <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400" />
             </Link>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white">
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white truncate">
                 Student Management
               </h1>
-              <p className="text-slate-300 mt-2">
+              <p className="text-xs sm:text-sm text-slate-300 mt-1 truncate">
                 Track student progress and engagement
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
-            <button onClick={fetchData} className="p-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-400 hover:text-white hover:border-slate-500 transition-colors" title="Refresh">
-              <RefreshCw className="w-5 h-5" />
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full lg:w-auto">
+            <button onClick={fetchData} className="p-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-400 hover:text-white hover:border-slate-500 transition-colors shrink-0" title="Refresh">
+              <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             
             <button 
               onClick={handleExportCSV}
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center space-x-2"
+              className="flex-1 sm:flex-none px-3.5 sm:px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs sm:text-sm font-medium rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 flex items-center justify-center space-x-1.5 shadow-md shadow-blue-600/20"
             >
               <Download className="w-4 h-4" />
               <span>Export Data</span>
@@ -429,7 +429,7 @@ const EducatorStudents = () => {
 
             <button 
               onClick={() => setShowAddModal(true)}
-              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 flex items-center space-x-2 shadow-lg shadow-purple-600/20"
+              className="flex-1 sm:flex-none px-3.5 sm:px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs sm:text-sm font-medium rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 flex items-center justify-center space-x-1.5 shadow-md shadow-purple-600/20"
             >
               <Plus className="w-4 h-4" />
               <span>Add Student</span>
@@ -443,45 +443,45 @@ const EducatorStudents = () => {
           initial="initial"
           animate="animate"
           transition={{ delay: 0.2 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8"
         >
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 sm:p-6 min-w-0">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-2xl font-bold text-white">{studentStats.totalStudents}</h3>
-                <p className="text-slate-400 text-sm">Total Students</p>
+              <div className="min-w-0">
+                <h3 className="text-xl sm:text-2xl font-bold text-white truncate">{studentStats.totalStudents}</h3>
+                <p className="text-slate-400 text-xs sm:text-sm truncate">Total Students</p>
               </div>
-              <Users className="w-8 h-8 text-blue-400" />
+              <Users className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400 shrink-0 ml-2" />
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 sm:p-6 min-w-0">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-2xl font-bold text-white">{studentStats.activeStudents}</h3>
-                <p className="text-slate-400 text-sm">Active Students</p>
+              <div className="min-w-0">
+                <h3 className="text-xl sm:text-2xl font-bold text-white truncate">{studentStats.activeStudents}</h3>
+                <p className="text-slate-400 text-xs sm:text-sm truncate">Active Students</p>
               </div>
-              <TrendingUp className="w-8 h-8 text-green-400" />
+              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-400 shrink-0 ml-2" />
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 sm:p-6 min-w-0">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-2xl font-bold text-white">{studentStats.completedCourses}</h3>
-                <p className="text-slate-400 text-sm">Completed</p>
+              <div className="min-w-0">
+                <h3 className="text-xl sm:text-2xl font-bold text-white truncate">{studentStats.completedCourses}</h3>
+                <p className="text-slate-400 text-xs sm:text-sm truncate">Completed</p>
               </div>
-              <Award className="w-8 h-8 text-yellow-400" />
+              <Award className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-400 shrink-0 ml-2" />
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+          <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 sm:p-6 min-w-0">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-2xl font-bold text-white">{Math.round(studentStats.avgProgress)}%</h3>
-                <p className="text-slate-400 text-sm">Avg Progress</p>
+              <div className="min-w-0">
+                <h3 className="text-xl sm:text-2xl font-bold text-white truncate">{Math.round(studentStats.avgProgress)}%</h3>
+                <p className="text-slate-400 text-xs sm:text-sm truncate">Avg Progress</p>
               </div>
-              <TrendingUp className="w-8 h-8 text-purple-400" />
+              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400 shrink-0 ml-2" />
             </div>
           </div>
         </motion.div>
@@ -492,19 +492,19 @@ const EducatorStudents = () => {
           initial="initial"
           animate="animate"
           transition={{ delay: 0.3 }}
-          className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 mb-8"
+          className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8"
         >
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:items-center gap-3 w-full lg:w-auto">
               {/* Search */}
-              <div className="relative">
+              <div className="relative w-full sm:w-auto lg:w-64">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                 <input
                   type="text"
                   placeholder="Search students..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-full sm:w-64"
+                  className="pl-9 pr-4 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-full"
                 />
               </div>
 
@@ -512,7 +512,7 @@ const EducatorStudents = () => {
               <select
                 value={filterCourse}
                 onChange={(e) => setFilterCourse(e.target.value)}
-                className="px-4 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-full"
               >
                 <option value="all">All Courses</option>
                 {courses.map(course => (
@@ -524,7 +524,7 @@ const EducatorStudents = () => {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-full"
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
@@ -536,7 +536,7 @@ const EducatorStudents = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-full"
               >
                 <option value="recent">Most Recent</option>
                 <option value="progress">Highest Progress</option>
@@ -545,107 +545,175 @@ const EducatorStudents = () => {
               </select>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <span className="text-slate-400 text-sm">
+            <div className="flex items-center justify-between lg:justify-end space-x-2 border-t lg:border-t-0 border-slate-700/50 pt-3 lg:pt-0">
+              <span className="text-slate-400 text-xs sm:text-sm font-medium">
                 {filteredStudents.length} student{filteredStudents.length !== 1 ? 's' : ''}
               </span>
             </div>
           </div>
         </motion.div>
 
-        {/* Students Table */}
+        {/* Students List / Table Container */}
         <motion.div
           variants={fadeInUp}
           initial="initial"
           animate="animate"
           transition={{ delay: 0.4 }}
+          className="w-full max-w-full"
         >
           {students.length === 0 ? (
             <EmptyState />
           ) : filteredStudents.length === 0 ? (
-            <div className="text-center py-16">
-              <Search className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-white mb-2">No students found</h3>
-              <p className="text-slate-400">Try adjusting your search or filters</p>
+            <div className="text-center py-12 sm:py-16 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl">
+              <Search className="w-12 h-12 sm:w-16 sm:h-16 text-slate-600 mx-auto mb-4" />
+              <h3 className="text-lg sm:text-xl font-bold text-white mb-2">No students found</h3>
+              <p className="text-xs sm:text-sm text-slate-400">Try adjusting your search or filters</p>
             </div>
           ) : (
-            <div className="overflow-x-auto bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4">
-              <table className="min-w-full text-left">
-                <thead>
-                  <tr className="text-slate-400 text-sm border-b border-slate-700/40">
-                    <th className="py-3 px-3">Student</th>
-                    <th className="py-3 px-3">Name</th>
-                    <th className="py-3 px-3">Email</th>
-                    <th className="py-3 px-3">Enrolled Course</th>
-                    <th className="py-3 px-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedStudents.map(student => (
-                    <tr key={student.id} className="hover:bg-slate-900/30 transition-colors">
-                      <td className="py-3 px-3 align-middle">
+            <div className="space-y-4">
+              {/* Mobile Student Cards (Visible on screens < 768px) */}
+              <div className="grid grid-cols-1 gap-3.5 md:hidden">
+                {sortedStudents.map(student => (
+                  <div key={student.id} className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/60 rounded-2xl p-4 space-y-3 shadow-lg">
+                    <div className="flex items-center justify-between min-w-0">
+                      <div className="flex items-center space-x-3 min-w-0">
                         {student.avatar ? (
-                          <img src={student.avatar} alt={student.name} className="w-10 h-10 rounded-full object-cover" />
+                          <img src={student.avatar} alt={student.name} className="w-10 h-10 rounded-full object-cover shrink-0" />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
                             { (student.name || '?').split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase() }
                           </div>
                         )}
-                      </td>
-                      <td className="py-3 px-3 align-middle text-white">{student.name}</td>
-                      <td className="py-3 px-3 align-middle text-slate-400 text-sm">{student.email}</td>
-                      <td className="py-3 px-3 align-middle text-slate-300 text-sm">
-                        {student.courseName && student.courseName !== 'Unassigned' ? (
-                          <div className="flex flex-wrap gap-1.5 max-w-xs">
-                            {student.courseName.split(', ').map((cName, idx) => (
-                              <span key={idx} className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-500/10 border border-purple-500/20 text-purple-300">
-                                {cName}
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-500 border border-slate-700">
-                            Unassigned
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-3 px-3 align-middle text-right">
-                        <div className="flex items-center justify-end space-x-2">
-                          <button
-                            onClick={() => handleOpenEditModal(student)}
-                            className="p-1.5 bg-slate-800 text-blue-400 hover:text-blue-300 hover:bg-slate-700 rounded-lg transition-colors"
-                            title="Manage Access"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteStudentSubmit(student.id, student.name)}
-                            className="p-1.5 bg-slate-800 text-red-400 hover:text-red-300 hover:bg-slate-700 rounded-lg transition-colors"
-                            title="Delete Student"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                        <div className="min-w-0">
+                          <h4 className="text-sm font-bold text-white truncate">{student.name}</h4>
+                          <p className="text-xs text-slate-400 truncate flex items-center gap-1 mt-0.5">
+                            <Mail className="w-3 h-3 text-slate-500 shrink-0" />
+                            <span className="truncate">{student.email}</span>
+                          </p>
                         </div>
-                      </td>
+                      </div>
+
+                      <div className="flex items-center space-x-1.5 shrink-0 ml-2">
+                        <button
+                          onClick={() => handleOpenEditModal(student)}
+                          className="p-2 bg-blue-600/10 border border-blue-500/20 text-blue-400 hover:text-white hover:bg-blue-600 rounded-xl transition-all"
+                          title="Manage Access"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteStudentSubmit(student.id, student.name)}
+                          className="p-2 bg-red-600/10 border border-red-500/20 text-red-400 hover:text-white hover:bg-red-600 rounded-xl transition-all"
+                          title="Delete Student"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-700/40">
+                      <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Enrolled Courses</p>
+                      {student.courseName && student.courseName !== 'Unassigned' ? (
+                        <div className="flex flex-wrap gap-1.5">
+                          {student.courseName.split(', ').map((cName, idx) => (
+                            <span key={idx} className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-500/15 border border-purple-500/30 text-purple-300">
+                              {cName}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-500 border border-slate-700 inline-block">
+                          Unassigned
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop / Tablet Table View (Visible on screens >= 768px) */}
+              <div className="hidden md:block overflow-x-auto bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="text-slate-400 text-xs uppercase tracking-wider border-b border-slate-700/50">
+                      <th className="py-3 px-3 w-14">Avatar</th>
+                      <th className="py-3 px-3">Name</th>
+                      <th className="py-3 px-3">Email</th>
+                      <th className="py-3 px-3">Enrolled Courses</th>
+                      <th className="py-3 px-3 text-right w-28">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-700/30">
+                    {sortedStudents.map(student => (
+                      <tr key={student.id} className="hover:bg-slate-900/40 transition-colors group">
+                        <td className="py-3 px-3 align-middle">
+                          {student.avatar ? (
+                            <img src={student.avatar} alt={student.name} className="w-10 h-10 rounded-full object-cover" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">
+                              { (student.name || '?').split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase() }
+                            </div>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 align-middle text-white font-semibold text-sm">
+                          {student.name}
+                        </td>
+                        <td className="py-3 px-3 align-middle text-slate-400 text-sm max-w-[200px] truncate" title={student.email}>
+                          {student.email}
+                        </td>
+                        <td className="py-3 px-3 align-middle">
+                          {student.courseName && student.courseName !== 'Unassigned' ? (
+                            <div className="flex flex-wrap gap-1.5 max-w-sm">
+                              {student.courseName.split(', ').map((cName, idx) => (
+                                <span key={idx} className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-500/10 border border-purple-500/20 text-purple-300">
+                                  {cName}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800 text-slate-500 border border-slate-700">
+                              Unassigned
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 align-middle text-right">
+                          <div className="flex items-center justify-end space-x-2">
+                            <button
+                              onClick={() => handleOpenEditModal(student)}
+                              className="p-2 bg-slate-800 text-blue-400 hover:text-white hover:bg-blue-600 rounded-xl transition-all"
+                              title="Manage Access"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteStudentSubmit(student.id, student.name)}
+                              className="p-2 bg-slate-800 text-red-400 hover:text-white hover:bg-red-600 rounded-xl transition-all"
+                              title="Delete Student"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </motion.div>
  
         {/* Add Student Modal */}
         {showAddModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#0f172a] border border-slate-800 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl"
+              className="bg-[#0f172a] border border-slate-800 rounded-2xl sm:rounded-3xl w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl my-auto"
             >
-              <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800 bg-slate-900/30">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2 font-sans">
+              <div className="flex justify-between items-center px-4 sm:px-6 py-4 border-b border-slate-800 bg-slate-900/30">
+                <h3 className="text-base sm:text-xl font-bold text-white flex items-center gap-2 font-sans">
                   <Users className="w-5 h-5 text-purple-400" />
                   <span>Provision New Student Account</span>
                 </h3>
@@ -796,15 +864,15 @@ const EducatorStudents = () => {
 
         {/* Edit Student Access Modal */}
         {showEditModal && selectedStudent && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-fadeIn">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-3 sm:p-4 overflow-y-auto">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="bg-slate-900/95 border border-slate-700/80 rounded-3xl w-full max-w-xl overflow-hidden shadow-2xl shadow-blue-500/10 backdrop-blur-2xl"
+              className="bg-slate-900/95 border border-slate-700/80 rounded-2xl sm:rounded-3xl w-full max-w-xl max-h-[90vh] overflow-y-auto shadow-2xl shadow-blue-500/10 backdrop-blur-2xl my-auto"
             >
               {/* Header */}
-              <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800 bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900">
+              <div className="flex justify-between items-center px-4 sm:px-6 py-4 border-b border-slate-800 bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
                     <Edit className="w-5 h-5" />

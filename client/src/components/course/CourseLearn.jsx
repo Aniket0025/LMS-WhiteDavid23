@@ -33,12 +33,15 @@ import {
   Share2,
   Check,
   RotateCcw,
-  FileCheck
+  FileCheck,
+  ShieldAlert
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { getCourseById } from '../../Api/courseApi';
 import { checkCoursePurchase, getCourseProgress, updateCourseProgress } from '../../Api/userApi';
 import { getLectureWithAccess } from '../../Api/lectureApi';
 import { useAuth } from '../../context/AuthContext';
+import OpenVideoPlayer from './OpenVideoPlayer';
 import './CourseLearn.css';
 
 const CourseLearn = () => {
@@ -91,33 +94,18 @@ const CourseLearn = () => {
 
   const getViewerSrc = (url, mode, lectureId) => {
     if (!url) return '';
+    let srcUrl = url;
     if (mode === 'direct' && lectureId) {
-      return getDocumentProxyUrl(lectureId);
+      srcUrl = getDocumentProxyUrl(lectureId);
+    } else if (mode === 'google') {
+      srcUrl = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
     }
-    if (mode === 'google') {
-      return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
-    }
-    return url;
+    // Append parameters to hide toolbar and auto-fit PDF page width (view=FitH) for big mobile display
+    return srcUrl.includes('#') ? srcUrl : `${srcUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`;
   };
 
-  const handleDocumentDownload = async (lectureId, fileName) => {
-    try {
-      const proxyUrl = getDocumentProxyUrl(lectureId);
-      const response = await fetch(proxyUrl);
-      if (!response.ok) throw new Error('Download failed');
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName || 'document.pdf';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Document download error:', err);
-      window.open(getDocumentProxyUrl(lectureId), '_blank');
-    }
+  const handleDocumentDownload = (lectureId, fileName) => {
+    toast.error('Downloading course resources is restricted for content protection.');
   };
 
   // Course and access state
@@ -167,15 +155,10 @@ const CourseLearn = () => {
     setTimeout(() => setSavedNotesStatus(''), 2500);
   };
 
-  const handleDownloadNotes = () => {
+  const handleCopyNotes = () => {
     if (!notesText.trim()) return;
-    const blob = new Blob([notesText], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${currentVideoData?.title || 'lecture'}_notes.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+    navigator.clipboard.writeText(notesText);
+    toast.success('Lecture notes copied to clipboard!');
   };
 
   // Toggle chapter collapse/expand
@@ -467,38 +450,39 @@ const CourseLearn = () => {
     <div ref={containerRef} className={`h-screen bg-slate-950 text-slate-100 flex flex-col overflow-hidden ${isFullscreen ? 'bg-black' : ''}`}>
       
       {/* Sleek Top Header Navigation Bar */}
-      <header className="h-16 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 px-4 flex items-center justify-between z-30 flex-shrink-0 shadow-md">
-        <div className="flex items-center space-x-3 min-w-0 flex-1">
-          {/* Sidebar Toggle Toggle Button */}
+      <header className="h-14 sm:h-16 bg-slate-900/90 backdrop-blur-xl border-b border-slate-800/80 px-2 sm:px-4 flex items-center justify-between z-30 flex-shrink-0 shadow-md w-full max-w-full overflow-hidden">
+        <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+          {/* Sidebar Toggle Button */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className={`p-2 rounded-xl transition-all duration-200 ${
+            className={`p-1.5 sm:p-2 rounded-xl transition-all duration-200 shrink-0 ${
               sidebarOpen 
                 ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' 
                 : 'bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-700/80 border border-slate-700/50'
             }`}
             title={sidebarOpen ? "Hide Curriculum" : "Show Curriculum"}
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
 
           {/* Back to Course details */}
           <button
             onClick={() => navigate(`/course/${courseId}`)}
-            className="hidden sm:flex items-center text-slate-400 hover:text-white transition-colors text-sm font-medium px-2.5 py-1.5 rounded-lg hover:bg-slate-800/60"
+            className="flex items-center text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700/60 text-xs font-semibold px-2.5 py-1.5 rounded-xl transition-all shrink-0 shadow-sm"
+            title="Back to Course Details"
           >
-            <ArrowLeft className="w-4 h-4 mr-1.5" />
-            <span>Course Page</span>
+            <ArrowLeft className="w-4 h-4 mr-1 text-blue-400" />
+            <span className="hidden xs:inline">Back</span>
           </button>
 
-          <div className="h-4 w-px bg-slate-800 hidden sm:block"></div>
+          <div className="h-4 w-px bg-slate-800 shrink-0"></div>
 
           {/* Current Title Breadcrumb */}
           <div className="min-w-0 flex-1">
-            <h1 className="text-white font-semibold text-sm md:text-base truncate flex items-center space-x-2">
-              <span className="truncate">{currentVideoData?.title || 'Select a lecture'}</span>
+            <h1 className="text-white font-semibold text-xs sm:text-sm md:text-base truncate">
+              {currentVideoData?.title || 'Select a lecture'}
             </h1>
-            <p className="text-xs text-slate-400 truncate hidden sm:block">
+            <p className="text-[11px] text-slate-400 truncate hidden sm:block">
               Chapter {currentChapter + 1}: {course?.chapters?.[currentChapter]?.chapterTitle} • Lecture {currentLecture + 1}
             </p>
           </div>
@@ -560,7 +544,7 @@ const CourseLearn = () => {
         {/* Mobile Backdrop Overlay */}
         {sidebarOpen && isMobile && (
           <div 
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40"
             onClick={() => setSidebarOpen(false)}
           />
         )}
@@ -569,12 +553,12 @@ const CourseLearn = () => {
         <motion.aside
           initial={false}
           animate={{
-            width: !sidebarOpen ? 0 : isMobile ? '85vw' : sidebarCollapsed ? 64 : 340,
+            width: !sidebarOpen ? 0 : isMobile ? '82vw' : sidebarCollapsed ? 64 : 340,
             opacity: !sidebarOpen ? 0 : 1
           }}
           transition={{ duration: 0.25, ease: "easeInOut" }}
           className={`bg-slate-900/95 border-r border-slate-800/80 flex flex-col overflow-hidden relative z-40 flex-shrink-0 ${
-            sidebarOpen && isMobile ? 'fixed inset-y-0 left-0 shadow-2xl' : ''
+            sidebarOpen && isMobile ? 'fixed inset-y-0 left-0 shadow-2xl max-w-xs sm:max-w-sm' : ''
           }`}
         >
           {sidebarOpen && !sidebarCollapsed && (
@@ -789,68 +773,45 @@ const CourseLearn = () => {
                 ) : currentVideoData.lectureType === 'file' ? (
                   /* PDF Document View */
                   <div className="w-full bg-slate-950 border-b border-slate-800 flex flex-col">
-                    <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900 border-b border-slate-800 text-xs">
-                      <div className="flex items-center space-x-2">
-                        <FileText className="w-4 h-4 text-emerald-400" />
-                        <span className="font-semibold text-white">Document Notes</span>
+                    <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 bg-slate-900 border-b border-slate-800 text-xs">
+                      <div className="flex items-center space-x-2 min-w-0">
+                        <FileText className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <span className="font-semibold text-white truncate">Document Notes</span>
+                        <span className="hidden sm:inline-flex items-center space-x-1 px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-semibold rounded-full shrink-0">
+                          <ShieldAlert className="w-3 h-3" />
+                          <span>Protected</span>
+                        </span>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 shrink-0">
                         <button
                           onClick={() => setPreviewDocUrl(currentVideoData.videoUrl)}
-                          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium flex items-center space-x-1 text-xs"
+                          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium flex items-center space-x-1 text-xs shadow-sm"
                         >
                           <Maximize2 className="w-3.5 h-3.5" />
-                          <span>Fullscreen View</span>
-                        </button>
-                        <button
-                          onClick={() => handleDocumentDownload(currentVideoData._id, (currentVideoData.title || 'document') + '.pdf')}
-                          className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg font-medium flex items-center space-x-1 border border-slate-700 text-xs"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          <span>Download</span>
+                          <span>Fullscreen</span>
                         </button>
                       </div>
                     </div>
-                    <div className="doc-iframe-wrapper">
+                    <div className="doc-iframe-wrapper" onContextMenu={(e) => e.preventDefault()}>
                       <iframe
                         src={getViewerSrc(currentVideoData.videoUrl, 'direct', currentVideoData._id)}
                         title={currentVideoData.title}
-                        className="w-full h-full border-0 bg-slate-950"
+                        className="doc-clipped-iframe"
                         allow="fullscreen"
                       />
                     </div>
                   </div>
                 ) : (
-                  /* Video Player */
-                  <div className="relative w-full aspect-video max-h-[70vh] bg-black shadow-2xl overflow-hidden group">
-                    {isEmbedVideo(currentVideoData.videoUrl) ? (
-                      <iframe
-                        src={getVideoEmbedSrc(currentVideoData.videoUrl)}
-                        title={currentVideoData.title}
-                        className="w-full h-full border-0"
-                        allow="autoplay; encrypted-media; fullscreen"
-                        allowFullScreen
-                      />
-                    ) : (
-                      <video
-                        ref={videoRef}
-                        className="w-full h-full object-contain"
-                        controls
-                        controlsList="nodownload"
-                        onPlay={() => setIsVideoPlaying(true)}
-                        onPause={() => setIsVideoPlaying(false)}
-                        onEnded={() => {
-                          setIsVideoPlaying(false);
-                          markLectureComplete(currentChapter, currentLecture);
-                        }}
-                        poster={course?.thumbnail}
-                      >
-                        <source src={currentVideoData.videoUrl} type="video/mp4" />
-                        <source src={currentVideoData.videoUrl} type="video/webm" />
-                        Your browser does not support HTML5 video.
-                      </video>
-                    )}
-                  </div>
+                  /* OpenPlayerJS Video Player */
+                  <OpenVideoPlayer
+                    src={currentVideoData.videoUrl}
+                    poster={course?.thumbnail}
+                    title={currentVideoData.title}
+                    onEnded={() => markLectureComplete(currentChapter, currentLecture)}
+                    user={user}
+                    isEmbed={isEmbedVideo(currentVideoData.videoUrl)}
+                    embedSrc={getVideoEmbedSrc(currentVideoData.videoUrl)}
+                  />
                 )}
               </div>
             ) : (
@@ -863,49 +824,49 @@ const CourseLearn = () => {
           </div>
 
           {/* Sub-Player Action Bar & Navigation */}
-          <div className="bg-slate-900/90 border-b border-slate-800/80 px-4 md:px-8 py-3 flex flex-wrap items-center justify-between gap-3 shadow-md">
+          <div className="bg-slate-900/90 border-b border-slate-800/80 px-3 sm:px-6 py-2.5 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 shadow-md w-full">
             <div className="flex items-center space-x-2">
-              <span className="text-xs text-slate-400 font-medium">Lecture Action:</span>
+              <span className="text-xs text-slate-400 font-medium hidden xs:inline">Lecture Action:</span>
               {!isLectureCompleted(currentChapter, currentLecture) ? (
                 <button
                   onClick={() => markLectureComplete(currentChapter, currentLecture)}
-                  className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl font-medium text-xs shadow-lg shadow-emerald-600/20 flex items-center space-x-1.5 transition-all transform hover:scale-[1.02]"
+                  className="px-3.5 py-1.5 sm:px-4 sm:py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl font-medium text-xs shadow-lg shadow-emerald-600/20 flex items-center space-x-1.5 transition-all transform hover:scale-[1.02]"
                 >
-                  <Circle className="w-4 h-4" />
+                  <Circle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span>Mark as Complete</span>
                 </button>
               ) : (
-                <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl font-medium text-xs flex items-center space-x-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <div className="px-3.5 py-1.5 sm:px-4 sm:py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl font-medium text-xs flex items-center space-x-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
                   <span>Completed</span>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-3 ml-auto sm:ml-0">
               <button
                 onClick={goToPreviousLecture}
                 disabled={!canGoPrevious()}
-                className={`px-3 py-1.5 rounded-xl border text-xs font-medium flex items-center space-x-1 transition-all ${
+                className={`px-2.5 py-1.5 sm:px-3 rounded-xl border text-xs font-medium flex items-center space-x-1 transition-all ${
                   canGoPrevious() 
                     ? 'bg-slate-800/80 border-slate-700 text-slate-200 hover:bg-slate-700' 
                     : 'bg-slate-900 border-slate-800 text-slate-600 cursor-not-allowed'
                 }`}
               >
                 <ChevronLeft className="w-4 h-4" />
-                <span>Previous</span>
+                <span className="hidden xs:inline">Previous</span>
               </button>
 
               <button
                 onClick={goToNextLecture}
                 disabled={!canGoNext()}
-                className={`px-3 py-1.5 rounded-xl border text-xs font-medium flex items-center space-x-1 transition-all ${
+                className={`px-2.5 py-1.5 sm:px-3 rounded-xl border text-xs font-medium flex items-center space-x-1 transition-all ${
                   canGoNext() 
                     ? 'bg-blue-600 border-blue-500 text-white hover:bg-blue-500 shadow-md shadow-blue-600/20' 
                     : 'bg-slate-900 border-slate-800 text-slate-600 cursor-not-allowed'
                 }`}
               >
-                <span>Next Lecture</span>
+                <span>Next</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -915,10 +876,10 @@ const CourseLearn = () => {
           <div className="p-4 md:p-8 max-w-6xl w-full mx-auto space-y-6">
             
             {/* Tab Navigation */}
-            <div className="flex items-center space-x-6 border-b border-slate-800/80 text-sm font-medium overflow-x-auto custom-scrollbar">
+            <div className="flex items-center space-x-3 sm:space-x-6 border-b border-slate-800/80 text-xs sm:text-sm font-medium overflow-x-auto scrollbar-none max-w-full whitespace-nowrap pb-0.5">
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`pb-3 transition-colors flex items-center space-x-2 whitespace-nowrap ${
+                className={`pb-3 transition-colors flex items-center space-x-1.5 sm:space-x-2 whitespace-nowrap ${
                   activeTab === 'overview' ? 'text-blue-400 tab-active-indicator' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -928,7 +889,7 @@ const CourseLearn = () => {
 
               <button
                 onClick={() => setActiveTab('notes')}
-                className={`pb-3 transition-colors flex items-center space-x-2 whitespace-nowrap ${
+                className={`pb-3 transition-colors flex items-center space-x-1.5 sm:space-x-2 whitespace-nowrap ${
                   activeTab === 'notes' ? 'text-blue-400 tab-active-indicator' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -938,17 +899,17 @@ const CourseLearn = () => {
 
               <button
                 onClick={() => setActiveTab('resources')}
-                className={`pb-3 transition-colors flex items-center space-x-2 whitespace-nowrap ${
+                className={`pb-3 transition-colors flex items-center space-x-1.5 sm:space-x-2 whitespace-nowrap ${
                   activeTab === 'resources' ? 'text-blue-400 tab-active-indicator' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                <Download className="w-4 h-4" />
+                <BookOpen className="w-4 h-4" />
                 <span>Resources</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('discussion')}
-                className={`pb-3 transition-colors flex items-center space-x-2 whitespace-nowrap ${
+                className={`pb-3 transition-colors flex items-center space-x-1.5 sm:space-x-2 whitespace-nowrap ${
                   activeTab === 'discussion' ? 'text-blue-400 tab-active-indicator' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -1006,7 +967,7 @@ const CourseLearn = () => {
                     onChange={(e) => setNotesText(e.target.value)}
                     rows={8}
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm leading-relaxed"
-                    placeholder="Take notes here while learning... Click save or download anytime."
+                    placeholder="Take notes here while learning..."
                   />
 
                   <div className="flex items-center justify-end space-x-3">
@@ -1019,12 +980,12 @@ const CourseLearn = () => {
                     </button>
 
                     <button
-                      onClick={handleDownloadNotes}
+                      onClick={handleCopyNotes}
                       disabled={!notesText.trim()}
                       className="px-4 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-300 rounded-xl text-xs font-semibold border border-slate-700 transition-all flex items-center space-x-1.5"
                     >
-                      <Download className="w-4 h-4" />
-                      <span>Download .txt</span>
+                      <FileText className="w-4 h-4" />
+                      <span>Copy Notes</span>
                     </button>
                   </div>
                 </div>
@@ -1032,27 +993,35 @@ const CourseLearn = () => {
 
               {activeTab === 'resources' && (
                 <div className="space-y-4">
-                  <h3 className="text-base font-semibold text-white">Downloadable Materials</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-base font-semibold text-white">Course Study Resources</h3>
+                    <span className="px-2.5 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold rounded-full flex items-center gap-1.5">
+                      <ShieldAlert className="w-3.5 h-3.5" />
+                      <span>Downloading Restricted</span>
+                    </span>
+                  </div>
                   {currentVideoData?.lectureType === 'file' ? (
-                    <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 flex items-center justify-between">
+                    <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       <div className="flex items-center space-x-3">
-                        <FileText className="w-6 h-6 text-emerald-400" />
+                        <FileText className="w-6 h-6 text-emerald-400 shrink-0" />
                         <div>
                           <p className="text-sm font-semibold text-white">{currentVideoData.title}.pdf</p>
-                          <p className="text-xs text-slate-400">PDF Document Notes</p>
+                          <p className="text-xs text-slate-400">PDF Document • Online Protected Viewer</p>
                         </div>
                       </div>
                       <button
-                        onClick={() => handleDocumentDownload(currentVideoData._id, currentVideoData.title + '.pdf')}
-                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all"
+                        onClick={() => setPreviewDocUrl(currentVideoData.videoUrl)}
+                        className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5 transition-all shadow-md shadow-blue-600/20"
                       >
-                        <Download className="w-4 h-4" />
-                        <span>Download PDF</span>
+                        <Maximize2 className="w-4 h-4" />
+                        <span>View Document Online</span>
                       </button>
                     </div>
                   ) : (
-                    <div className="text-center py-8 text-slate-400 text-xs">
-                      No external downloadable attachments for this lecture.
+                    <div className="text-center py-8 bg-slate-950/40 rounded-xl border border-slate-800/60 p-4">
+                      <BookOpen className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                      <p className="text-xs text-slate-300 font-medium">No external document attachments for this lecture.</p>
+                      <p className="text-[11px] text-slate-500 mt-1">Direct file downloads are restricted for course content protection.</p>
                     </div>
                   )}
                 </div>
@@ -1085,13 +1054,10 @@ const CourseLearn = () => {
                 </h3>
               </div>
               <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => handleDocumentDownload(currentVideoData?._id, (currentVideoData?.title || 'document') + '.pdf')}
-                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-1 border border-slate-700"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download</span>
-                </button>
+                <div className="px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl text-xs font-semibold flex items-center space-x-1">
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                  <span>Protected View</span>
+                </div>
                 <button
                   onClick={() => setPreviewDocUrl(null)}
                   className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg"
@@ -1100,11 +1066,11 @@ const CourseLearn = () => {
                 </button>
               </div>
             </div>
-            <div className="flex-1 bg-slate-950 relative">
+            <div className="flex-1 bg-slate-950 relative overflow-hidden" onContextMenu={(e) => e.preventDefault()}>
               <iframe
                 src={getViewerSrc(previewDocUrl, 'direct', currentVideoData?._id)}
                 title="Fullscreen Document Preview"
-                className="w-full h-full border-0 bg-slate-950"
+                className="doc-clipped-iframe"
                 allow="fullscreen"
               />
             </div>

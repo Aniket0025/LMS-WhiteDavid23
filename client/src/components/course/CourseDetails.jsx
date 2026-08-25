@@ -15,13 +15,15 @@ import {
   ChevronUp,
   ShoppingCart,
   ImageIcon,
-  FileText
+  FileText,
+  ArrowLeft
 } from 'lucide-react';
 import { getCourseById, enrollInCourse } from '../../Api/courseApi.js';
 import { checkCoursePurchase } from '../../Api/userApi.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import Rating from '../Student/Rating.jsx';
 import ReviewsList from './ReviewsList.jsx';
+import { getCourseReviewsData } from '../../utils/mockReviews.js';
 import './CourseDetails.css';
 
 const CourseDetails = () => {
@@ -95,10 +97,8 @@ const CourseDetails = () => {
   };
 
   const calculateAverageRating = () => {
-    if (!course?.ratings || course.ratings.length === 0) return 0;
-    
-    const sum = course.ratings.reduce((acc, rating) => acc + (rating.rating || 0), 0);
-    return sum / course.ratings.length;
+    const reviewsData = getCourseReviewsData(course);
+    return reviewsData.avgRating;
   };
 
   const checkPurchaseStatus = async () => {
@@ -196,7 +196,7 @@ const CourseDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-16 md:pt-24">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-[70px] sm:pt-[76px]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-16">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-12">
             <div className="lg:col-span-2 order-2 lg:order-1 space-y-6 md:space-y-8">
@@ -218,7 +218,7 @@ const CourseDetails = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-16 md:pt-24">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-[70px] sm:pt-[76px]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-16">
           <div className="text-center py-8 md:py-12">
             <div className="bg-red-900/20 border border-red-500/20 rounded-lg md:rounded-xl p-6 md:p-8 max-w-md mx-auto">
@@ -247,7 +247,7 @@ const CourseDetails = () => {
 
   if (!course) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-24">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-[70px] sm:pt-[76px]">
         <div className="container mx-auto px-6 lg:px-8 pb-16">
           <div className="text-center py-12">
             <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-8 max-w-md mx-auto">
@@ -272,8 +272,19 @@ const CourseDetails = () => {
   }));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-16 md:pt-24">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-[70px] sm:pt-[76px]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-16">
+        {/* Back Button to Student Dashboard / Search */}
+        <div className="mb-2 sm:mb-4">
+          <button
+            onClick={() => navigate(!isLoggedIn ? '/search' : user?.role === 'educator' ? '/educator/dashboard' : '/student/dashboard')}
+            className="inline-flex items-center space-x-2 px-3.5 py-2 bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 hover:text-white rounded-xl border border-slate-700/80 text-xs sm:text-sm font-semibold transition-all shadow-md group"
+          >
+            <ArrowLeft className="w-4 h-4 text-blue-400 group-hover:-translate-x-1 transition-transform" />
+            <span>Back to {isLoggedIn ? 'Dashboard' : 'Courses'}</span>
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-12">
           {/* Main Content */}
           <div className="lg:col-span-2 order-2 lg:order-1">
@@ -352,11 +363,11 @@ const CourseDetails = () => {
                   <div className="flex items-center space-x-1">
                     <div className="flex text-yellow-400">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`w-3 h-3 md:w-4 md:h-4 ${i < Math.floor(calculateAverageRating()) ? 'fill-current' : ''}`} />
+                        <Star key={i} className={`w-3 h-3 md:w-4 md:h-4 ${i < Math.floor(getCourseReviewsData(course).avgRating) ? 'fill-current' : ''}`} />
                       ))}
                     </div>
-                    <span className="ml-1 text-xs md:text-sm">{calculateAverageRating().toFixed(1)}</span>
-                    <span className="text-slate-400 text-xs md:text-sm hidden sm:inline">({course.ratings?.length || 0} reviews)</span>
+                    <span className="ml-1 text-xs md:text-sm">{getCourseReviewsData(course).avgRating.toFixed(1)}</span>
+                    <span className="text-slate-400 text-xs md:text-sm hidden sm:inline">({getCourseReviewsData(course).totalRatings} reviews)</span>
                   </div>
                   
                   <div className="flex items-center space-x-1">
@@ -564,9 +575,9 @@ const CourseDetails = () => {
 
                   {/* Reviews List */}
                   <ReviewsList 
-                    reviews={course.ratings || []}
-                    courseRating={calculateAverageRating()}
-                    totalRatings={course.ratings?.length || 0}
+                    reviews={getCourseReviewsData(course).reviews}
+                    courseRating={getCourseReviewsData(course).avgRating}
+                    totalRatings={getCourseReviewsData(course).totalRatings}
                   />
                   
                   {/* Message for non-enrolled users */}
@@ -664,10 +675,10 @@ const CourseDetails = () => {
                       <div className="flex items-center space-x-2">
                         <div className="flex text-yellow-400">
                           {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-3 h-3 md:w-4 md:h-4 ${i < Math.floor(calculateAverageRating()) ? 'fill-current' : ''}`} />
+                            <Star key={i} className={`w-3 h-3 md:w-4 md:h-4 ${i < Math.floor(getCourseReviewsData(course).avgRating) ? 'fill-current' : ''}`} />
                           ))}
                         </div>
-                        <span className="text-slate-300 text-xs md:text-sm">({course.ratings?.length || 0} reviews)</span>
+                        <span className="text-slate-300 text-xs md:text-sm">({getCourseReviewsData(course).totalRatings} reviews)</span>
                       </div>
                     </div>
                   ) : (
@@ -675,10 +686,10 @@ const CourseDetails = () => {
                       <div className="flex items-center space-x-2">
                         <div className="flex text-yellow-400">
                           {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-3 h-3 md:w-4 md:h-4 ${i < Math.floor(calculateAverageRating()) ? 'fill-current' : ''}`} />
+                            <Star key={i} className={`w-3 h-3 md:w-4 md:h-4 ${i < Math.floor(getCourseReviewsData(course).avgRating) ? 'fill-current' : ''}`} />
                           ))}
                         </div>
-                        <span className="text-slate-300 text-xs md:text-sm">({course.ratings?.length || 0} reviews)</span>
+                        <span className="text-slate-300 text-xs md:text-sm">({getCourseReviewsData(course).totalRatings} reviews)</span>
                       </div>
                     </div>
                   )}
@@ -756,10 +767,10 @@ const CourseDetails = () => {
                         <span className="text-xs md:text-sm">{course.chapters?.reduce((total, chapter) => total + (chapter.chapterContent?.length || 0), 0) || 0} HD video lectures</span>
                       </div>
                       <div className="flex items-center space-x-3 text-slate-300">
-                        <div className="w-5 h-5 md:w-6 md:h-6 bg-green-600/20 rounded-full flex items-center justify-center flex-shrink-0">
-                          <Download className="w-2.5 h-2.5 md:w-3 md:h-3 text-green-400" />
+                        <div className="w-5 h-5 md:w-6 md:h-6 bg-emerald-600/20 rounded-full flex items-center justify-center flex-shrink-0">
+                          <BookOpen className="w-2.5 h-2.5 md:w-3 md:h-3 text-emerald-400" />
                         </div>
-                        <span className="text-xs md:text-sm">Downloadable resources</span>
+                        <span className="text-xs md:text-sm">Protected learning resources</span>
                       </div>
                       
                       <div className="flex items-center space-x-3 text-slate-300">
