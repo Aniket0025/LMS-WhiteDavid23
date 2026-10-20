@@ -15,7 +15,8 @@ import {
   BarChart3,
   Users,
   Sparkles,
-  GraduationCap
+  GraduationCap,
+  Compass
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { logoutUser } from "../../Api/authApi";
@@ -27,6 +28,24 @@ const Navbar = () => {
   const location = useLocation();
 
   const isEducatorPath = location.pathname.startsWith('/educator');
+  const isStudentPath = location.pathname.startsWith('/student');
+
+  const educatorNavItems = [
+    { name: 'Dashboard', href: '/educator/dashboard', icon: LayoutDashboard },
+    { name: 'Create Course', href: '/educator/add-course', icon: Plus },
+    { name: 'All Courses', href: '/educator/all-courses', icon: BookOpen },
+    { name: 'Analytics', href: '/educator/analytics', icon: BarChart3 },
+    { name: 'Students', href: '/educator/students', icon: Users },
+  ];
+
+  const studentNavItems = [
+    { name: 'My Learning', href: '/student/dashboard', icon: BookOpen },
+    { name: 'Account Settings', href: '/student/account', icon: Settings },
+    { name: 'Browse Courses', href: '/course', icon: Compass },
+  ];
+  if (user?.role === 'educator') {
+    studentNavItems.push({ name: 'Educator Hub', href: '/educator/dashboard', icon: Sparkles });
+  }
 
   // Refs for click outside detection
   const dropdownRef = useRef(null);
@@ -552,6 +571,62 @@ const Navbar = () => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Tier 2: Educator Sub-Navigation Bar - Integrated with ZERO gap */}
+      {isEducatorPath && (
+        <div className="border-t border-slate-800/80 bg-slate-950/98 backdrop-blur-xl">
+          <div className="container mx-auto px-3 sm:px-6 lg:px-8">
+            <nav className="flex items-center space-x-1.5 sm:space-x-2 overflow-x-auto py-1.5 sm:py-2 scrollbar-none" aria-label="Educator Navigation">
+              {educatorNavItems.map((item) => {
+                const active = location.pathname === item.href || (item.href === '/educator/dashboard' && location.pathname === '/educator');
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`inline-flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 shrink-0 whitespace-nowrap ${
+                      active
+                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 font-bold'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${active ? 'text-white' : 'text-slate-400'}`} />
+                    <span>{item.name}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+      )}
+
+      {/* Tier 2: Student Sub-Navigation Bar - Integrated with ZERO gap */}
+      {isStudentPath && (
+        <div className="border-t border-slate-800/80 bg-slate-950/98 backdrop-blur-xl">
+          <div className="container mx-auto px-3 sm:px-6 lg:px-8">
+            <nav className="flex items-center space-x-1.5 sm:space-x-2 overflow-x-auto py-1.5 sm:py-2 scrollbar-none" aria-label="Student Navigation">
+              {studentNavItems.map((item) => {
+                const active = location.pathname === item.href;
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`inline-flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 shrink-0 whitespace-nowrap ${
+                      active
+                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 font-bold'
+                        : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${active ? 'text-white' : 'text-slate-400'}`} />
+                    <span>{item.name}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+      )}
     </motion.nav>
   );
 };

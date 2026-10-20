@@ -96,37 +96,8 @@ const EducatorLayout = () => {
 
   // Render nested routes for educators
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 w-full max-w-full overflow-x-hidden pt-16">
-      {/* Sleek Flush Educator Sub-Navigation Bar */}
-      <div className="sticky top-16 z-30 bg-slate-950/95 backdrop-blur-xl border-b border-slate-800/80 shadow-md">
-        <div className="container mx-auto px-3 sm:px-6 lg:px-8">
-          <nav className="flex items-center space-x-1.5 sm:space-x-2 overflow-x-auto py-1.5 sm:py-2 scrollbar-none" aria-label="Educator Navigation">
-            {navigationItems.map((item) => {
-              const active = isActiveRoute(item.href);
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`inline-flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 shrink-0 whitespace-nowrap ${
-                    active
-                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 font-bold'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-                  }`}
-                >
-                  <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${active ? 'text-white' : 'text-slate-400'}`} />
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-      </div>
-
-      {/* Page Content with proper headroom so headers are never clipped */}
-      <div className="w-full max-w-full overflow-x-hidden pt-4 sm:pt-6 pb-12">
-        <Outlet />
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 w-full max-w-full overflow-x-hidden pt-[104px] sm:pt-[108px] pb-12">
+      <Outlet />
     </div>
   );
 };
