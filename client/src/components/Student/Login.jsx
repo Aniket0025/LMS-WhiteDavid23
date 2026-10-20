@@ -95,7 +95,7 @@ const Login = () => {
 
       if (response.success) {
         // Use AuthContext login method
-        login(response.token, response.user);
+        login(response.token);
 
         // Reset form
         setFormData({

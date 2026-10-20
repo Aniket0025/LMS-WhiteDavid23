@@ -6,13 +6,11 @@ import { verifyRecaptchaToken } from "../utils/recaptchaUtils.js";
 
 // Step 1: Send OTP for registration
 export const sendRegistrationOTP = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body;
   
   if (!name || !email || !password) {
     return res.json({ success: false, message: "Please fill all the fields" });
   }
-
-  const assignedRole = (role === 'admin' || role === 'educator') ? 'educator' : 'student';
 
   try {
     // Check if user already exists
@@ -37,7 +35,6 @@ export const sendRegistrationOTP = async (req, res) => {
         {
           name,
           password: hashpassword,
-          role: assignedRole,
           otp,
           otpExpiry,
           isVerified: false
@@ -50,7 +47,6 @@ export const sendRegistrationOTP = async (req, res) => {
         name,
         email,
         password: hashpassword,
-        role: assignedRole,
         otp,
         otpExpiry,
         isVerified: false
@@ -231,7 +227,7 @@ export const resendOTP = async (req, res) => {
 };
 
 export const register = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body;
   if (!name || !email || !password) {
     return res.json({ success: false, message: "Please fill all the fields" });
   }
@@ -243,16 +239,8 @@ export const register = async (req, res) => {
       return res.json({ success: false, message: "User already exists" });
     }
 
-    const assignedRole = (role === 'admin' || role === 'educator') ? 'educator' : 'student';
-
     const hashpassword = await bcrypt.hash(password, 10);
-    const user = new User({ 
-      name, 
-      email, 
-      password: hashpassword, 
-      role: assignedRole,
-      isVerified: true 
-    });
+    const user = new User({ name, email, password: hashpassword, isVerified: true });
     await user.save();
     
     const token = jwt.sign(
@@ -271,17 +259,7 @@ export const register = async (req, res) => {
     });
     res
       .status(201)
-      .json({ 
-        success: true, 
-        message: `${user.role === 'educator' ? 'Educator (Admin)' : 'User'} registered successfully`, 
-        token: token,
-        user: {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role
-        }
-      });
+      .json({ success: true, message: "User registered successfully", token: token });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal Server Error" });
     console.log(error.message);
@@ -388,14 +366,7 @@ export const login = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "User logged in successfully",
-      token: token,
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar
-      }
+      token: token
     });
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal Server Error" });

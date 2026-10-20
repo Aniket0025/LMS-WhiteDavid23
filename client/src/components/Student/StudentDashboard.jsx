@@ -181,9 +181,10 @@ const StudentDashboard = () => {
             <div className="space-y-2.5 sm:space-y-3 min-w-0 flex-1">
               <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 backdrop-blur-md text-[11px] sm:text-xs font-semibold text-blue-400 max-w-full truncate">
                 <Sparkles className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                <span className="truncate">Student Learning Portal</span>
-                {user?.role === 'educator' && (
-                  <span className="ml-1 pl-2 border-l border-blue-500/30 text-purple-400 shrink-0">Educator Mode</span>
+                {(user?.role === 'educator' || user?.role === 'admin') && (
+                  <span className="ml-1 pl-2 border-l border-blue-500/30 text-purple-400 shrink-0">
+                    {user?.role === 'admin' ? 'Admin Mode' : 'Educator Mode'}
+                  </span>
                 )}
               </div>
               
