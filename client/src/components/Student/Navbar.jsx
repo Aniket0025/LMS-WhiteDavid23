@@ -99,7 +99,7 @@ const Navbar = () => {
       className="fixed top-0 left-0 w-full bg-slate-950/95 backdrop-blur-xl border-b border-slate-800/60 z-50 shadow-xl"
     >
       <div className="container mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 md:h-18">
+        <div className="flex justify-between items-center h-16">
           {/* Logo & Portal Badge */}
           <div className="flex items-center space-x-2.5 sm:space-x-3 shrink-0">
             <Link to="/" className="flex items-center space-x-2.5 sm:space-x-3 group">
@@ -124,66 +124,7 @@ const Navbar = () => {
           </div>
 
           {/* Center: Context-Aware Desktop Navigation */}
-          {isEducatorPath ? (
-            /* Educator Desktop Navigation Tabs */
-            <nav className="hidden lg:flex items-center space-x-1 bg-slate-900/90 p-1 rounded-2xl border border-slate-800/80 shadow-inner" aria-label="Educator Navigation">
-              <Link
-                to="/educator/dashboard"
-                className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
-                  location.pathname === '/educator/dashboard' || location.pathname === '/educator'
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 font-bold'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-                }`}
-              >
-                <LayoutDashboard className="w-3.5 h-3.5" />
-                <span>Dashboard</span>
-              </Link>
-              <Link
-                to="/educator/add-course"
-                className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
-                  location.pathname === '/educator/add-course'
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 font-bold'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-                }`}
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Create Course</span>
-              </Link>
-              <Link
-                to="/educator/all-courses"
-                className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
-                  location.pathname === '/educator/all-courses'
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 font-bold'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-                }`}
-              >
-                <BookOpen className="w-3.5 h-3.5" />
-                <span>All Courses</span>
-              </Link>
-              <Link
-                to="/educator/analytics"
-                className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
-                  location.pathname === '/educator/analytics'
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 font-bold'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-                }`}
-              >
-                <BarChart3 className="w-3.5 h-3.5" />
-                <span>Analytics</span>
-              </Link>
-              <Link
-                to="/educator/students"
-                className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
-                  location.pathname === '/educator/students'
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 font-bold'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
-                }`}
-              >
-                <Users className="w-3.5 h-3.5" />
-                <span>Students</span>
-              </Link>
-            </nav>
-          ) : (
+          {!isEducatorPath && (
             /* Standard Desktop Navigation */
             <nav className="hidden md:flex items-center space-x-1" aria-label="Main Navigation">
               <Link
@@ -234,7 +175,7 @@ const Navbar = () => {
                   className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-purple-600/20 to-indigo-600/20 text-purple-300 border border-purple-500/30 hover:border-purple-400/60 transition-all ml-1.5"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Instructor Hub</span>
+                  <span>Educator Hub</span>
                 </Link>
               )}
             </nav>
