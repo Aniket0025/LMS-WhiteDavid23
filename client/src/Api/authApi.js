@@ -53,7 +53,13 @@ export const loginUser = async (credentials) => {
     return res.data;
   } catch (error) {
     console.error("Login error:", error.response?.data || error.message);
-    throw error.response?.data || { message: "Something went wrong" };
+    const friendlyMessage = 
+      error.response?.data?.message || 
+      (error.response?.status === 503 ? "Database service is initializing. Please check MONGODB_URI in Render dashboard." : null) ||
+      (error.response?.status === 502 ? "Render server is starting up. Please wait 15-30 seconds and try again." : null) ||
+      (error.message === "Network Error" ? "Unable to reach server. Render free tier may be waking up or MongoDB is disconnected." : error.message) || 
+      "Something went wrong";
+    throw { message: friendlyMessage };
   }
 };
 
