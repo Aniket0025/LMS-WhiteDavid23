@@ -189,7 +189,7 @@ const EducatorDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 pt-2 sm:pt-4 pb-16 overflow-x-hidden text-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 pt-6 sm:pt-8 pb-16 overflow-x-hidden text-slate-100">
       <div className="container mx-auto px-3 sm:px-6 lg:px-8 max-w-7xl w-full">
         
         {/* Welcome Header Banner */}

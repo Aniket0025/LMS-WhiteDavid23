@@ -91,15 +91,10 @@ export const uploadVideoToCloudinary = async (fileBuffer, fileName) => {
 };
 
 /**
- * Universal image upload (course thumbnail) - uses MEGA Drive if configured, falls back to Cloudinary
+ * Course Thumbnail upload - strictly uses Cloudinary only for fast CDN delivery, transformations, and responsive images
  */
 export const uploadImageToCloudinary = async (fileBuffer, fileName) => {
-  if (isMegaConfigured()) {
-    console.log("💾 Storage provider: MEGA Drive (Thumbnail)");
-    return await uploadImageToMega(fileBuffer, fileName);
-  }
-
-  // Cloudinary fallback
+  console.log("☁️ Storage provider: Cloudinary (Course Thumbnail)");
   try {
     return new Promise((resolve, reject) => {
       cloudinary.uploader
@@ -113,8 +108,10 @@ export const uploadImageToCloudinary = async (fileBuffer, fileName) => {
           },
           (error, result) => {
             if (error) {
+              console.error("Cloudinary thumbnail upload error:", error);
               reject(error);
             } else {
+              console.log("Cloudinary thumbnail upload successful:", result.secure_url);
               resolve(result);
             }
           }
@@ -122,6 +119,7 @@ export const uploadImageToCloudinary = async (fileBuffer, fileName) => {
         .end(fileBuffer);
     });
   } catch (error) {
+    console.error("Cloudinary thumbnail upload exception:", error);
     throw error;
   }
 };
