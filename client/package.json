@@ -15,6 +15,7 @@
     "fluid-player": "^3.60.0",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.537.0",
+    "pdfjs-dist": "^6.4.299",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hot-toast": "^2.6.0",

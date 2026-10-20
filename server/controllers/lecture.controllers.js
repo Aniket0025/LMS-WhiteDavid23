@@ -393,15 +393,21 @@ export const proxyDocument = async (req, res) => {
       }
     }
 
-    // Extract public_id from the Cloudinary URL
-    // URL format: https://res.cloudinary.com/<cloud>/raw/upload/v<version>/<public_id>
-    const urlParts = lecture.videoUrl.split('/raw/upload/');
-    if (urlParts.length < 2) {
-      return res.status(400).json({ success: false, message: "Invalid document URL" });
+    // Extract public_id from lecture model or Cloudinary URL
+    let publicId = lecture.publicId;
+    if (!publicId) {
+      if (lecture.videoUrl.includes('/raw/upload/')) {
+        const afterUpload = lecture.videoUrl.split('/raw/upload/')[1];
+        publicId = afterUpload ? afterUpload.replace(/^v\d+\//, '') : '';
+      } else if (lecture.videoUrl.includes('/upload/')) {
+        const afterUpload = lecture.videoUrl.split('/upload/')[1];
+        publicId = afterUpload ? afterUpload.replace(/^v\d+\//, '') : '';
+      }
     }
-    // Remove version prefix (v123456/) to get the public_id
-    const afterUpload = urlParts[1];
-    const publicId = afterUpload.replace(/^v\d+\//, '');
+
+    if (!publicId) {
+      return res.status(400).json({ success: false, message: "Invalid document URL or identifier" });
+    }
 
     // Use Cloudinary's generate_archive API to download the file as a zip
     // This API is NOT blocked by the free-tier PDF delivery restriction
@@ -443,7 +449,10 @@ export const proxyDocument = async (req, res) => {
     res.setHeader('Content-Type', contentType);
     res.setHeader('Content-Length', fileBuffer.length);
     res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
-    res.setHeader('Cache-Control', 'private, max-age=3600');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.send(fileBuffer);
 
   } catch (error) {

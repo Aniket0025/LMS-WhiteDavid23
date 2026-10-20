@@ -164,15 +164,10 @@ export const uploadProfilePictureToCloudinary = async (fileBuffer, fileName) => 
 };
 
 /**
- * Universal document upload - uses MEGA Drive if configured, falls back to Cloudinary
+ * Document & PDF upload - strictly uses Cloudinary only for fast and reliable CDN delivery
  */
 export const uploadRawFileToCloudinary = async (fileBuffer, fileName) => {
-  if (isMegaConfigured()) {
-    console.log("💾 Storage provider: MEGA Drive (Document)");
-    return await uploadRawFileToMega(fileBuffer, fileName);
-  }
-
-  // Cloudinary fallback
+  console.log("☁️ Storage provider: Cloudinary (Document/PDF)");
   try {
     return new Promise((resolve, reject) => {
       cloudinary.uploader
@@ -189,7 +184,7 @@ export const uploadRawFileToCloudinary = async (fileBuffer, fileName) => {
               console.error("Cloudinary document upload error:", error);
               reject(error);
             } else {
-              console.log("Document upload successful:", result.public_id);
+              console.log("Cloudinary document upload successful:", result.secure_url);
               resolve(result);
             }
           }

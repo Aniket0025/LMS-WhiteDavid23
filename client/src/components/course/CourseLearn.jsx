@@ -43,6 +43,7 @@ import { checkCoursePurchase, getCourseProgress, updateCourseProgress } from '..
 import { getLectureWithAccess } from '../../Api/lectureApi';
 import { useAuth } from '../../context/AuthContext';
 import OpenVideoPlayer from './OpenVideoPlayer';
+import ProtectedPdfViewer from './ProtectedPdfViewer';
 import './CourseLearn.css';
 
 const CourseLearn = () => {
@@ -845,35 +846,13 @@ const CourseLearn = () => {
                     />
                   </div>
                 ) : currentVideoData.lectureType === 'file' ? (
-                  /* PDF Document View */
+                  /* Protected PDF Document View — Read-only Canvas, Zero Download */
                   <div className="w-full bg-slate-950 border-b border-slate-800 flex flex-col">
-                    <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 bg-slate-900 border-b border-slate-800 text-xs">
-                      <div className="flex items-center space-x-2 min-w-0">
-                        <FileText className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <span className="font-semibold text-white truncate">Document Notes</span>
-                        <span className="hidden sm:inline-flex items-center space-x-1 px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-semibold rounded-full shrink-0">
-                          <ShieldAlert className="w-3.5 h-3.5" />
-                          <span>Protected</span>
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2 shrink-0">
-                        <button
-                          onClick={() => setPreviewDocUrl(currentVideoData.videoUrl)}
-                          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium flex items-center space-x-1 text-xs shadow-sm active:scale-95"
-                        >
-                          <Maximize2 className="w-3.5 h-3.5" />
-                          <span>Fullscreen</span>
-                        </button>
-                      </div>
-                    </div>
-                    <div className="doc-iframe-wrapper" onContextMenu={(e) => e.preventDefault()}>
-                      <iframe
-                        src={getViewerSrc(currentVideoData.videoUrl, 'direct', currentVideoData._id)}
-                        title={currentVideoData.title}
-                        className="doc-clipped-iframe"
-                        allow="fullscreen"
-                      />
-                    </div>
+                    <ProtectedPdfViewer
+                      url={getDocumentProxyUrl(currentVideoData._id)}
+                      title={currentVideoData.title}
+                      user={user}
+                    />
                   </div>
                 ) : (
                   /* OpenPlayerJS Video Player */
@@ -1233,12 +1212,11 @@ const CourseLearn = () => {
                 </button>
               </div>
             </div>
-            <div className="flex-1 bg-slate-950 relative overflow-hidden" onContextMenu={(e) => e.preventDefault()}>
-              <iframe
-                src={getViewerSrc(previewDocUrl, 'direct', currentVideoData?._id)}
-                title="Fullscreen Document Preview"
-                className="doc-clipped-iframe"
-                allow="fullscreen"
+            <div className="flex-1 bg-slate-950 relative overflow-hidden flex flex-col min-h-0" onContextMenu={(e) => e.preventDefault()}>
+              <ProtectedPdfViewer
+                url={getDocumentProxyUrl(currentVideoData?._id) || previewDocUrl}
+                title={currentVideoData?.title}
+                user={user}
               />
             </div>
           </div>
