@@ -144,3 +144,22 @@
   border-radius: 0 4px 4px 0;
   box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
 }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Safe touch feedback for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .touch-tap-target {
+    min-height: 44px;
+  }
+}
+
