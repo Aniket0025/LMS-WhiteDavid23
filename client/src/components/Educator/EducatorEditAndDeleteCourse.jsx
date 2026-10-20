@@ -214,7 +214,7 @@ const EducatorEditAndDeleteCourse = () => {
     }
 
     if (!newLecture.videoFile && !newLecture.videoUrl.trim()) {
-      setError('Please provide a Google Drive link or upload a file');
+      setError('Please provide a MEGA Drive / video link or upload a file');
       return;
     }
 
@@ -447,8 +447,8 @@ const EducatorEditAndDeleteCourse = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <motion.div variants={fadeInUp} className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
             <h2 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2"><Image className="w-4 h-4" /><span>Thumbnail</span></h2>
-            <div className="flex items-start gap-6">
-              <div className="w-1/2">
+            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+              <div className="w-full sm:w-1/2">
                 <div className="relative aspect-video bg-slate-900/50 border-2 border-dashed border-slate-600 rounded-lg overflow-hidden">
                   {imagePreview ? (
                     <>
@@ -464,12 +464,12 @@ const EducatorEditAndDeleteCourse = () => {
                 </div>
               </div>
 
-              <div className="w-1/2">
+              <div className="w-full sm:w-1/2">
                 <input id="thumb" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                <label htmlFor="thumb" className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg cursor-pointer">
+                <label htmlFor="thumb" className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg cursor-pointer text-xs sm:text-sm">
                   <Upload className="w-4 h-4 mr-2" /> Choose Image
                 </label>
-                <p className="text-sm text-slate-400 mt-3">Recommended: 1280x720, max 5MB</p>
+                <p className="text-xs sm:text-sm text-slate-400 mt-2 sm:mt-3">Recommended: 1280x720, max 5MB</p>
               </div>
             </div>
           </motion.div>
@@ -768,13 +768,13 @@ const EducatorEditAndDeleteCourse = () => {
         </form>
 
         {showDeleteConfirm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-slate-800 p-6 rounded-lg max-w-md w-full mx-4">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-slate-800 p-5 sm:p-6 rounded-2xl max-w-md w-full border border-slate-700 shadow-2xl">
               <h3 className="text-lg font-semibold text-white mb-2">Delete Course</h3>
-              <p className="text-slate-400 mb-4">Are you sure you want to delete "{formData.title}"?</p>
+              <p className="text-slate-400 text-sm mb-5">Are you sure you want to delete "{formData.title}"?</p>
               <div className="flex gap-3">
-                <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 px-4 py-2 bg-slate-700 text-slate-300 rounded-lg">Cancel</button>
-                <button onClick={handleDelete} disabled={loading} className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg">{loading ? 'Deleting...' : 'Delete'}</button>
+                <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 px-4 py-2.5 bg-slate-700 text-slate-300 rounded-xl text-sm font-medium hover:bg-slate-600 transition-colors">Cancel</button>
+                <button onClick={handleDelete} disabled={loading} className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-medium hover:bg-red-500 transition-colors shadow-lg shadow-red-600/20">{loading ? 'Deleting...' : 'Delete'}</button>
               </div>
             </motion.div>
           </div>
@@ -782,8 +782,8 @@ const EducatorEditAndDeleteCourse = () => {
 
         {/* Add Chapter Modal */}
         {showAddChapter && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-slate-800 p-6 rounded-lg max-w-md w-full mx-4">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-slate-800 p-5 sm:p-6 rounded-2xl max-w-md w-full border border-slate-700 shadow-2xl">
               <h3 className="text-lg font-semibold text-white mb-4">Add New Chapter</h3>
               <div className="space-y-4">
                 <div>
@@ -793,7 +793,7 @@ const EducatorEditAndDeleteCourse = () => {
                     value={newChapterTitle}
                     onChange={(e) => setNewChapterTitle(e.target.value)}
                     placeholder="Enter chapter title"
-                    className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50"
+                    className="w-full px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-sm"
                     onKeyPress={(e) => e.key === 'Enter' && handleAddChapter()}
                   />
                 </div>
@@ -804,14 +804,14 @@ const EducatorEditAndDeleteCourse = () => {
                     setShowAddChapter(false);
                     setNewChapterTitle('');
                   }}
-                  className="flex-1 px-4 py-2 bg-slate-700 text-slate-300 rounded-lg"
+                  className="flex-1 px-4 py-2.5 bg-slate-700 text-slate-300 rounded-xl text-sm font-medium hover:bg-slate-600 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleAddChapter}
                   disabled={loadingChapters || !newChapterTitle.trim()}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-500 transition-colors shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loadingChapters ? <Loader className="w-4 h-4 animate-spin inline mr-2" /> : null}
                   Add Chapter
@@ -823,8 +823,8 @@ const EducatorEditAndDeleteCourse = () => {
 
         {/* Add Lecture Modal */}
         {showAddLecture && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-slate-800 p-6 rounded-lg max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-slate-800 p-4 sm:p-6 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto overscroll-contain border border-slate-700 shadow-2xl">
               <h3 className="text-lg font-semibold text-white mb-4">Add New Lecture</h3>
               <div className="space-y-4">
                 <div>
@@ -925,7 +925,7 @@ const EducatorEditAndDeleteCourse = () => {
                     {/* URL input */}
                     <div className="p-3 border-b border-slate-700/60">
                       <p className="text-xs text-blue-400 font-semibold mb-1.5">
-                        🔗 {newLecture.lectureType === 'video' ? 'Google Drive / YouTube Link' : newLecture.lectureType === 'image' ? 'Image URL' : 'Document URL'}
+                        🔗 {newLecture.lectureType === 'video' ? 'MEGA Drive / YouTube Link' : newLecture.lectureType === 'image' ? 'Image URL' : 'Document URL'}
                       </p>
                       <input
                         type="url"
@@ -934,7 +934,7 @@ const EducatorEditAndDeleteCourse = () => {
                         className="w-full px-3 py-2 bg-slate-800/80 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 text-sm"
                         placeholder={
                           newLecture.lectureType === 'video'
-                            ? 'https://drive.google.com/file/d/.../view?usp=sharing'
+                            ? 'https://mega.nz/file/xxxx#yyyy or https://mega.nz/embed/xxxx#yyyy'
                             : newLecture.lectureType === 'image'
                             ? 'https://example.com/image.jpg'
                             : 'https://example.com/document.pdf'
@@ -942,7 +942,7 @@ const EducatorEditAndDeleteCourse = () => {
                       />
                       {newLecture.lectureType === 'video' && (
                         <p className="text-[11px] text-slate-400 mt-1.5">
-                          💡 Set Google Drive sharing to <span className="text-blue-400 font-medium">"Anyone with the link can view"</span>
+                          💡 MEGA Drive: Right-click your video in MEGA, click <span className="text-blue-400 font-medium">"Get Link"</span> or <span className="text-blue-400 font-medium">"Embed code"</span>, and paste here
                         </p>
                       )}
                     </div>

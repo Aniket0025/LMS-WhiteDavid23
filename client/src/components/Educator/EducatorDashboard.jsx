@@ -245,79 +245,80 @@ const EducatorDashboard = () => {
         )}
 
         {/* Key Metrics Grid */}
+        {/* Key Metrics Grid */}
         <motion.div
           variants={fadeInUp}
           initial="initial"
           animate="animate"
           transition={{ delay: 0.2 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-10"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-10"
         >
           {/* Card 1: Total Courses */}
-          <div className="group relative bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 hover:border-blue-500/40 rounded-2xl p-5 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Courses Created</span>
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
-                <BookOpen className="w-5 h-5" />
+          <div className="group relative bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 hover:border-blue-500/40 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300">
+            <div className="flex items-center justify-between mb-2 sm:mb-4">
+              <span className="text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider truncate">Courses</span>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shrink-0">
+                <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
-            <div className="flex items-baseline justify-between">
-              <h3 className="text-3xl font-black text-white">{stats.totalCourses}</h3>
-              <span className="text-xs text-blue-400 font-medium flex items-center gap-1 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
-                {stats.publishedCourses} Published
+            <div className="flex flex-wrap items-baseline justify-between gap-1">
+              <h3 className="text-xl sm:text-3xl font-black text-white">{stats.totalCourses}</h3>
+              <span className="text-[10px] sm:text-xs text-blue-400 font-medium flex items-center gap-1 bg-blue-500/10 px-1.5 sm:px-2 py-0.5 rounded-full border border-blue-500/20">
+                {stats.publishedCourses} Pub
               </span>
             </div>
-            <p className="text-slate-400 text-xs mt-2">{stats.draftCourses} draft courses in progress</p>
+            <p className="text-slate-400 text-[11px] sm:text-xs mt-1.5 sm:mt-2 truncate">{stats.draftCourses} drafts in progress</p>
           </div>
 
           {/* Card 2: Enrolled Students */}
-          <div className="group relative bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 hover:border-emerald-500/40 rounded-2xl p-5 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Course Enrolments</span>
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
-                <Users className="w-5 h-5" />
+          <div className="group relative bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 hover:border-emerald-500/40 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300">
+            <div className="flex items-center justify-between mb-2 sm:mb-4">
+              <span className="text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider truncate">Enrolments</span>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shrink-0">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
-            <div className="flex items-baseline justify-between">
-              <h3 className="text-3xl font-black text-white">{stats.totalStudents}</h3>
-              <span className="text-xs text-emerald-400 font-medium flex items-center gap-1 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                <TrendingUp className="w-3 h-3" /> Active
+            <div className="flex flex-wrap items-baseline justify-between gap-1">
+              <h3 className="text-xl sm:text-3xl font-black text-white">{stats.totalStudents}</h3>
+              <span className="text-[10px] sm:text-xs text-emerald-400 font-medium flex items-center gap-1 bg-emerald-500/10 px-1.5 sm:px-2 py-0.5 rounded-full border border-emerald-500/20">
+                <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> Active
               </span>
             </div>
-            <p className="text-slate-400 text-xs mt-2">Platform total: {platformStats.totalStudents} students</p>
+            <p className="text-slate-400 text-[11px] sm:text-xs mt-1.5 sm:mt-2 truncate">{platformStats.totalStudents} platform users</p>
           </div>
 
           {/* Card 3: Total Revenue */}
-          <div className="group relative bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 hover:border-purple-500/40 rounded-2xl p-5 hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Estimated Revenue</span>
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
-                <IndianRupee className="w-5 h-5" />
+          <div className="group relative bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 hover:border-purple-500/40 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300">
+            <div className="flex items-center justify-between mb-2 sm:mb-4">
+              <span className="text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider truncate">Revenue</span>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 shrink-0">
+                <IndianRupee className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
-            <div className="flex items-baseline justify-between">
-              <h3 className="text-3xl font-black text-white">₹{stats.totalRevenue.toLocaleString()}</h3>
-              <span className="text-xs text-purple-400 font-medium flex items-center gap-1 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
-                <Zap className="w-3 h-3" /> Sales
+            <div className="flex flex-wrap items-baseline justify-between gap-1">
+              <h3 className="text-xl sm:text-3xl font-black text-white">₹{stats.totalRevenue.toLocaleString()}</h3>
+              <span className="text-[10px] sm:text-xs text-purple-400 font-medium flex items-center gap-1 bg-purple-500/10 px-1.5 sm:px-2 py-0.5 rounded-full border border-purple-500/20">
+                <Zap className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> Sales
               </span>
             </div>
-            <p className="text-slate-400 text-xs mt-2">Calculated from course sales</p>
+            <p className="text-slate-400 text-[11px] sm:text-xs mt-1.5 sm:mt-2 truncate">Course revenue</p>
           </div>
 
           {/* Card 4: Instructor Rating */}
-          <div className="group relative bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 hover:border-amber-500/40 rounded-2xl p-5 hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Instructor Rating</span>
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-110 group-hover:bg-amber-600 group-hover:text-white transition-all duration-300">
-                <Star className="w-5 h-5" />
+          <div className="group relative bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 hover:border-amber-500/40 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300">
+            <div className="flex items-center justify-between mb-2 sm:mb-4">
+              <span className="text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider truncate">Rating</span>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-110 group-hover:bg-amber-600 group-hover:text-white transition-all duration-300 shrink-0">
+                <Star className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
-            <div className="flex items-baseline justify-between">
-              <h3 className="text-3xl font-black text-white">{stats.avgRating} <span className="text-sm font-normal text-amber-400">★</span></h3>
-              <span className="text-xs text-amber-400 font-medium flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                High Feedback
+            <div className="flex flex-wrap items-baseline justify-between gap-1">
+              <h3 className="text-xl sm:text-3xl font-black text-white">{stats.avgRating} <span className="text-sm font-normal text-amber-400">★</span></h3>
+              <span className="text-[10px] sm:text-xs text-amber-400 font-medium flex items-center gap-1 bg-amber-500/10 px-1.5 sm:px-2 py-0.5 rounded-full border border-amber-500/20">
+                Top Rated
               </span>
             </div>
-            <p className="text-slate-400 text-xs mt-2">Based on student course reviews</p>
+            <p className="text-slate-400 text-[11px] sm:text-xs mt-1.5 sm:mt-2 truncate">Student feedback</p>
           </div>
         </motion.div>
 

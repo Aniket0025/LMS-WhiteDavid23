@@ -261,4 +261,41 @@ videoRouter.post('/upload-document', authenticate, authorize('educator'), upload
   }
 });
 
+// Stream or proxy a file directly from MEGA Drive
+videoRouter.get('/mega-stream', async (req, res) => {
+  try {
+    const { url } = req.query;
+    if (!url) {
+      return res.status(400).json({ success: false, message: 'Missing url query parameter' });
+    }
+
+    if (!url.includes('mega.nz') && !url.includes('mega.io')) {
+      return res.status(400).json({ success: false, message: 'Invalid MEGA URL' });
+    }
+
+    const { getFileStreamFromMega } = await import('../config/mega.js');
+    const { stream, name, size } = await getFileStreamFromMega(url);
+
+    const lowerName = (name || '').toLowerCase();
+    let contentType = 'application/octet-stream';
+    if (lowerName.endsWith('.mp4')) contentType = 'video/mp4';
+    else if (lowerName.endsWith('.webm')) contentType = 'video/webm';
+    else if (lowerName.endsWith('.jpg') || lowerName.endsWith('.jpeg')) contentType = 'image/jpeg';
+    else if (lowerName.endsWith('.png')) contentType = 'image/png';
+    else if (lowerName.endsWith('.webp')) contentType = 'image/webp';
+    else if (lowerName.endsWith('.gif')) contentType = 'image/gif';
+    else if (lowerName.endsWith('.pdf')) contentType = 'application/pdf';
+
+    res.setHeader('Content-Type', contentType);
+    if (size) res.setHeader('Content-Length', size);
+    res.setHeader('Content-Disposition', `inline; filename="${name || 'file'}"`);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+
+    stream.pipe(res);
+  } catch (err) {
+    console.error('MEGA streaming proxy error:', err);
+    res.status(500).json({ success: false, message: 'Failed to stream from MEGA Drive', error: err.message });
+  }
+});
+
 export default videoRouter;

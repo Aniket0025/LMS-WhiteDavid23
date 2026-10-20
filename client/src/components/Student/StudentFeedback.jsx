@@ -72,17 +72,17 @@ const StudentFeedback = () => {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-b from-slate-950 to-[#0a1128] overflow-hidden">
-      <div className="container mx-auto px-6">
+    <section className="py-16 sm:py-20 bg-gradient-to-b from-slate-950 to-[#0a1128] overflow-hidden">
+      <div className="container mx-auto px-4 sm:px-6">
         {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+        <div className="text-center mb-10 sm:mb-16">
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
             What Our Students{" "}
             <span className="text-blue-400">Say About Us</span>
           </h2>
         </div>
 
-        <div className="h-9"></div>
+        <div className="h-4 sm:h-9"></div>
 
         {/* Feedback Section - Desktop Marquee */}
         <div className="hidden md:block relative overflow-hidden">
@@ -118,20 +118,22 @@ const StudentFeedback = () => {
             {feedbacks.map((fb, index) => (
               <div
                 key={index}
-                className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800"
+                className="p-1"
               >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className={`w-13 h-13 min-w-[3.25rem] min-h-[3.25rem] rounded-2xl bg-gradient-to-br ${avatarGradients[index % avatarGradients.length]} border-2 flex items-center justify-center font-black text-base shadow-lg tracking-wider`}>
-                    {getInitials(fb.name)}
+                <div className="p-4 sm:p-6 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800">
+                  <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                    <div className={`w-11 h-11 sm:w-13 sm:h-13 min-w-[2.75rem] min-h-[2.75rem] rounded-2xl bg-gradient-to-br ${avatarGradients[index % avatarGradients.length]} border-2 flex items-center justify-center font-black text-sm sm:text-base shadow-lg tracking-wider`}>
+                      {getInitials(fb.name)}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-base sm:text-lg font-bold text-white truncate">{fb.name}</h3>
+                      {fb.role && <p className="text-xs text-blue-400 font-medium truncate">{fb.role}</p>}
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white">{fb.name}</h3>
-                    {fb.role && <p className="text-xs text-blue-400 font-medium">{fb.role}</p>}
-                  </div>
+                  <p className="text-slate-300 text-xs sm:text-sm leading-relaxed italic">
+                    “{fb.feedback}”
+                  </p>
                 </div>
-                <p className="text-slate-300 text-sm leading-relaxed italic">
-                  “{fb.feedback}”
-                </p>
               </div>
             ))}
           </Slider>

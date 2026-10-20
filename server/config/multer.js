@@ -1,13 +1,20 @@
 import multer from "multer";
 import { cloudinary } from "./cloudnary.js";
+import {
+  isMegaConfigured,
+  uploadVideoToMega,
+  uploadImageToMega,
+  uploadProfilePictureToMega,
+  uploadRawFileToMega
+} from "./mega.js";
 
 // Configure multer for memory storage
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
   limits: {
-    fileSize: 100 * 1024 * 1024, // Increased to 100MB limit for videos
-    fieldSize: 100 * 1024 * 1024, // Increased field size limit
+    fileSize: 500 * 1024 * 1024, // 500MB limit for video files
+    fieldSize: 500 * 1024 * 1024,
   },
   fileFilter: (req, file, cb) => {
     // Accept video, image and document files
@@ -30,9 +37,16 @@ const upload = multer({
   },
 });
 
-// Function to upload video to Cloudinary
-
+/**
+ * Universal video upload - uses MEGA Drive if configured, falls back to Cloudinary
+ */
 export const uploadVideoToCloudinary = async (fileBuffer, fileName) => {
+  if (isMegaConfigured()) {
+    console.log("💾 Storage provider: MEGA Drive (Video)");
+    return await uploadVideoToMega(fileBuffer, fileName);
+  }
+
+  // Cloudinary fallback
   try {
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
@@ -40,17 +54,17 @@ export const uploadVideoToCloudinary = async (fileBuffer, fileName) => {
           resource_type: "video",
           folder: "lms-videos",
           public_id: fileName,
-          chunk_size: 1024 * 1024, // Reduced to 1MB chunks for better stability
-          timeout: 300000, // 5 minutes timeout
+          chunk_size: 1024 * 1024,
+          timeout: 300000,
           quality: "auto:good",
-          format: "mp4", // Force mp4 format for better compatibility
-          video_codec: "h264", // Use h264 codec for better compression
+          format: "mp4",
+          video_codec: "h264",
           eager: [
             { width: 640, height: 360, crop: "limit", quality: "auto:good" }
           ],
-          eager_async: true, // Process transformations asynchronously
-          overwrite: true, // Allow overwriting existing files
-          invalidate: true, // Invalidate CDN cache
+          eager_async: true,
+          overwrite: true,
+          invalidate: true,
         },
         (error, result) => {
           if (error) {
@@ -63,7 +77,6 @@ export const uploadVideoToCloudinary = async (fileBuffer, fileName) => {
         }
       );
 
-      // Add error handling for stream
       uploadStream.on('error', (error) => {
         console.error("Upload stream error:", error);
         reject(error);
@@ -77,8 +90,16 @@ export const uploadVideoToCloudinary = async (fileBuffer, fileName) => {
   }
 };
 
-// Function to upload image to Cloudinary
+/**
+ * Universal image upload (course thumbnail) - uses MEGA Drive if configured, falls back to Cloudinary
+ */
 export const uploadImageToCloudinary = async (fileBuffer, fileName) => {
+  if (isMegaConfigured()) {
+    console.log("💾 Storage provider: MEGA Drive (Thumbnail)");
+    return await uploadImageToMega(fileBuffer, fileName);
+  }
+
+  // Cloudinary fallback
   try {
     return new Promise((resolve, reject) => {
       cloudinary.uploader
@@ -105,11 +126,16 @@ export const uploadImageToCloudinary = async (fileBuffer, fileName) => {
   }
 };
 
-// Function to upload profile picture to Cloudinary
-export const uploadProfilePictureToCloudinary = async (
-  fileBuffer,
-  fileName
-) => {
+/**
+ * Universal profile picture upload - uses MEGA Drive if configured, falls back to Cloudinary
+ */
+export const uploadProfilePictureToCloudinary = async (fileBuffer, fileName) => {
+  if (isMegaConfigured()) {
+    console.log("💾 Storage provider: MEGA Drive (Profile Picture)");
+    return await uploadProfilePictureToMega(fileBuffer, fileName);
+  }
+
+  // Cloudinary fallback
   try {
     return new Promise((resolve, reject) => {
       cloudinary.uploader
@@ -139,8 +165,16 @@ export const uploadProfilePictureToCloudinary = async (
   }
 };
 
-// Function to upload raw files (documents like pdf, doc, ppt) to Cloudinary
+/**
+ * Universal document upload - uses MEGA Drive if configured, falls back to Cloudinary
+ */
 export const uploadRawFileToCloudinary = async (fileBuffer, fileName) => {
+  if (isMegaConfigured()) {
+    console.log("💾 Storage provider: MEGA Drive (Document)");
+    return await uploadRawFileToMega(fileBuffer, fileName);
+  }
+
+  // Cloudinary fallback
   try {
     return new Promise((resolve, reject) => {
       cloudinary.uploader
@@ -170,4 +204,16 @@ export const uploadRawFileToCloudinary = async (fileBuffer, fileName) => {
   }
 };
 
-export { upload };
+// Aliases for explicit MEGA storage naming
+export const uploadVideoToStorage = uploadVideoToCloudinary;
+export const uploadImageToStorage = uploadImageToCloudinary;
+export const uploadProfilePictureToStorage = uploadProfilePictureToCloudinary;
+export const uploadRawFileToStorage = uploadRawFileToCloudinary;
+
+export {
+  upload,
+  uploadVideoToMega,
+  uploadImageToMega,
+  uploadProfilePictureToMega,
+  uploadRawFileToMega
+};

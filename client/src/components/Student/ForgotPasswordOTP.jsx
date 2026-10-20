@@ -169,7 +169,7 @@ const ForgotPasswordOTP = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 flex items-center justify-center pt-20 sm:pt-24 pb-12 px-4">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 -left-32 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl animate-pulse"></div>
@@ -189,10 +189,10 @@ const ForgotPasswordOTP = () => {
               <Shield className="w-6 h-6 text-white" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Verify Reset Code</h1>
-          <p className="text-slate-300 text-sm">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Verify Reset Code</h1>
+          <p className="text-slate-300 text-xs sm:text-sm">
             We've sent a 6-digit code to<br />
-            <span className="font-medium text-blue-400">{email}</span>
+            <span className="font-medium text-blue-400 break-all">{email}</span>
           </p>
         </motion.div>
 
@@ -202,7 +202,7 @@ const ForgotPasswordOTP = () => {
           initial="initial"
           animate="animate"
           transition={{ delay: 0.2 }}
-          className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 shadow-2xl"
+          className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 sm:p-6 shadow-2xl"
         >
           <form onSubmit={handleSubmit} className="space-y-6">
             {stateOtp && (
@@ -215,18 +215,19 @@ const ForgotPasswordOTP = () => {
               <label className="block text-xs font-medium text-slate-300 text-center">
                 Enter 6-Digit Reset Code
               </label>
-              <div className="flex justify-center space-x-3">
+              <div className="flex justify-center gap-1.5 sm:gap-3">
                 {otp.map((digit, index) => (
                   <input
                     key={index}
                     ref={(el) => (inputRefs.current[index] = el)}
                     type="text"
                     maxLength="1"
+                    inputMode="numeric"
                     value={digit}
                     onChange={(e) => handleInputChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
                     onPaste={index === 0 ? handlePaste : undefined}
-                    className="w-12 h-12 text-center text-lg font-bold bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    className="w-9 h-11 sm:w-12 sm:h-12 text-center text-base sm:text-lg font-bold bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                   />
                 ))}
               </div>

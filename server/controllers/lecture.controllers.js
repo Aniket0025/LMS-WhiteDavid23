@@ -367,6 +367,32 @@ export const proxyDocument = async (req, res) => {
       return res.status(400).json({ success: false, message: "Not a document lecture" });
     }
 
+    // Handle MEGA Drive stored documents
+    if (lecture.videoUrl.includes('mega.nz') || lecture.videoUrl.includes('mega.io')) {
+      try {
+        const { getFileStreamFromMega } = await import('../config/mega.js');
+        const { stream, name, size } = await getFileStreamFromMega(lecture.videoUrl);
+
+        let contentType = 'application/octet-stream';
+        const lowerName = (name || '').toLowerCase();
+        if (lowerName.endsWith('.pdf')) contentType = 'application/pdf';
+        else if (lowerName.endsWith('.doc')) contentType = 'application/msword';
+        else if (lowerName.endsWith('.docx')) contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        else if (lowerName.endsWith('.ppt')) contentType = 'application/vnd.ms-powerpoint';
+        else if (lowerName.endsWith('.pptx')) contentType = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+
+        res.setHeader('Content-Type', contentType);
+        if (size) res.setHeader('Content-Length', size);
+        res.setHeader('Content-Disposition', `inline; filename="${name || 'document'}"`);
+        res.setHeader('Cache-Control', 'private, max-age=3600');
+
+        return stream.pipe(res);
+      } catch (megaErr) {
+        console.error('Failed to stream document from MEGA Drive:', megaErr);
+        return res.status(502).json({ success: false, message: "Failed to fetch document from MEGA Drive storage" });
+      }
+    }
+
     // Extract public_id from the Cloudinary URL
     // URL format: https://res.cloudinary.com/<cloud>/raw/upload/v<version>/<public_id>
     const urlParts = lecture.videoUrl.split('/raw/upload/');

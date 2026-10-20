@@ -283,19 +283,67 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={toggleMobileMenu}
-            data-mobile-menu-button
-            className="md:hidden p-3 text-slate-300 hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 rounded-xl"
-          >
-            <motion.div
-              animate={{ rotate: isMenuOpen ? 90 : 0 }}
-              transition={{ duration: 0.2 }}
+          {/* Mobile Right Action Bar */}
+          <div className="flex md:hidden items-center space-x-1.5 sm:space-x-2">
+            {/* Quick Search Button */}
+            <Link
+              to="/search"
+              className="p-2 text-slate-300 hover:text-white hover:bg-slate-800/60 rounded-xl transition-all"
+              title="Search Courses"
             >
-              {isMenuOpen ? <X className="w-8 h-8 text-white" /> : <Menu className="w-8 h-8 text-white" />}
-            </motion.div>
-          </button>
+              <Search className="w-5 h-5 text-slate-300" />
+            </Link>
+
+            {/* Quick Auth / Avatar Button */}
+            {isLoggedIn ? (
+              <button
+                onClick={toggleMobileMenu}
+                className="relative p-0.5 focus:outline-none"
+                title="Profile Menu"
+              >
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user?.name || 'Profile'}
+                    className="w-8 h-8 rounded-full object-cover border border-slate-700 shadow-md"
+                  />
+                ) : (
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md ${
+                    user?.role === 'educator'
+                      ? 'bg-gradient-to-r from-purple-600 to-pink-600'
+                      : 'bg-gradient-to-r from-blue-600 to-purple-600'
+                  }`}>
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                )}
+                <div className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-slate-950 ${
+                  user?.role === 'educator' ? 'bg-purple-500' : 'bg-green-500'
+                }`} />
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs font-semibold rounded-lg shadow-sm"
+              >
+                Sign In
+              </Link>
+            )}
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={toggleMobileMenu}
+              data-mobile-menu-button
+              className="p-2 text-slate-300 hover:text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 rounded-xl"
+              aria-label="Toggle navigation menu"
+            >
+              <motion.div
+                animate={{ rotate: isMenuOpen ? 90 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {isMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
+              </motion.div>
+            </button>
+          </div>
         </div>
 
         {/* Enhanced Mobile Menu */}
@@ -307,7 +355,7 @@ const Navbar = () => {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="md:hidden bg-slate-900/95 backdrop-blur-xl border-t border-slate-800/50"
+              className="md:hidden bg-slate-900/98 backdrop-blur-2xl border-t border-slate-800/80 max-h-[calc(100vh-4.5rem)] overflow-y-auto overscroll-contain shadow-2xl"
             >
               <div className="p-6 space-y-4">
                 {/* Search */}

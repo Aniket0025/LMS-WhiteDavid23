@@ -1,6 +1,7 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { BookOpen, Settings, Compass, Sparkles } from 'lucide-react';
 
 const StudentLayout = () => {
   const { isLoggedIn, user, loading } = useAuth();
@@ -60,11 +61,67 @@ const StudentLayout = () => {
     );
   }
 
+  const location = useLocation();
+
+  const studentNavItems = [
+    {
+      name: 'My Learning',
+      href: '/student/dashboard',
+      icon: BookOpen
+    },
+    {
+      name: 'Account Settings',
+      href: '/student/account',
+      icon: Settings
+    },
+    {
+      name: 'Browse Courses',
+      href: '/course',
+      icon: Compass
+    }
+  ];
+
+  if (user?.role === 'educator') {
+    studentNavItems.push({
+      name: 'Educator Hub',
+      href: '/educator/dashboard',
+      icon: Sparkles
+    });
+  }
+
   // Render nested routes for students and educators (educators can also be students)
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 w-full max-w-full overflow-x-hidden">
-      {/* You can add student-specific navigation, sidebar, or header here */}
-      <Outlet />
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 w-full max-w-full overflow-x-hidden pt-[64px] sm:pt-[72px]">
+      {/* Sticky Student Sub-Navigation Bar */}
+      <div className="sticky top-[64px] sm:top-[72px] z-30 bg-slate-950/90 backdrop-blur-xl border-b border-slate-800/80 shadow-md">
+        <div className="container mx-auto px-3 sm:px-6 lg:px-8">
+          <nav className="flex items-center space-x-1.5 sm:space-x-2 overflow-x-auto py-2.5 scrollbar-none" aria-label="Student Navigation">
+            {studentNavItems.map((item) => {
+              const active = location.pathname === item.href;
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`inline-flex items-center space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 shrink-0 whitespace-nowrap ${
+                    active
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25 font-semibold'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${active ? 'text-white' : 'text-slate-400'}`} />
+                  <span>{item.name}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
+
+      {/* Page Content */}
+      <div className="w-full max-w-full overflow-x-hidden">
+        <Outlet />
+      </div>
     </div>
   );
 };

@@ -74,7 +74,7 @@ const CoursesSection = () => {
   };
 
   return (
-    <section className="py-20 px-6 lg:px-8 bg-gradient-to-b from-slate-950 to-slate-900">
+    <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-950 to-slate-900">
       <div className="container mx-auto">
         {/* Section Header */}
         <motion.div
@@ -82,12 +82,12 @@ const CoursesSection = () => {
           initial="initial"
           whileInView="animate"
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-10 sm:mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-6">
             Featured Courses
           </h2>
-          <p className="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-lg md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
             Discover our most popular courses designed by industry experts to
             help you master new skills and advance your career
           </p>
@@ -101,7 +101,7 @@ const CoursesSection = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 mb-8 sm:mb-12"
             >
               {[...Array(6)].map((_, index) => (
                 <motion.div
@@ -158,7 +158,7 @@ const CoursesSection = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 mb-8 sm:mb-12"
             >
               {featuredCourses.map((course, index) => (
                 <motion.div

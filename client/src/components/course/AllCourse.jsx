@@ -164,38 +164,38 @@ const AllCourse = () => {
   if (loading) return <LoadingState />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-24">
-      <div className="container mx-auto px-6 lg:px-8 pb-16">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-20 sm:pt-24">
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8 pb-16">
         
         {/* Header Section */}
         <motion.div
           variants={fadeInUp}
           initial="initial"
           animate="animate"
-          className="text-center mb-12"
+          className="text-center mb-8 sm:mb-12"
         >
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-6">
             Explore <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">Courses</span>
           </h1>
-          <p className="text-xl text-slate-300 max-w-3xl mx-auto mb-8">
+          <p className="text-sm sm:text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-6 sm:mb-8">
             Discover thousands of courses from expert instructors and advance your skills
           </p>
           
           {/* Course Stats */}
-          <div className="flex flex-wrap justify-center gap-8 text-slate-300">
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-8 text-slate-300">
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-400">{courses.length}</div>
-              <div className="text-sm">Total Courses</div>
+              <div className="text-xl sm:text-2xl font-bold text-blue-400">{courses.length}</div>
+              <div className="text-xs sm:text-sm">Total Courses</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-400">{getUniqueCategories().length}</div>
-              <div className="text-sm">Categories</div>
+              <div className="text-xl sm:text-2xl font-bold text-purple-400">{getUniqueCategories().length}</div>
+              <div className="text-xs sm:text-sm">Categories</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-400">
+              <div className="text-xl sm:text-2xl font-bold text-green-400">
                 {courses.reduce((acc, course) => acc + (course.enrolledStudents?.length || 0), 0)}
               </div>
-              <div className="text-sm">Students Enrolled</div>
+              <div className="text-xs sm:text-sm">Students Enrolled</div>
             </div>
           </div>
         </motion.div>
@@ -205,10 +205,10 @@ const AllCourse = () => {
           variants={fadeInUp}
           initial="initial"
           animate="animate"
-          className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 mb-8"
+          className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8"
         >
           {/* Search Input */}
-          <div className="flex flex-col lg:flex-row gap-4 items-center mb-6">
+          <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 items-center mb-4 sm:mb-6">
             <div className="relative flex-1 w-full">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
               <input

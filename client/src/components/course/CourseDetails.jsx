@@ -392,7 +392,7 @@ const CourseDetails = () => {
               className="mb-6 md:mb-8"
             >
               <div className="bg-slate-800/30 rounded-lg md:rounded-xl p-1 backdrop-blur-sm border border-slate-700/50">
-                <nav className="flex space-x-1 overflow-x-auto scrollbar-hide" role="tablist">
+                <nav className="flex space-x-1.5 sm:space-x-2 overflow-x-auto scrollbar-none py-0.5" role="tablist">
                   {['overview', 'curriculum', 'instructor', 'reviews'].map((tab) => (
                     <button
                       key={tab}
@@ -400,9 +400,9 @@ const CourseDetails = () => {
                       role="tab"
                       aria-selected={activeTab === tab}
                       aria-controls={`${tab}-panel`}
-                      className={`flex-1 min-w-0 py-2 md:py-3 px-2 md:px-4 rounded-md md:rounded-lg font-medium text-xs md:text-sm capitalize transition-all duration-200 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 ${
+                      className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg font-medium text-xs sm:text-sm capitalize transition-all duration-200 whitespace-nowrap shrink-0 focus:outline-none ${
                         activeTab === tab
-                          ? 'bg-blue-600 text-white shadow-lg'
+                          ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-semibold'
                           : 'text-slate-400 hover:text-slate-300 hover:bg-slate-700/50'
                       }`}
                     >

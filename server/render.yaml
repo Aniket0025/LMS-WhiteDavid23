@@ -22,3 +22,12 @@ services:
         sync: false
       - key: STRIPE_SECRET_KEY
         sync: false
+      - key: MEGA_EMAIL
+        sync: false
+      - key: MEGA_PASSWORD
+        sync: false
+      - key: MEGA_API_KEY
+        sync: false
+      - key: MEGA_FOLDER_NAME
+        value: LMS-Drive-Storage
+

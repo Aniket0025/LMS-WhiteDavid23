@@ -271,7 +271,7 @@ const StudentAccount = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-20 sm:pt-24 overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-4 sm:pt-6 overflow-x-hidden">
       <div className="container mx-auto px-3 sm:px-6 lg:px-8 pb-16 max-w-4xl w-full">
         <div className="max-w-4xl mx-auto min-w-0 w-full">
           {/* Header */}

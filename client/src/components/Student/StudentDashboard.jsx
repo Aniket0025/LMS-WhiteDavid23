@@ -163,7 +163,7 @@ const StudentDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 text-slate-100 pt-[70px] sm:pt-[76px] overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 text-slate-100 pt-4 sm:pt-6 overflow-x-hidden w-full max-w-full">
       <div className="container mx-auto px-2.5 sm:px-6 lg:px-8 pb-20 max-w-7xl w-full min-w-0">
         
         {/* Welcome Hero Banner */}

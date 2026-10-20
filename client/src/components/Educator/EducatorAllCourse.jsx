@@ -481,109 +481,109 @@ const EducatorAllCourse = () => {
               initial="initial"
               animate="animate"
               transition={{ delay: 0.2 }}
-              className="grid grid-cols-2 lg:grid-cols-5 gap-6 mb-8"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8"
             >
-              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-2xl font-bold text-white">{courses.length}</h3>
-                    <p className="text-slate-400 text-sm">
+                  <div className="min-w-0">
+                    <h3 className="text-xl sm:text-2xl font-bold text-white truncate">{courses.length}</h3>
+                    <p className="text-slate-400 text-xs sm:text-sm truncate">
                       {viewType === 'mine' ? 'My Courses' : 'Platform Courses'}
                     </p>
                   </div>
-                  <BookOpen className="w-8 h-8 text-blue-400" />
+                  <BookOpen className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400 shrink-0 ml-1" />
                 </div>
               </div>
 
               {viewType === 'mine' ? (
                 <>
-                  <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                  <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-2xl font-bold text-white">
+                      <div className="min-w-0">
+                        <h3 className="text-xl sm:text-2xl font-bold text-white truncate">
                           {courses.filter(c => c.status === 'published').length}
                         </h3>
-                        <p className="text-slate-400 text-sm">Published</p>
+                        <p className="text-slate-400 text-xs sm:text-sm truncate">Published</p>
                       </div>
-                      <BookOpen className="w-8 h-8 text-green-400" />
+                      <BookOpen className="w-6 h-6 sm:w-8 sm:h-8 text-green-400 shrink-0 ml-1" />
                     </div>
                   </div>
 
-                  <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                  <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-2xl font-bold text-white">
+                      <div className="min-w-0">
+                        <h3 className="text-xl sm:text-2xl font-bold text-white truncate">
                           {courses.filter(c => c.status === 'draft').length}
                         </h3>
-                        <p className="text-slate-400 text-sm">Draft</p>
+                        <p className="text-slate-400 text-xs sm:text-sm truncate">Draft</p>
                       </div>
-                      <Users className="w-8 h-8 text-yellow-400" />
+                      <Users className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-400 shrink-0 ml-1" />
                     </div>
                   </div>
 
-                  <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                  <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-2xl font-bold text-white">
+                      <div className="min-w-0">
+                        <h3 className="text-xl sm:text-2xl font-bold text-white truncate">
                           {courses.reduce((sum, course) => sum + (course.students || 0), 0)}
                         </h3>
-                        <p className="text-slate-400 text-sm">My Students</p>
+                        <p className="text-slate-400 text-xs sm:text-sm truncate">My Students</p>
                       </div>
-                      <Users className="w-8 h-8 text-purple-400" />
+                      <Users className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400 shrink-0 ml-1" />
                     </div>
                   </div>
 
-                  <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                  <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 col-span-2 sm:col-span-1">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-2xl font-bold text-white">
+                      <div className="min-w-0">
+                        <h3 className="text-xl sm:text-2xl font-bold text-white truncate">
                           ₹{courses.reduce((sum, course) => sum + (course.students * course.price || 0), 0).toLocaleString('en-IN')}
                         </h3>
-                        <p className="text-slate-400 text-sm">Total Revenue</p>
+                        <p className="text-slate-400 text-xs sm:text-sm truncate">Total Revenue</p>
                       </div>
-                      <Users className="w-8 h-8 text-orange-400" />
+                      <Users className="w-6 h-6 sm:w-8 sm:h-8 text-orange-400 shrink-0 ml-1" />
                     </div>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                  <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-2xl font-bold text-white">{courses.filter(c => c.isOwnCourse || false).length}</h3>
-                        <p className="text-slate-400 text-sm">My Courses</p>
+                      <div className="min-w-0">
+                        <h3 className="text-xl sm:text-2xl font-bold text-white truncate">{courses.filter(c => c.isOwnCourse || false).length}</h3>
+                        <p className="text-slate-400 text-xs sm:text-sm truncate">My Courses</p>
                       </div>
-                      <BookOpen className="w-8 h-8 text-green-400" />
+                      <BookOpen className="w-6 h-6 sm:w-8 sm:h-8 text-green-400 shrink-0 ml-1" />
                     </div>
                   </div>
 
-                  <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                  <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-2xl font-bold text-white">{courses.filter(c => !c.isOwnCourse || false).length}</h3>
-                        <p className="text-slate-400 text-sm">Other Courses</p>
+                      <div className="min-w-0">
+                        <h3 className="text-xl sm:text-2xl font-bold text-white truncate">{courses.filter(c => !c.isOwnCourse || false).length}</h3>
+                        <p className="text-slate-400 text-xs sm:text-sm truncate">Other Courses</p>
                       </div>
-                      <Users className="w-8 h-8 text-yellow-400" />
+                      <Users className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-400 shrink-0 ml-1" />
                     </div>
                   </div>
 
-                  <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                  <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl sm:rounded-2xl p-3.5 sm:p-5">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-2xl font-bold text-white">{platformStats.totalStudents}</h3>
-                        <p className="text-slate-400 text-sm">Platform Students</p>
+                      <div className="min-w-0">
+                        <h3 className="text-xl sm:text-2xl font-bold text-white truncate">{platformStats.totalStudents}</h3>
+                        <p className="text-slate-400 text-xs sm:text-sm truncate">Platform Students</p>
                       </div>
-                      <Users className="w-8 h-8 text-purple-400" />
+                      <Users className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400 shrink-0 ml-1" />
                     </div>
                   </div>
 
-                  <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6">
+                  <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 col-span-2 sm:col-span-1">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-2xl font-bold text-white">{platformStats.totalEducators}</h3>
-                        <p className="text-slate-400 text-sm">Platform Educators</p>
+                      <div className="min-w-0">
+                        <h3 className="text-xl sm:text-2xl font-bold text-white truncate">{platformStats.totalEducators}</h3>
+                        <p className="text-slate-400 text-xs sm:text-sm truncate">Platform Educators</p>
                       </div>
-                      <Users className="w-8 h-8 text-orange-400" />
+                      <Users className="w-6 h-6 sm:w-8 sm:h-8 text-orange-400 shrink-0 ml-1" />
                     </div>
                   </div>
                 </>
@@ -596,19 +596,19 @@ const EducatorAllCourse = () => {
           initial="initial"
           animate="animate"
           transition={{ delay: 0.3 }}
-          className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-6 mb-8"
+          className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8"
         >
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex flex-wrap gap-2.5 sm:gap-3 items-center w-full lg:w-auto">
               {/* Search */}
-              <div className="relative">
+              <div className="relative w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                 <input
                   type="text"
                   placeholder="Search courses..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-full sm:w-64"
+                  className="pl-10 pr-4 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-full text-xs sm:text-sm"
                 />
               </div>
 
@@ -616,7 +616,7 @@ const EducatorAllCourse = () => {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-xs sm:text-sm"
               >
                 <option value="all">All Status</option>
                 <option value="published">Published</option>
@@ -628,7 +628,7 @@ const EducatorAllCourse = () => {
               <select
                 value={filterOwnership}
                 onChange={(e) => setFilterOwnership(e.target.value)}
-                className="px-4 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-xs sm:text-sm"
               >
                 <option value="all">All Courses</option>
                 <option value="mine">My Courses</option>
@@ -639,7 +639,7 @@ const EducatorAllCourse = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-xs sm:text-sm"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>

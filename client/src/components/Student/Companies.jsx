@@ -1,22 +1,22 @@
 export default function Companies() {
   return (
-    <section className="py-20 bg-gradient-to-b from-slate-950 to-[#0a1128]">
-      <div className="container mx-auto px-6">
+    <section className="py-16 sm:py-20 bg-gradient-to-b from-slate-950 to-[#0a1128]">
+      <div className="container mx-auto px-4 sm:px-6">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12 sm:mb-16">
           <div className="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600/20 to-blue-800/20 rounded-full border border-blue-500/30 mb-6">
             
           </div>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
             Powerful Features for{" "}
             <span className="text-blue-400">Modern Learning</span>
           </h2>
           
         </div>
 
-        <div className="h-9"></div>
+        <div className="h-4 sm:h-9"></div>
         {/* Main Content: Image Left, Features Right */}
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           {/* Left Side - Image */}
           <div className="relative order-2 lg:order-1">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-3xl blur-3xl transform rotate-3"></div>
@@ -33,7 +33,7 @@ export default function Companies() {
           </div>
 
           {/* Right Side - Features */}
-          <div className="space-y-10 order-1 lg:order-2 max-w-3xl mx-auto">
+          <div className="space-y-6 sm:space-y-10 order-1 lg:order-2 max-w-3xl mx-auto w-full">
             {/* Feature Card Component */}
             {[
               {
@@ -118,15 +118,16 @@ export default function Companies() {
             ].map((feature, index) => (
               <div
                 key={index}
-                className={`group p-6 md:p-8 rounded-2xl bg-gradient-to-br from-black/10 via-black/5 to-transparent ${feature.border} transition-all duration-300 hover:shadow-lg hover:scale-[1.02]`}
+                className={`group p-4 sm:p-6 md:p-8 rounded-2xl bg-gradient-to-br from-black/10 via-black/5 to-transparent ${feature.border} transition-all duration-300 hover:shadow-lg hover:scale-[1.01]`}
               >
-                <div className="flex items-start gap-5 md:gap-6">
+                <div className="flex items-start gap-4 sm:gap-6">
                   <div
-                    className={`flex-shrink-0 p-4 bg-gradient-to-br ${feature.colors} rounded-xl ${feature.shadow} transition-all duration-300`}
+                    className={`flex-shrink-0 p-3 sm:p-4 bg-gradient-to-br ${feature.colors} rounded-xl ${feature.shadow} transition-all duration-300`}
                   >
                     <svg
-                      width="32"
-                      height="32"
+                      width="28"
+                      height="28"
+                      className="sm:w-8 sm:h-8"
                       viewBox="0 0 28 28"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
@@ -134,11 +135,11 @@ export default function Companies() {
                       {feature.icon}
                     </svg>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg md:text-xl font-bold text-white mb-2 md:mb-3 group-hover:opacity-90">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base sm:text-xl font-bold text-white mb-1.5 sm:mb-2 group-hover:opacity-90">
                       {feature.title}
                     </h3>
-                    <p className="text-gray-400 text-sm md:text-base leading-relaxed">
+                    <p className="text-gray-400 text-xs sm:text-base leading-relaxed">
                       {feature.description}
                     </p>
                   </div>

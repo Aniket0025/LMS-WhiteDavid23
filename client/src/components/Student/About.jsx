@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   BookOpen, 
@@ -182,7 +183,7 @@ const About = () => {
       >
         <div className="max-w-6xl mx-auto text-center">
           <motion.h1 
-            className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6"
+            className="text-4xl sm:text-6xl lg:text-7xl font-bold mb-6"
             variants={fadeInUp}
             initial="initial"
             animate="animate"
@@ -268,19 +269,19 @@ const About = () => {
             Our Impact
           </motion.h2>
           
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             {stats.map((stat, index) => {
               const IconComponent = stat.icon;
               return (
                 <motion.div
                   key={stat.label}
-                  className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 text-center hover:border-slate-600/50 hover:bg-slate-800/70 transition-all duration-300"
+                  className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-4 sm:p-6 text-center hover:border-slate-600/50 hover:bg-slate-800/70 transition-all duration-300"
                   variants={fadeInUp}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <IconComponent className="w-8 h-8 text-blue-400 mx-auto mb-4" />
-                  <div className="text-3xl font-bold text-white mb-2">{stat.number}</div>
-                  <div className="text-slate-400">{stat.label}</div>
+                  <IconComponent className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400 mx-auto mb-3 sm:mb-4" />
+                  <div className="text-2xl sm:text-3xl font-bold text-white mb-1 sm:mb-2">{stat.number}</div>
+                  <div className="text-xs sm:text-sm text-slate-400">{stat.label}</div>
                 </motion.div>
               );
             })}
@@ -539,20 +540,15 @@ const About = () => {
           <p className="text-xl text-slate-300 mb-8">
             Join thousands of students who have transformed their careers with whitedavid23
           </p>
-          <motion.div 
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-            whileHover={{ scale: 1.02 }}
-          >
-            <motion.a
-              href="/course"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              to="/course"
+              className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             >
               <BookOpen className="w-5 h-5" />
               Explore Courses
-            </motion.a>
-          </motion.div>
+            </Link>
+          </div>
         </div>
       </motion.section>
 

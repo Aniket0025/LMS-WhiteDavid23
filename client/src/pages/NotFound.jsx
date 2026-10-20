@@ -30,7 +30,7 @@ const NotFound = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 flex items-center justify-center px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-16 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0">
         {/* Floating geometric shapes */}
@@ -74,7 +74,7 @@ const NotFound = () => {
           className="mb-8"
         >
           <motion.h1 
-            className="text-8xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 mb-4"
+            className="text-7xl sm:text-8xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 mb-4"
             animate={{ 
               backgroundPosition: ['0%', '100%'],
             }}
@@ -163,21 +163,21 @@ const NotFound = () => {
           </Link>
 
           <Link
-            to="/all-courses"
+            to="/course"
             className="group p-6 bg-slate-800/30 backdrop-blur-xl border border-slate-700/50 rounded-2xl hover:border-purple-500/50 hover:bg-purple-500/5 transition-all duration-300"
           >
             <BookOpen className="w-8 h-8 text-purple-400 mx-auto mb-3 group-hover:scale-110 transition-transform duration-200" />
             <h3 className="text-white font-medium mb-2">Start Learning</h3>
-            <p className="text-slate-400 text-sm">Login to your account</p>
+            <p className="text-slate-400 text-sm">Explore all available courses</p>
           </Link>
 
           <Link
-            to="/signup"
+            to="/login"
             className="group p-6 bg-slate-800/30 backdrop-blur-xl border border-slate-700/50 rounded-2xl hover:border-pink-500/50 hover:bg-pink-500/5 transition-all duration-300"
           >
             <Star className="w-8 h-8 text-pink-400 mx-auto mb-3 group-hover:scale-110 transition-transform duration-200" />
             <h3 className="text-white font-medium mb-2">Get Started</h3>
-            <p className="text-slate-400 text-sm">Create your account</p>
+            <p className="text-slate-400 text-sm">Sign in to your account</p>
           </Link>
         </motion.div>
 

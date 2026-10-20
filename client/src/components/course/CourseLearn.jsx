@@ -48,7 +48,6 @@ const CourseLearn = () => {
   const { id: courseId } = useParams();
   const navigate = useNavigate();
   const { user, isLoggedIn, loading: authLoading } = useAuth();
-  const videoRef = useRef(null);
   const containerRef = useRef(null);
 
   // Build the server-side proxy URL for a document lecture
@@ -59,13 +58,27 @@ const CourseLearn = () => {
     return `${backendUrl}/api/lecture/document/${lectureId}?token=${encodeURIComponent(token || '')}`;
   };
 
-  // Convert Google Drive URL to preview link
-  const getGoogleDriveEmbedUrl = (url) => {
+  // Convert MEGA Drive URL to embed player link
+  const getMegaEmbedUrl = (url) => {
     if (!url) return null;
-    const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-    if (match) return `https://drive.google.com/file/d/${match[1]}/preview`;
-    const idMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    if (idMatch) return `https://drive.google.com/file/d/${idMatch[1]}/preview`;
+    // Format 1: Already an embed URL: https://mega.nz/embed/... or mega.io/embed/...
+    if (url.includes('mega.nz/embed/') || url.includes('mega.io/embed/')) {
+      return url;
+    }
+    // Format 2: Standard file share link: https://mega.nz/file/<id>#<key>
+    const match = url.match(/^https?:\/\/(?:www\.)?mega\.(?:nz|io)\/file\/([a-zA-Z0-9_-]+#.+)$/);
+    if (match) {
+      return `https://mega.nz/embed/${match[1]}`;
+    }
+    // Format 3: Legacy link format: https://mega.nz/#!<id>!<key>
+    const legacyMatch = url.match(/^https?:\/\/(?:www\.)?mega\.(?:nz|io)\/#!(?:file\/)?([a-zA-Z0-9_-]+)!([a-zA-Z0-9_-]+)/);
+    if (legacyMatch) {
+      return `https://mega.nz/embed/${legacyMatch[1]}#${legacyMatch[2]}`;
+    }
+    // Generic fallback for any other mega link containing /file/
+    if (url.includes('mega.nz/file/') || url.includes('mega.io/file/')) {
+      return url.replace('/file/', '/embed/');
+    }
     return null;
   };
 
@@ -77,28 +90,31 @@ const CourseLearn = () => {
     return null;
   };
 
-  // Detect if video should be iframe embed
+  // Detect if video should be iframe embed (MEGA Drive, YouTube, etc.)
   const isEmbedVideo = (url) => {
     if (!url) return false;
-    return url.includes('drive.google.com') || url.includes('youtube.com') || url.includes('youtu.be');
+    return (
+      url.includes('mega.nz') ||
+      url.includes('mega.io') ||
+      url.includes('youtube.com') ||
+      url.includes('youtu.be')
+    );
   };
 
   const getVideoEmbedSrc = (url) => {
     if (!url) return '';
     const yt = getYouTubeEmbedUrl(url);
     if (yt) return yt;
-    const gd = getGoogleDriveEmbedUrl(url);
-    if (gd) return gd;
+    const mega = getMegaEmbedUrl(url);
+    if (mega) return mega;
     return url;
   };
 
   const getViewerSrc = (url, mode, lectureId) => {
     if (!url) return '';
     let srcUrl = url;
-    if (mode === 'direct' && lectureId) {
+    if (lectureId) {
       srcUrl = getDocumentProxyUrl(lectureId);
-    } else if (mode === 'google') {
-      srcUrl = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
     }
     // Append parameters to hide toolbar and auto-fit PDF page width (view=FitH) for big mobile display
     return srcUrl.includes('#') ? srcUrl : `${srcUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`;

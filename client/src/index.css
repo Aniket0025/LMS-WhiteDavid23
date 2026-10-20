@@ -111,6 +111,8 @@ html.lenis body {
     margin: 0;
     padding: 0;
     width: 100%;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
   }
 
   #root {
@@ -127,6 +129,30 @@ html.lenis body {
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent iOS automatic zoom on form input focus by ensuring at least 16px */
+  @media (max-width: 768px) {
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+  }
+
+  /* Hide scrollbars for clean mobile horizontal carousels/tab bars */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Touch action optimization for smooth interactive buttons */
+  button, a, input, select, textarea {
+    touch-action: manipulation;
   }
 
   img, video, iframe, svg, canvas {

@@ -14,7 +14,7 @@ A full-stack Learning Management System (LMS) built with Node.js, Express, Mongo
 ## Tech Stack
 - **Backend:** Node.js, Express, MongoDB, Mongoose
 - **Frontend:** React (see `/client`)
-- **Media:** Cloudinary (video hosting)
+- **Media & Cloud Storage:** MEGA Drive (Mega.nz cloud storage) / Cloudinary
 - **Auth:** JWT, bcrypt
 
 ## Getting Started
@@ -33,10 +33,18 @@ npm install
 
 ### 3. Set up environment variables
 Create a `.env` file in `/server`:
-```
+```env
 MONGODB_URI=your_mongodb_uri
-PORT=3000
+PORT=5000
 JWT_TOKEN=your_jwt_secret
+
+# MEGA Drive Cloud Storage (Primary)
+MEGA_EMAIL=your_mega_email@example.com
+MEGA_PASSWORD=your_mega_password
+MEGA_API_KEY=your_optional_mega_api_key
+MEGA_FOLDER_NAME=LMS-Drive-Storage
+
+# Cloudinary (Fallback)
 CLOUDINARY_NAME=your_cloudinary_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_SECRET_KEY=your_cloudinary_secret

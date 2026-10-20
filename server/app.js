@@ -4,6 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import connectDB from './config/mongodb.js';
 import { connectCloudinary } from './config/cloudnary.js';
+import { connectMega } from './config/mega.js';
 import authRouter from './routes/auth.routes.js';
 import userRouter from './routes/user.routes.js';
 import courseRouter from './routes/course.routes.js';
@@ -82,6 +83,7 @@ app.use((req, res, next) => {
 
 connectDB();
 connectCloudinary();
+connectMega();
 
 app.get('/', (req, res) => {
     res.send("Hare Krishna");

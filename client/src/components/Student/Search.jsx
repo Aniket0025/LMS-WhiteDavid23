@@ -141,30 +141,30 @@ const Search = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 pt-24 pb-20 text-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 pt-20 sm:pt-24 pb-20 text-slate-100">
       {/* Dynamic Glow Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-32 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 max-w-7xl">
+      <div className="container mx-auto px-3 sm:px-6 lg:px-8 relative z-10 max-w-7xl">
         
         {/* Header Hero */}
         <motion.div
           variants={fadeInUp}
           initial="initial"
           animate="animate"
-          className="text-center mb-10"
+          className="text-center mb-6 sm:mb-10"
         >
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-4">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold mb-3 sm:mb-4">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Explore Course Library</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight mb-4">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight mb-3 sm:mb-4">
             Find Your Next <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">Learning Goal</span>
           </h1>
-          <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
+          <p className="text-slate-400 text-xs sm:text-base max-w-2xl mx-auto">
             Discover thousands of video courses designed by expert instructors to build real-world skills
           </p>
         </motion.div>
@@ -175,24 +175,24 @@ const Search = () => {
           initial="initial"
           animate="animate"
           transition={{ delay: 0.1 }}
-          className="max-w-3xl mx-auto mb-8"
+          className="max-w-3xl mx-auto mb-6 sm:mb-8"
         >
           <form onSubmit={handleSearchSubmit} className="relative">
-            <div className="flex items-center bg-slate-900/80 backdrop-blur-2xl border border-slate-700/80 rounded-2xl p-2 shadow-2xl focus-within:border-blue-500/80 transition-all duration-300">
+            <div className="flex items-center bg-slate-900/80 backdrop-blur-2xl border border-slate-700/80 rounded-xl sm:rounded-2xl p-1.5 sm:p-2 shadow-2xl focus-within:border-blue-500/80 transition-all duration-300">
               <div className="relative flex-1 flex items-center">
-                <SearchIcon className="absolute left-4 text-slate-400 w-5 h-5" />
+                <SearchIcon className="absolute left-3 sm:left-4 text-slate-400 w-4 h-4 sm:w-5 sm:h-5" />
                 <input
                   type="text"
-                  placeholder="Search courses, skills, technologies (e.g. React, Python...)"
+                  placeholder="Search courses, skills (e.g. React, Python...)"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-10 py-3.5 bg-transparent text-white placeholder-slate-400 text-sm sm:text-base focus:outline-none"
+                  className="w-full pl-9 sm:pl-12 pr-8 sm:pr-10 py-2.5 sm:py-3.5 bg-transparent text-white placeholder-slate-400 text-xs sm:text-base focus:outline-none"
                 />
                 {searchTerm && (
                   <button
                     type="button"
                     onClick={handleClearSearch}
-                    className="absolute right-3 p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+                    className="absolute right-2 sm:right-3 p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -201,7 +201,7 @@ const Search = () => {
               
               <button
                 type="submit"
-                className="px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-500/20 transition-all transform hover:scale-[1.02] shrink-0"
+                className="px-4 sm:px-6 py-2.5 sm:py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm rounded-lg sm:rounded-xl shadow-lg shadow-blue-500/20 transition-all transform hover:scale-[1.02] shrink-0"
               >
                 Search
               </button>

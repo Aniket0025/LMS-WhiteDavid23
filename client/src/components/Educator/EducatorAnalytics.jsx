@@ -307,7 +307,7 @@ const EducatorAnalytics = () => {
           initial="initial"
           animate="animate"
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-8"
         >
           {/* Card 1: Total Revenue */}
           <div className="group bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 hover:border-emerald-500/40 rounded-2xl p-5 hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300">
@@ -425,8 +425,8 @@ const EducatorAnalytics = () => {
               </div>
 
               {/* Chart Visualizer */}
-              <div className="h-64 pt-4">
-                <div className="w-full h-full flex items-end justify-between gap-2 border-b border-slate-700/50 pb-2">
+              <div className="h-64 pt-4 overflow-x-auto scrollbar-none">
+                <div className="w-full min-w-[280px] h-full flex items-end justify-between gap-1.5 sm:gap-2 border-b border-slate-700/50 pb-2">
                   {analyticsData.chartData.map((d, index) => {
                     const val = selectedMetric === 'revenue' ? (d.revenue || 0) : (d.students || 0);
                     const heightPercent = maxChartValue > 0 ? Math.max((val / maxChartValue) * 100, 6) : 6;

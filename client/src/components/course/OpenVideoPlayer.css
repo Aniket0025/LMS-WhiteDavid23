@@ -1,75 +1,241 @@
-/* OpenVideoPlayer.css - Modern Responsive Video Player Styling */
+/* ============================================
+   OpenVideoPlayer.css
+   Fluid Player Integration + Custom Controls
+   ============================================ */
 
-/* Strict Content & Anti-Download Protection */
-.open-player-wrapper {
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
-  -webkit-touch-callout: none !important;
+/* ────────────────────────────────────────────
+   1. OUTER WRAPPER
+   ──────────────────────────────────────────── */
+.fp-outer-wrapper {
   position: relative;
   width: 100%;
-}
-
-.open-player-wrapper video {
-  pointer-events: auto;
+  background: #020617;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(30, 41, 59, 0.6);
   user-select: none !important;
   -webkit-user-select: none !important;
   -webkit-touch-callout: none !important;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Hide native WebKit download buttons */
-video::-internal-media-controls-download-button {
-  display: none !important;
-}
-video::-webkit-media-controls-enclosure {
-  overflow: hidden !important;
+/* ────────────────────────────────────────────
+   2. VIDEO AREA — holds the Fluid Player
+   ──────────────────────────────────────────── */
+.fp-video-area {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  overflow: hidden;
 }
 
-/* Video Canvas Rotation Transforms */
-.video-transform-box {
+/* Transform layer — zoom/rotation sits on top of Fluid Player */
+.fp-transform-layer {
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: center center;
 }
 
-.video-transform-box.rotate-0 {
-  transform: rotate(0deg);
+/* Fluid Player Container — this holds the <video> that Fluid Player wraps */
+.fp-fluid-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
 
-.video-transform-box.rotate-90 {
-  transform: rotate(90deg) scale(0.72);
+/* Make the Fluid Player wrapper fill the container completely */
+.fp-fluid-container .fluid_video_wrapper {
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  background-color: #000 !important;
 }
 
-.video-transform-box.rotate-180 {
-  transform: rotate(180deg);
+/* Make the video element fill the wrapper */
+.fp-fluid-container .fluid_video_wrapper video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
 }
 
-.video-transform-box.rotate-270 {
-  transform: rotate(270deg) scale(0.72);
+/* Hide any native browser download buttons */
+.fp-fluid-container video::-internal-media-controls-download-button {
+  display: none !important;
+}
+.fp-fluid-container video::-webkit-media-controls-enclosure {
+  overflow: hidden !important;
+}
+.fp-fluid-container video::-webkit-media-controls {
+  display: none !important;
 }
 
-@media (max-width: 768px) {
-  .video-transform-box.rotate-90,
-  .video-transform-box.rotate-270 {
-    transform: rotate(90deg) scale(1.35);
-  }
+/* ────────────────────────────────────────────
+   3. FLUID PLAYER THEME — Dark Slate/Blue
+   ──────────────────────────────────────────── */
+
+/* ── Control Bar Background ── */
+.fp-fluid-container .fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container {
+  background: linear-gradient(
+    to top,
+    rgba(2, 6, 23, 0.92) 0%,
+    rgba(2, 6, 23, 0.7) 50%,
+    transparent 100%
+  ) !important;
+  padding-bottom: 4px !important;
 }
 
-/* Embed Iframe Top Bar Clip Wrapper (Hides Google Drive preview top bar) */
-.embed-iframe-clip-wrapper {
+/* ── Progress Bar Track ── */
+.fp-fluid-container .fluid_video_wrapper .fluid_controls_container .fluid_controls_progress_container .fluid_controls_progress {
+  background: rgba(51, 65, 85, 0.5) !important;
+}
+
+/* ── Progress Bar Buffered ── */
+.fp-fluid-container .fluid_video_wrapper .fluid_controls_container .fluid_controls_progress_container .fluid_controls_buffered {
+  background: rgba(71, 85, 105, 0.4) !important;
+}
+
+/* ── Progress Bar Fill (current progress) ── */
+.fp-fluid-container .fluid_video_wrapper .fluid_controls_container .fluid_controls_progress_container .fluid_controls_progress .fluid_controls_currentprogress {
+  background: linear-gradient(90deg, #3b82f6, #6366f1) !important;
+}
+
+/* ── Progress Bar Scrubber/Knob ── */
+.fp-fluid-container .fluid_video_wrapper .fluid_controls_container .fluid_controls_progress_container .fluid_controls_progress .fluid_controls_currentprogress .fluid_controls_currentpos {
+  background: #3b82f6 !important;
+  border: 2px solid #fff !important;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.6) !important;
+}
+
+/* ── Control Buttons ── */
+.fp-fluid-container .fluid_video_wrapper .fluid_controls_container .fluid_button {
+  transition: opacity 0.15s ease, transform 0.15s ease !important;
+}
+
+.fp-fluid-container .fluid_video_wrapper .fluid_controls_container .fluid_button:hover {
+  opacity: 1 !important;
+  transform: scale(1.12);
+}
+
+/* ── Time Display ── */
+.fp-fluid-container .fluid_video_wrapper .fluid_controls_container .fluid_fluid_control_duration {
+  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace !important;
+  font-size: 11px !important;
+  color: #94a3b8 !important;
+}
+
+/* ── Volume Bar ── */
+.fp-fluid-container .fluid_video_wrapper .fluid_controls_container .fluid_control_volume .fluid_control_volume_container .fluid_control_currentvolume {
+  background: #3b82f6 !important;
+}
+
+/* ── Speed / Playback Rate Menu ── */
+.fp-fluid-container .fluid_video_wrapper .fluid_fp_menu {
+  background: rgba(15, 23, 42, 0.96) !important;
+  border: 1px solid rgba(51, 65, 85, 0.7) !important;
+  border-radius: 10px !important;
+  backdrop-filter: blur(16px) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+  overflow: hidden !important;
+}
+
+.fp-fluid-container .fluid_video_wrapper .fluid_fp_menu ul li {
+  color: #cbd5e1 !important;
+  transition: background 0.12s ease, color 0.12s ease !important;
+}
+
+.fp-fluid-container .fluid_video_wrapper .fluid_fp_menu ul li:hover {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #60a5fa !important;
+}
+
+.fp-fluid-container .fluid_video_wrapper .fluid_fp_menu ul li.active,
+.fp-fluid-container .fluid_video_wrapper .fluid_fp_menu ul li[aria-checked="true"] {
+  background: rgba(59, 130, 246, 0.2) !important;
+  color: #3b82f6 !important;
+  font-weight: 700 !important;
+}
+
+/* ── Initial Play Button (big center play) ── */
+.fp-fluid-container .fluid_video_wrapper .fluid_initial_play {
+  background: rgba(59, 130, 246, 0.9) !important;
+  border: 3px solid rgba(255, 255, 255, 0.25) !important;
+  border-radius: 50% !important;
+  box-shadow:
+    0 0 40px rgba(59, 130, 246, 0.4),
+    0 4px 20px rgba(0, 0, 0, 0.3) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.fp-fluid-container .fluid_video_wrapper .fluid_initial_play:hover {
+  transform: scale(1.08) !important;
+  box-shadow:
+    0 0 60px rgba(59, 130, 246, 0.6),
+    0 8px 30px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* ── Context Menu ── */
+.fp-fluid-container .fluid_video_wrapper .fluid_context_menu {
+  background: rgba(15, 23, 42, 0.96) !important;
+  border: 1px solid rgba(51, 65, 85, 0.6) !important;
+  border-radius: 10px !important;
+  backdrop-filter: blur(16px) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5) !important;
+  padding: 4px 0 !important;
+}
+
+.fp-fluid-container .fluid_video_wrapper .fluid_context_menu li {
+  color: #cbd5e1 !important;
+  font-size: 12px !important;
+}
+
+.fp-fluid-container .fluid_video_wrapper .fluid_context_menu li:hover {
+  background: rgba(59, 130, 246, 0.12) !important;
+  color: #3b82f6 !important;
+}
+
+/* ── Mini Player ── */
+.fluid_video_wrapper.fluid_player_layout_mini {
+  border-radius: 12px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(59, 130, 246, 0.2) !important;
+  overflow: hidden !important;
+}
+
+/* ── Theater Mode ── */
+.fp-fluid-container .fluid_video_wrapper.fluid_theatre_mode {
+  border-radius: 0 !important;
+}
+
+/* ── Poster Image ── */
+.fp-fluid-container .fluid_video_wrapper .fluid_pseudo_poster {
+  background-size: cover !important;
+  background-position: center center !important;
+}
+
+/* ── Timeline Preview / Thumbnail ── */
+.fp-fluid-container .fluid_video_wrapper .fluid_timeline_preview_container {
+  border: 2px solid rgba(59, 130, 246, 0.5) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ────────────────────────────────────────────
+   4. EMBED IFRAME (YouTube / MEGA Drive)
+   ──────────────────────────────────────────── */
+.fp-embed-wrapper {
   position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #000000;
+  background: #000;
 }
 
-.embed-clipped-iframe {
+.fp-embed-iframe {
   position: absolute;
   top: -46px;
   left: 0;
@@ -78,12 +244,14 @@ video::-webkit-media-controls-enclosure {
   border: 0;
 }
 
-/* Security Watermark Badge */
-.watermark-badge {
+/* ────────────────────────────────────────────
+   5. WATERMARK BADGE
+   ──────────────────────────────────────────── */
+.fp-watermark {
   position: absolute;
   top: 10px;
   left: 10px;
-  z-index: 25;
+  z-index: 50;
   pointer-events: none;
   display: flex;
   align-items: center;
@@ -91,7 +259,7 @@ video::-webkit-media-controls-enclosure {
   padding: 3px 10px;
   background: rgba(15, 23, 42, 0.85);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 20px;
   color: rgba(241, 245, 249, 0.9);
   font-size: 10px;
@@ -100,29 +268,220 @@ video::-webkit-media-controls-enclosure {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-/* Always Visible Control Toolbar */
-.always-visible-toolbar {
-  position: relative;
+/* ────────────────────────────────────────────
+   6. EXTRA TOOLBAR (Zoom + Rotate)
+   ──────────────────────────────────────────── */
+.fp-extra-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
+  padding: 8px 12px;
+  background: #0f172a;
+  border-top: 1px solid rgba(30, 41, 59, 0.7);
   box-sizing: border-box;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.always-visible-toolbar input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #3b82f6;
-  border: 2px solid #ffffff;
-  cursor: pointer;
+.fp-extra-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.always-visible-toolbar input[type="range"]::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #3b82f6;
-  border: 2px solid #ffffff;
+.fp-extra-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.fp-extra-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Zoom Group ── */
+.fp-zoom-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  border-radius: 10px;
+  padding: 2px;
+}
+
+.fp-zoom-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border: none;
+  background: transparent;
+  color: #64748b;
   cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.fp-zoom-btn:hover:not(:disabled) {
+  background: rgba(51, 65, 85, 0.8);
+  color: #3b82f6;
+}
+
+.fp-zoom-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.fp-zoom-value {
+  padding: 3px 6px;
+  border: none;
+  background: transparent;
+  color: #e2e8f0;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  min-width: 36px;
+  text-align: center;
+  transition: color 0.15s;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.fp-zoom-value:hover {
+  color: #3b82f6;
+}
+
+/* ── Rotate Button ── */
+.fp-rotate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  background: rgba(30, 41, 59, 0.5);
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.fp-rotate-btn:hover {
+  background: rgba(51, 65, 85, 0.8);
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.fp-rotate-btn.fp-active {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+}
+
+/* ── Fullscreen Button (embed only) ── */
+.fp-fullscreen-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: #3b82f6;
+  border: 1px solid rgba(96, 165, 250, 0.5);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.12s;
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+}
+
+.fp-fullscreen-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* ────────────────────────────────────────────
+   7. RESPONSIVE
+   ──────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .fp-extra-bar {
+    padding: 6px 8px;
+    gap: 4px;
+  }
+
+  .fp-extra-label {
+    font-size: 10px;
+  }
+
+  .fp-zoom-btn {
+    padding: 4px;
+  }
+
+  .fp-zoom-value {
+    font-size: 10px;
+    min-width: 30px;
+  }
+
+  .fp-rotate-btn {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .fp-fullscreen-btn {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .fp-watermark {
+    font-size: 8px;
+    padding: 2px 7px;
+    top: 6px;
+    left: 6px;
+  }
+
+  .fp-fs-text {
+    display: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .fp-extra-left {
+    display: none;
+  }
+
+  .fp-extra-right {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .fp-rotate-btn span {
+    display: none;
+  }
+}
+
+/* ────────────────────────────────────────────
+   8. FULLSCREEN MODE
+   ──────────────────────────────────────────── */
+.fp-outer-wrapper:fullscreen,
+.fp-outer-wrapper:-webkit-full-screen {
+  border-radius: 0;
+  background: #000;
+}
+
+.fp-outer-wrapper:fullscreen .fp-video-area,
+.fp-outer-wrapper:-webkit-full-screen .fp-video-area {
+  height: calc(100vh - 44px);
+  aspect-ratio: unset;
+}
+
+.fp-outer-wrapper:fullscreen .fp-extra-bar,
+.fp-outer-wrapper:-webkit-full-screen .fp-extra-bar {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(8px);
 }

@@ -182,7 +182,7 @@ const OTPVerification = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 flex items-center justify-center pt-20 sm:pt-24 pb-12 px-4">
       {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 -left-32 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl animate-pulse"></div>
@@ -196,17 +196,17 @@ const OTPVerification = () => {
           variants={fadeInUp}
           initial="initial"
           animate="animate"
-          className="text-center mb-8"
+          className="text-center mb-6 sm:mb-8"
         >
-          <div className="flex items-center justify-center mb-6">
-            <div className="p-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl">
-              <Mail className="w-8 h-8 text-white" />
+          <div className="flex items-center justify-center mb-4 sm:mb-6">
+            <div className="p-3 sm:p-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl">
+              <Mail className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-3">Verify Your Email</h1>
-          <p className="text-slate-300 text-base">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 sm:mb-3">Verify Your Email</h1>
+          <p className="text-slate-300 text-xs sm:text-base">
             We've sent a 6-digit code to<br />
-            <span className="text-blue-400 font-medium">{email}</span>
+            <span className="text-blue-400 font-medium break-all">{email}</span>
           </p>
         </motion.div>
 
@@ -216,15 +216,15 @@ const OTPVerification = () => {
           initial="initial"
           animate="animate"
           transition={{ delay: 0.2 }}
-          className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-8 shadow-2xl"
+          className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-2xl"
         >
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* OTP Input */}
-            <div className="space-y-4">
-              <label className="block text-sm font-medium text-slate-300 text-center">
+            <div className="space-y-3 sm:space-y-4">
+              <label className="block text-xs sm:text-sm font-medium text-slate-300 text-center">
                 Enter Verification Code
               </label>
-              <div className="flex justify-center space-x-3" onPaste={handlePaste}>
+              <div className="flex justify-center gap-1.5 sm:gap-3" onPaste={handlePaste}>
                 {otp.map((digit, index) => (
                   <input
                     key={index}
@@ -235,7 +235,7 @@ const OTPVerification = () => {
                     value={digit}
                     onChange={(e) => handleOtpChange(index, e.target.value.replace(/\D/g, ''))}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className={`w-12 h-14 text-center text-xl font-bold bg-slate-900/50 border rounded-xl text-white focus:outline-none focus:ring-2 transition-all duration-200 ${
+                    className={`w-9 h-11 sm:w-12 sm:h-14 text-center text-lg sm:text-xl font-bold bg-slate-900/50 border rounded-lg sm:rounded-xl text-white focus:outline-none focus:ring-2 transition-all duration-200 ${
                       error 
                         ? 'border-red-500 focus:ring-red-500/20' 
                         : 'border-slate-600 focus:border-blue-500 focus:ring-blue-500/20'
