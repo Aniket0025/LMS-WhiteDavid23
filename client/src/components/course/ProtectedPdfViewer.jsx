@@ -67,14 +67,22 @@ const ProtectedPdfViewer = ({
       if (['INPUT', 'TEXTAREA'].includes(e.target?.tagName)) {
         return;
       }
-      if (e.key === 'ArrowLeft') {
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
         goToPrevPage();
-      } else if (e.key === 'ArrowRight') {
+      } else if (e.key === 'ArrowRight' || e.key === 'PageDown') {
         goToNextPage();
       } else if (e.key === 'Home') {
         jumpToPage(1);
       } else if (e.key === 'End' && numPages) {
         jumpToPage(numPages);
+      } else if (e.key === 'j' || e.key === 'J') {
+        e.preventDefault();
+        setModalPageInput(pageNum);
+        setShowJumpModal(true);
+      } else if (e.key === '+' || e.key === '=') {
+        handleZoomIn();
+      } else if (e.key === '-') {
+        handleZoomOut();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -286,6 +294,26 @@ const ProtectedPdfViewer = ({
     }
   };
 
+  const handleFitWidth = () => {
+    if (!containerRef.current || !pdfDoc) return;
+    pdfDoc.getPage(pageNum).then((page) => {
+      const viewport = page.getViewport({ scale: 1.0, rotation });
+      const containerWidth = containerRef.current.clientWidth - 48;
+      const fitScale = Math.max(0.4, Math.min(3.0, containerWidth / viewport.width));
+      setScale(parseFloat(fitScale.toFixed(2)));
+    }).catch(() => {});
+  };
+
+  const handleFitPage = () => {
+    if (!containerRef.current || !pdfDoc) return;
+    pdfDoc.getPage(pageNum).then((page) => {
+      const viewport = page.getViewport({ scale: 1.0, rotation });
+      const containerHeight = (containerRef.current.clientHeight || 600) - 130;
+      const fitScale = Math.max(0.4, Math.min(3.0, containerHeight / viewport.height));
+      setScale(parseFloat(fitScale.toFixed(2)));
+    }).catch(() => {});
+  };
+
   const handleRotate = () => {
     setRotation((prev) => (prev + 90) % 360);
   };
@@ -325,7 +353,7 @@ const ProtectedPdfViewer = ({
             onClick={goToPrevPage}
             disabled={pageNum <= 1 || loading}
             className="pdf-btn"
-            title="Previous Page (Left Arrow)"
+            title="Previous Page (Left Arrow / Page Up)"
             aria-label="Previous Page"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -335,6 +363,7 @@ const ProtectedPdfViewer = ({
             onSubmit={handlePageFormSubmit}
             className="pdf-page-form"
           >
+            <span className="text-[11px] text-slate-400 font-medium hidden sm:inline mr-1">Page</span>
             <input
               ref={pageInputRef}
               type="number"
@@ -380,7 +409,7 @@ const ProtectedPdfViewer = ({
             onClick={goToNextPage}
             disabled={pageNum >= numPages || loading}
             className="pdf-btn"
-            title="Next Page (Right Arrow)"
+            title="Next Page (Right Arrow / Page Down)"
             aria-label="Next Page"
           >
             <ChevronRight className="w-4 h-4" />
@@ -389,12 +418,43 @@ const ProtectedPdfViewer = ({
 
         {/* Right: Zoom & Orientation Controls */}
         <div className="pdf-toolbar-right">
+          {/* Desktop Direct Jump Button */}
+          <button
+            onClick={() => {
+              setModalPageInput(pageNum);
+              setShowJumpModal(true);
+            }}
+            className="pdf-btn hidden sm:inline-flex items-center gap-1.5 px-2.5 text-xs font-semibold"
+            title="Jump to Page (Keyboard: J)"
+          >
+            <Hash className="w-3.5 h-3.5 text-blue-400" />
+            <span>Jump</span>
+          </button>
+
+          {/* Desktop Fit Width / Fit Page Quick Buttons */}
+          <div className="hidden lg:flex items-center space-x-1">
+            <button
+              onClick={handleFitWidth}
+              className="pdf-btn text-[11px] font-medium px-2"
+              title="Fit to Width"
+            >
+              Fit Width
+            </button>
+            <button
+              onClick={handleFitPage}
+              className="pdf-btn text-[11px] font-medium px-2"
+              title="Fit to Page"
+            >
+              Fit Page
+            </button>
+          </div>
+
           <div className="pdf-zoom-group">
             <button
               onClick={handleZoomOut}
               disabled={scale <= 0.4 || loading}
               className="pdf-btn"
-              title="Zoom Out"
+              title="Zoom Out (-)"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
@@ -402,7 +462,7 @@ const ProtectedPdfViewer = ({
             <button
               onClick={handleResetZoom}
               className="pdf-zoom-label"
-              title="Fit to Width / Reset Zoom"
+              title="Reset Zoom (Fit Width)"
             >
               {Math.round(scale * 100)}%
             </button>
@@ -411,7 +471,7 @@ const ProtectedPdfViewer = ({
               onClick={handleZoomIn}
               disabled={scale >= 3.0 || loading}
               className="pdf-btn"
-              title="Zoom In"
+              title="Zoom In (+)"
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>

@@ -343,6 +343,35 @@
   flex-shrink: 0;
 }
 
+/* Desktop Enhancements */
+@media (min-width: 1024px) {
+  .protected-pdf-container {
+    height: 76vh;
+    min-height: 640px;
+    max-height: 860px;
+  }
+
+  .pdf-toolbar {
+    padding: 10px 16px;
+    gap: 12px;
+  }
+
+  .pdf-canvas-wrapper {
+    min-height: 560px;
+    padding: 24px 20px;
+  }
+
+  .pdf-page-input {
+    width: 44px;
+    height: 26px;
+    font-size: 12px;
+  }
+
+  .pdf-page-slash-total {
+    font-size: 12px;
+  }
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 640px) {
   .protected-pdf-container {
