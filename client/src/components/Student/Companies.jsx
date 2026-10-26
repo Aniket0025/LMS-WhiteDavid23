@@ -38,14 +38,27 @@ export default function Companies() {
     return currentTime >= ch.time ? idx : acc;
   }, 0);
 
+  // Lazy video autoplay only when scrolled into view to save bandwidth and CPU
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch(() => {
-        setIsPlaying(false);
-      });
-    }
+    const video = videoRef.current;
+    if (!video) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+          } else {
+            video.pause();
+            setIsPlaying(false);
+          }
+        });
+      },
+      { threshold: 0.25 }
+    );
+
+    observer.observe(video);
+    return () => observer.disconnect();
   }, []);
 
   const togglePlay = () => {
@@ -243,14 +256,14 @@ export default function Companies() {
                 className="relative aspect-video rounded-xl bg-slate-950 border border-slate-800 flex flex-col justify-between mb-3.5 sm:mb-4 overflow-hidden group select-none cursor-pointer shadow-inner"
                 onClick={togglePlay}
               >
-                {/* HTML5 Video Element */}
+                {/* HTML5 Video Element with optimized metadata preloading */}
                 <video
                   ref={videoRef}
                   className="absolute inset-0 w-full h-full object-cover"
                   playsInline
+                  preload="metadata"
                   muted={isMuted}
                   loop
-                  autoPlay
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedMetadata={handleLoadedMetadata}
                   onPlay={() => setIsPlaying(true)}

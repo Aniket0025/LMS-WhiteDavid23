@@ -258,7 +258,7 @@ const Hero = () => {
 
   return (
     <motion.div 
-      className="relative min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-950 via-[#060c1d] to-slate-950 overflow-hidden flex items-center justify-center px-4 sm:px-6 lg:px-8 py-10 sm:py-14 lg:py-16"
+      className="relative min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-950 via-[#060c1d] to-slate-950 overflow-hidden flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 lg:pt-32 pb-14 sm:pb-20"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
@@ -266,14 +266,20 @@ const Hero = () => {
       {/* Main Hero Section */}
       <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-12 max-w-7xl w-full items-center z-10">
         <motion.div 
-          className="lg:col-span-7 space-y-6 sm:space-y-7 text-center lg:text-left order-2 lg:order-1"
+          className="lg:col-span-7 space-y-6 sm:space-y-7 text-center lg:text-left order-1 lg:order-1"
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.8 }}
         >
+          {/* Top Pill Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-400 text-xs font-semibold shadow-sm mx-auto lg:mx-0">
+            <Sparkles className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
+            <span>Production-Grade Engineering Masterclasses</span>
+          </div>
+
           {/* Main Headline with Zero-Jank Fixed-Height Typewriter (Responsive for all screen sizes) */}
           <motion.h1 
-            className="text-2xl sm:text-4xl md:text-5xl lg:text-[40px] xl:text-[46px] 2xl:text-5xl font-black tracking-tight leading-[1.15]"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-[42px] xl:text-[46px] 2xl:text-5xl font-black tracking-tight leading-[1.15]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.8 }}
@@ -281,8 +287,8 @@ const Hero = () => {
             <span className="text-white block mb-1.5 sm:mb-2 font-black">
               Master New Skills in
             </span>
-            <div className="h-[1.35em] flex items-center overflow-hidden justify-center lg:justify-start">
-              <span className="text-[20px] sm:text-3xl md:text-4xl lg:text-[38px] xl:text-[42px] 2xl:text-[46px] bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent whitespace-nowrap inline-flex items-center">
+            <div className="h-[1.4em] flex items-center overflow-hidden justify-center lg:justify-start">
+              <span className="text-[21px] sm:text-3xl md:text-4xl lg:text-[38px] xl:text-[42px] 2xl:text-[46px] bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent whitespace-nowrap inline-flex items-center font-black">
                 {typewriterDisplay}
                 <span className="inline-block w-[2.5px] sm:w-[3px] h-[0.85em] bg-cyan-400 ml-1.5 rounded-full animate-pulse shrink-0" />
               </span>
@@ -424,7 +430,7 @@ const Hero = () => {
         {/* Hero Visual - Interactive Masterclass Spotlight (Visible on all devices!) */}
         {featuredCourses.length > 0 && (
           <motion.div 
-            className="lg:col-span-5 relative flex flex-col items-center justify-center order-1 lg:order-2 pt-2 lg:pt-0 w-full max-w-md xl:max-w-lg mx-auto"
+            className="lg:col-span-5 relative flex flex-col items-center justify-center order-2 lg:order-2 mt-8 lg:mt-0 w-full max-w-md xl:max-w-lg mx-auto"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4, duration: 0.8 }}
@@ -488,6 +494,8 @@ const Hero = () => {
                       <img 
                         src={primaryCourse.thumbnail} 
                         alt={primaryCourse.title}
+                        loading="eager"
+                        decoding="async"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     ) : (
@@ -566,7 +574,13 @@ const Hero = () => {
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-800 shrink-0">
                     {featuredCourses[1].thumbnail ? (
-                      <img src={featuredCourses[1].thumbnail} alt={featuredCourses[1].title} className="w-full h-full object-cover" />
+                      <img 
+                        src={featuredCourses[1].thumbnail} 
+                        alt={featuredCourses[1].title} 
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover" 
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-slate-500">
                         <BookOpen className="w-5 h-5" />

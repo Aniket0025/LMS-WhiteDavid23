@@ -16,7 +16,9 @@ import {
   Users,
   Sparkles,
   GraduationCap,
-  Compass
+  Compass,
+  Home as HomeIcon,
+  Info
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { logoutUser } from "../../Api/authApi";
@@ -493,127 +495,180 @@ const Navbar = () => {
               transition={{ duration: 0.3, ease: "easeInOut" }}
               className="md:hidden bg-slate-900/98 backdrop-blur-2xl border-t border-slate-800/80 max-h-[calc(100vh-4.5rem)] overflow-y-auto overscroll-contain shadow-2xl"
             >
-              <div className="p-6 space-y-4">
-                {/* Search */}
-                <Link
-                  to="/search"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center space-x-3 p-4 text-slate-300 hover:text-white hover:bg-slate-800/50 rounded-xl transition-all duration-200 group"
-                >
-                  <Search className="w-6 h-6 group-hover:scale-110 transition-transform duration-200" />
-                  <span className="font-medium text-base">Search Courses</span>
-                </Link>
-
-                {isLoggedIn ? (
-                  <>
-                    {/* User Info */}
-                    <div className="p-4 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-xl border border-slate-700/50">
-                      <div className="flex items-center space-x-3">
-                        {user?.avatar ? (
-                          <img
-                            src={user.avatar}
-                            alt={user?.name || 'Profile'}
-                            className="w-12 h-12 rounded-full object-cover border-2 border-slate-600 shadow-lg"
-                          />
-                        ) : (
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+              <div className="p-4 sm:p-6 space-y-4">
+                {/* 1. If Logged In: User Profile Card */}
+                {isLoggedIn && (
+                  <div className="p-4 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-indigo-600/10 rounded-2xl border border-slate-700/60 shadow-inner">
+                    <div className="flex items-center space-x-3">
+                      {user?.avatar ? (
+                        <img
+                          src={user.avatar}
+                          alt={user?.name || 'Profile'}
+                          className="w-12 h-12 rounded-full object-cover border-2 border-slate-600 shadow-lg shrink-0"
+                        />
+                      ) : (
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg shrink-0 ${
+                          user?.role === 'admin'
+                            ? 'bg-gradient-to-r from-amber-500 to-rose-600'
+                            : user?.role === 'educator'
+                            ? 'bg-gradient-to-r from-purple-600 to-pink-600'
+                            : 'bg-gradient-to-r from-blue-600 to-purple-600'
+                        }`}>
+                          <User className="w-6 h-6 text-white" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-bold text-base truncate">{user?.name || "Learner"}</p>
+                        <p className="text-slate-400 text-xs truncate">{user?.email}</p>
+                        <div className="flex items-center space-x-1.5 mt-1">
+                          <div className={`w-2 h-2 rounded-full ${
                             user?.role === 'admin'
-                              ? 'bg-gradient-to-r from-amber-500 to-rose-600'
+                              ? 'bg-amber-400 animate-pulse'
                               : user?.role === 'educator'
-                              ? 'bg-gradient-to-r from-purple-600 to-pink-600'
-                              : 'bg-gradient-to-r from-blue-600 to-purple-600'
+                              ? 'bg-purple-500 animate-pulse'
+                              : 'bg-emerald-400'
+                          }`}></div>
+                          <span className={`text-[11px] font-bold uppercase tracking-wider ${
+                            user?.role === 'admin'
+                              ? 'text-amber-400'
+                              : user?.role === 'educator'
+                              ? 'text-purple-400'
+                              : 'text-emerald-400'
                           }`}>
-                            <User className="w-6 h-6 text-white" />
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <p className="text-white font-medium text-base">{user?.name || "User"}</p>
-                          <p className="text-slate-400 text-sm">{user?.email}</p>
-                          <div className="flex items-center space-x-1 mt-1">
-                            <div className={`w-2 h-2 rounded-full ${
-                              user?.role === 'admin'
-                                ? 'bg-amber-400'
-                                : user?.role === 'educator'
-                                ? 'bg-purple-500'
-                                : 'bg-blue-500'
-                            }`}></div>
-                            <span className={`text-xs font-medium capitalize ${
-                              user?.role === 'admin'
-                                ? 'text-amber-400'
-                                : user?.role === 'educator'
-                                ? 'text-purple-400'
-                                : 'text-blue-400'
-                            }`}>
-                              {user?.role || 'Student'}
-                            </span>
-                          </div>
+                            {user?.role === 'admin' ? 'Super Admin' : user?.role === 'educator' ? 'Instructor' : 'Enrolled Student'}
+                          </span>
                         </div>
                       </div>
                     </div>
+                  </div>
+                )}
 
-                    {/* Navigation Links */}
-                    <div className="space-y-2">
-                      {(user?.role === 'educator' || user?.role === 'admin') ? (
-                        // Educator / Admin Mobile Navigation - can access both dashboards
-                        <>
-                          <Link
-                            to="/educator/dashboard"
-                            onClick={() => setIsMenuOpen(false)}
-                            className="flex items-center space-x-3 p-4 text-slate-300 hover:text-purple-400 hover:bg-slate-800/50 rounded-xl transition-all duration-200 group"
-                          >
-                            <BookOpen className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-purple-400" />
-                            <span className="font-medium text-base">{user?.role === 'admin' ? 'Admin Dashboard' : 'Educator Dashboard'}</span>
-                          </Link>
+                {/* 2. Platform Navigation */}
+                <div className="space-y-1">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
+                    Platform Navigation
+                  </span>
+                  
+                  <Link
+                    to="/"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`flex items-center space-x-3 px-3.5 py-3 rounded-xl transition-all ${
+                      location.pathname === '/' 
+                        ? 'bg-blue-600/20 text-blue-300 font-bold border border-blue-500/30' 
+                        : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <HomeIcon className="w-5 h-5 text-blue-400 shrink-0" />
+                    <span className="text-sm font-medium">Home</span>
+                  </Link>
 
-                          <Link
-                            to="/student/dashboard"
-                            onClick={() => setIsMenuOpen(false)}
-                            className="flex items-center space-x-3 p-4 text-slate-300 hover:text-blue-400 hover:bg-slate-800/50 rounded-xl transition-all duration-200 group"
-                          >
-                            <BookOpen className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-blue-400" />
-                            <span className="font-medium text-base">Student Dashboard</span>
-                          </Link>
-                        </>
-                      ) : (
-                        // Student Mobile Navigation - only student dashboard
-                        <Link
-                          to="/student/dashboard"
-                          onClick={() => setIsMenuOpen(false)}
-                          className="flex items-center space-x-3 p-4 text-slate-300 hover:text-blue-400 hover:bg-slate-800/50 rounded-xl transition-all duration-200 group"
-                        >
-                          <BookOpen className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-blue-400" />
-                          <span className="font-medium text-base">Student Dashboard</span>
-                        </Link>
-                      )}
+                  <Link
+                    to="/course"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`flex items-center space-x-3 px-3.5 py-3 rounded-xl transition-all ${
+                      location.pathname === '/course' 
+                        ? 'bg-blue-600/20 text-blue-300 font-bold border border-blue-500/30' 
+                        : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <Compass className="w-5 h-5 text-indigo-400 shrink-0" />
+                    <span className="text-sm font-medium">Explore All Courses</span>
+                  </Link>
 
+                  <Link
+                    to="/search"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`flex items-center space-x-3 px-3.5 py-3 rounded-xl transition-all ${
+                      location.pathname === '/search' 
+                        ? 'bg-blue-600/20 text-blue-300 font-bold border border-blue-500/30' 
+                        : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <Search className="w-5 h-5 text-cyan-400 shrink-0" />
+                    <span className="text-sm font-medium">Search Tracks</span>
+                  </Link>
+
+                  <Link
+                    to="/about"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`flex items-center space-x-3 px-3.5 py-3 rounded-xl transition-all ${
+                      location.pathname === '/about' 
+                        ? 'bg-blue-600/20 text-blue-300 font-bold border border-blue-500/30' 
+                        : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <Info className="w-5 h-5 text-purple-400 shrink-0" />
+                    <span className="text-sm font-medium">About whitedavid23</span>
+                  </Link>
+                </div>
+
+                {/* 3. Account / Workspace Section */}
+                {isLoggedIn ? (
+                  <div className="space-y-1 pt-3 border-t border-slate-800">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 block mb-1">
+                      Your Workspace
+                    </span>
+
+                    {(user?.role === 'educator' || user?.role === 'admin') && (
                       <Link
-                        to="/student/account"
+                        to="/educator/dashboard"
                         onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center space-x-3 p-4 text-slate-300 hover:text-blue-400 hover:bg-slate-800/50 rounded-xl transition-all duration-200 group"
+                        className="flex items-center space-x-3 px-3.5 py-3 rounded-xl text-purple-300 hover:bg-purple-900/20 border border-purple-500/25 transition-all"
                       >
-                        <Settings className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-slate-300" />
-                        <span className="font-medium text-base">Account Settings</span>
+                        <Sparkles className="w-5 h-5 text-purple-400 shrink-0" />
+                        <div>
+                          <span className="text-sm font-bold block">{user?.role === 'admin' ? 'Admin Hub' : 'Educator Studio'}</span>
+                          <span className="text-[11px] text-slate-400">Manage courses, lectures & analytics</span>
+                        </div>
                       </Link>
+                    )}
 
-                      <hr className="border-slate-700/50 my-4" />
+                    <Link
+                      to="/student/dashboard"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center space-x-3 px-3.5 py-3 rounded-xl text-slate-300 hover:text-blue-300 hover:bg-slate-800/60 transition-all"
+                    >
+                      <BookOpen className="w-5 h-5 text-blue-400 shrink-0" />
+                      <div>
+                        <span className="text-sm font-medium block">My Learning Dashboard</span>
+                        <span className="text-[11px] text-slate-500">Access your enrolled courses</span>
+                      </div>
+                    </Link>
 
+                    <Link
+                      to="/student/account"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center space-x-3 px-3.5 py-3 rounded-xl text-slate-300 hover:text-blue-300 hover:bg-slate-800/60 transition-all"
+                    >
+                      <Settings className="w-5 h-5 text-slate-400 shrink-0" />
+                      <span className="text-sm font-medium">Account Settings</span>
+                    </Link>
+
+                    <div className="pt-2">
                       <button
                         onClick={handleLogout}
-                        className="flex items-center space-x-3 p-4 text-slate-300 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-200 w-full text-left group"
+                        className="flex items-center space-x-3 px-3.5 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all w-full text-left"
                       >
-                        <LogOut className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-red-400" />
-                        <span className="font-medium text-base">Sign Out</span>
+                        <LogOut className="w-5 h-5 shrink-0" />
+                        <span className="text-sm font-semibold">Sign Out</span>
                       </button>
                     </div>
-                  </>
+                  </div>
                 ) : (
-                  <div className="flex flex-col space-y-4">
+                  <div className="pt-3 border-t border-slate-800 space-y-2.5">
                     <Link
                       to="/login"
                       onClick={() => setIsMenuOpen(false)}
-                      className="py-4 px-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 text-center transform hover:scale-[1.02] shadow-lg"
+                      className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm rounded-xl hover:from-blue-500 hover:to-indigo-500 transition-all text-center block shadow-lg shadow-blue-600/25"
                     >
-                      Sign In
+                      Sign In to Your Account
+                    </Link>
+                    <Link
+                      to="/signup"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="w-full py-2.5 px-4 bg-slate-900 border border-slate-700 hover:border-slate-600 text-slate-200 font-semibold text-xs rounded-xl transition-all text-center block"
+                    >
+                      Create Free Account
                     </Link>
                   </div>
                 )}

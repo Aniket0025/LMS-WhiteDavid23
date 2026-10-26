@@ -51,12 +51,13 @@ export const getAllCourses = async (req, res) => {
   try {
     const courses = await Course.find({ isPublished: true })
       .populate("educator", "name email avatar")
-      .populate("chapters")
+      .populate("chapters", "chapterTitle")
       .populate({
         path: "ratings.user",
         select: "name avatar"
       })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
     
     res.status(200).json({ success: true, courses });
   } catch (error) {

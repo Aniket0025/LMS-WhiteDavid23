@@ -179,7 +179,7 @@ const CourseDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-[70px] sm:pt-[76px]">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-20 sm:pt-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-16">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-12">
             <div className="lg:col-span-2 order-2 lg:order-1 space-y-6 md:space-y-8">
@@ -201,7 +201,7 @@ const CourseDetails = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-[70px] sm:pt-[76px]">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-20 sm:pt-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-16">
           <div className="text-center py-8 md:py-12">
             <div className="bg-red-900/20 border border-red-500/20 rounded-lg md:rounded-xl p-6 md:p-8 max-w-md mx-auto">
@@ -230,7 +230,7 @@ const CourseDetails = () => {
 
   if (!course) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-[70px] sm:pt-[76px]">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-20 sm:pt-24">
         <div className="container mx-auto px-6 lg:px-8 pb-16">
           <div className="text-center py-12">
             <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-8 max-w-md mx-auto">
@@ -255,7 +255,7 @@ const CourseDetails = () => {
   }));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-[70px] sm:pt-[76px]">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 pt-20 sm:pt-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-8 md:pb-16">
         {/* Back Button to Student Dashboard / Search */}
         <div className="mb-2 sm:mb-4">

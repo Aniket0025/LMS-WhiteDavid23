@@ -13,11 +13,15 @@ import chapterRouter from './routes/chapter.routes.js';
 import lectureRouter from './routes/lecture.routes.js';
 import videoRouter from './routes/video.routes.js';
 import morgan from 'morgan';
+import compression from 'compression';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Gzip/Deflate compression for all HTTP responses
+app.use(compression());
 
 // Trust reverse proxy (required for Render HTTPS and secure cookies)
 app.set('trust proxy', 1);

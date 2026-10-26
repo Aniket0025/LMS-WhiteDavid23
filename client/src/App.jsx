@@ -1,32 +1,50 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { lazy, Suspense } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Student/Navbar.jsx';
 import Home from './pages/Home.jsx';
-import Login from './components/Student/Login.jsx';
-import Signup from './components/Student/Signup.jsx';
-import ForgotPassword from './components/Student/ForgotPassword.jsx';
-import ForgotPasswordOTP from './components/Student/ForgotPasswordOTP.jsx';
-import ResetPassword from './components/Student/ResetPassword.jsx';
-import OTPVerification from './components/Student/OTPVerification.jsx';
-import Search from './components/Student/Search.jsx';
-import CourseDetails from './components/course/CourseDetails.jsx';
-import CourseLearn from './components/course/CourseLearn.jsx';
-import StudentAccount from './components/Student/StudentAccount.jsx';
-import StudentDashboard from './components/Student/StudentDashboard.jsx';
-import EducatorDashboard from './components/Educator/EducatorDashboard.jsx';
-import EducatorLayout from './components/layouts/EducatorLayout.jsx';
-import StudentLayout from './components/layouts/StudentLayout.jsx';
-import EducatorAddCourse from './components/Educator/EducatorAddCourse.jsx';
-import EducatorAllCourse from './components/Educator/EducatorAllCourse.jsx';
-import EducatorEditAndDeleteCourse from './components/Educator/EducatorEditAndDeleteCourse.jsx';
-import EducatorAnalytics from './components/Educator/EducatorAnalytics.jsx';
-import EducatorStudents from './components/Educator/EducatorStudents.jsx';
-import NotFound from './pages/NotFound.jsx';
-
 import './index.css';
-import AllCourse from './components/course/AllCourse.jsx';
-import About from './components/Student/About.jsx';
+
+// Code-split routes to dramatically reduce initial bundle size and speed up page load
+const Login = lazy(() => import('./components/Student/Login.jsx'));
+const Signup = lazy(() => import('./components/Student/Signup.jsx'));
+const ForgotPassword = lazy(() => import('./components/Student/ForgotPassword.jsx'));
+const ForgotPasswordOTP = lazy(() => import('./components/Student/ForgotPasswordOTP.jsx'));
+const ResetPassword = lazy(() => import('./components/Student/ResetPassword.jsx'));
+const OTPVerification = lazy(() => import('./components/Student/OTPVerification.jsx'));
+const Search = lazy(() => import('./components/Student/Search.jsx'));
+const CourseDetails = lazy(() => import('./components/course/CourseDetails.jsx'));
+const CourseLearn = lazy(() => import('./components/course/CourseLearn.jsx'));
+const AllCourse = lazy(() => import('./components/course/AllCourse.jsx'));
+const About = lazy(() => import('./components/Student/About.jsx'));
+const NotFound = lazy(() => import('./pages/NotFound.jsx'));
+
+// Student dashboard routes
+const StudentLayout = lazy(() => import('./components/layouts/StudentLayout.jsx'));
+const StudentAccount = lazy(() => import('./components/Student/StudentAccount.jsx'));
+const StudentDashboard = lazy(() => import('./components/Student/StudentDashboard.jsx'));
+
+// Educator studio routes
+const EducatorLayout = lazy(() => import('./components/layouts/EducatorLayout.jsx'));
+const EducatorDashboard = lazy(() => import('./components/Educator/EducatorDashboard.jsx'));
+const EducatorAddCourse = lazy(() => import('./components/Educator/EducatorAddCourse.jsx'));
+const EducatorAllCourse = lazy(() => import('./components/Educator/EducatorAllCourse.jsx'));
+const EducatorEditAndDeleteCourse = lazy(() => import('./components/Educator/EducatorEditAndDeleteCourse.jsx'));
+const EducatorAnalytics = lazy(() => import('./components/Educator/EducatorAnalytics.jsx'));
+const EducatorStudents = lazy(() => import('./components/Educator/EducatorStudents.jsx'));
+
+// Ultra-fast lightweight fallback loader
+const PageFallback = () => (
+  <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
+    <div className="relative flex items-center justify-center w-12 h-12">
+      <div className="w-10 h-10 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
+    </div>
+    <span className="mt-3 text-xs font-semibold text-slate-500 uppercase tracking-widest animate-pulse">
+      Loading
+    </span>
+  </div>
+);
 
 function App() {
   return (
@@ -55,51 +73,53 @@ function App() {
             },
           }}
         />
-        <Routes>
-          {/* Learning routes without navbar */}
-          <Route path="/course/:id/learn" element={<CourseLearn />} />
-          
-          {/* Regular routes with navbar */}
-          <Route path="*" element={
-            <div>
-              <Navbar />
-              <div className="bg-slate-950 min-h-screen">
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-                  <Route path="/forgot-password/verify-otp" element={<ForgotPasswordOTP />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/verify-otp" element={<OTPVerification />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/search" element={<Search />} />
-                  <Route path="/course/:id" element={<CourseDetails />} />
-                  <Route path="/course" element={<AllCourse />} />
-                  <Route path="*" element={<NotFound />} />
-                  
-                  {/* Student Routes - Protected by StudentLayout */}
-                  <Route path="/student" element={<StudentLayout />}>
-                    <Route path="account" element={<StudentAccount />} />
-                    <Route path="dashboard" element={<StudentDashboard />} />
-                  </Route>
+        <Suspense fallback={<PageFallback />}>
+          <Routes>
+            {/* Learning classroom route without navbar */}
+            <Route path="/course/:id/learn" element={<CourseLearn />} />
+            
+            {/* Regular routes with navbar */}
+            <Route path="*" element={
+              <div>
+                <Navbar />
+                <div className="bg-slate-950 min-h-screen">
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/forgot-password/verify-otp" element={<ForgotPasswordOTP />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/verify-otp" element={<OTPVerification />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/search" element={<Search />} />
+                    <Route path="/course/:id" element={<CourseDetails />} />
+                    <Route path="/course" element={<AllCourse />} />
+                    <Route path="*" element={<NotFound />} />
+                    
+                    {/* Student Routes - Protected by StudentLayout */}
+                    <Route path="/student" element={<StudentLayout />}>
+                      <Route path="account" element={<StudentAccount />} />
+                      <Route path="dashboard" element={<StudentDashboard />} />
+                    </Route>
 
-                  {/* Educator Routes - Protected by EducatorLayout */}
-                  <Route path="/educator" element={<EducatorLayout />}>
-                    <Route index element={<EducatorDashboard />} />
-                    <Route path="dashboard" element={<EducatorDashboard />} />
-                    <Route path="add-course" element={<EducatorAddCourse />} />
-                    <Route path="all-courses" element={<EducatorAllCourse />} />
-                    <Route path="edit-course/:id" element={<EducatorEditAndDeleteCourse />} />
-                    <Route path="course/:id/manage" element={<EducatorEditAndDeleteCourse />} />
-                    <Route path="analytics" element={<EducatorAnalytics />} />
-                    <Route path="students" element={<EducatorStudents />} />
-                  </Route>
-                </Routes>
+                    {/* Educator Routes - Protected by EducatorLayout */}
+                    <Route path="/educator" element={<EducatorLayout />}>
+                      <Route index element={<EducatorDashboard />} />
+                      <Route path="dashboard" element={<EducatorDashboard />} />
+                      <Route path="add-course" element={<EducatorAddCourse />} />
+                      <Route path="all-courses" element={<EducatorAllCourse />} />
+                      <Route path="edit-course/:id" element={<EducatorEditAndDeleteCourse />} />
+                      <Route path="course/:id/manage" element={<EducatorEditAndDeleteCourse />} />
+                      <Route path="analytics" element={<EducatorAnalytics />} />
+                      <Route path="students" element={<EducatorStudents />} />
+                    </Route>
+                  </Routes>
+                </div>
               </div>
-            </div>
-          } />
-        </Routes>
+            } />
+          </Routes>
+        </Suspense>
       </div>
     </AuthProvider>
   );
