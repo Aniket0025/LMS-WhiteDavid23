@@ -151,12 +151,12 @@ const Navbar = () => {
           {/* Center: Context-Aware Desktop Navigation */}
           {!isEducatorPath && (
             /* Standard Desktop Navigation */
-            <nav className="hidden md:flex items-center space-x-1" aria-label="Main Navigation">
+            <nav className="hidden md:flex items-center space-x-1 lg:space-x-1.5 shrink-0" aria-label="Main Navigation">
               <Link
                 to="/"
-                className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+                className={`px-3 lg:px-3.5 py-1.5 lg:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap shrink-0 ${
                   location.pathname === '/'
-                    ? 'text-white bg-slate-800/70 font-semibold'
+                    ? 'text-white bg-slate-800/70 font-semibold shadow-sm'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
                 }`}
               >
@@ -164,9 +164,9 @@ const Navbar = () => {
               </Link>
               <Link
                 to="/course"
-                className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+                className={`px-3 lg:px-3.5 py-1.5 lg:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap shrink-0 ${
                   location.pathname === '/course'
-                    ? 'text-white bg-slate-800/70 font-semibold'
+                    ? 'text-white bg-slate-800/70 font-semibold shadow-sm'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
                 }`}
               >
@@ -174,9 +174,9 @@ const Navbar = () => {
               </Link>
               <Link
                 to="/about"
-                className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+                className={`px-3 lg:px-3.5 py-1.5 lg:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap shrink-0 ${
                   location.pathname === '/about'
-                    ? 'text-white bg-slate-800/70 font-semibold'
+                    ? 'text-white bg-slate-800/70 font-semibold shadow-sm'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
                 }`}
               >
@@ -185,10 +185,10 @@ const Navbar = () => {
               {isLoggedIn && (
                 <Link
                   to="/student/dashboard"
-                  className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+                  className={`px-3 lg:px-3.5 py-1.5 lg:py-2 rounded-xl text-xs sm:text-sm font-medium transition-all whitespace-nowrap shrink-0 ${
                     location.pathname.startsWith('/student')
-                      ? 'text-white bg-slate-800/70 font-semibold'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
+                      ? 'text-white bg-slate-800/70 font-semibold shadow-sm'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/40'
                   }`}
                 >
                   My Learning
@@ -197,9 +197,9 @@ const Navbar = () => {
               {isLoggedIn && (user?.role === 'educator' || user?.role === 'admin') && (
                 <Link
                   to="/educator/dashboard"
-                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-purple-600/20 to-indigo-600/20 text-purple-300 border border-purple-500/30 hover:border-purple-400/60 transition-all ml-1.5"
+                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-purple-600/20 to-indigo-600/20 text-purple-300 border border-purple-500/30 hover:border-purple-400/60 transition-all ml-1 whitespace-nowrap shrink-0 shadow-sm"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                  <Sparkles className="w-3.5 h-3.5 text-purple-400 shrink-0" />
                   <span>{user?.role === 'admin' ? 'Admin Hub' : 'Educator Hub'}</span>
                 </Link>
               )}

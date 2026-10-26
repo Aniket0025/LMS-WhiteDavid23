@@ -258,28 +258,28 @@ const Hero = () => {
 
   return (
     <motion.div 
-      className="relative min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-950 via-[#060c1d] to-slate-950 overflow-hidden flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 lg:pt-32 pb-14 sm:pb-20"
+      className="relative bg-gradient-to-br from-slate-950 via-[#060c1d] to-slate-950 overflow-hidden flex flex-col justify-center px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 md:pt-28 pb-8 sm:pb-10 md:pb-12"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
       {/* Main Hero Section */}
-      <div className="grid lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-12 max-w-7xl w-full items-center z-10">
+      <div className="grid md:grid-cols-12 gap-6 md:gap-8 lg:gap-10 xl:gap-12 max-w-7xl w-full items-center z-10 mx-auto">
         <motion.div 
-          className="lg:col-span-7 space-y-6 sm:space-y-7 text-center lg:text-left order-1 lg:order-1"
-          initial={{ y: 50, opacity: 0 }}
+          className="md:col-span-7 space-y-5 lg:space-y-6 text-center md:text-left order-1"
+          initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.8 }}
         >
           {/* Top Pill Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-400 text-xs font-semibold shadow-sm mx-auto lg:mx-0">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-400 text-xs font-semibold shadow-sm mx-auto md:mx-0">
             <Sparkles className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
             <span>Production-Grade Engineering Masterclasses</span>
           </div>
 
           {/* Main Headline with Zero-Jank Fixed-Height Typewriter (Responsive for all screen sizes) */}
           <motion.h1 
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-[42px] xl:text-[46px] 2xl:text-5xl font-black tracking-tight leading-[1.15]"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-[42px] xl:text-[46px] 2xl:text-5xl font-black tracking-tight leading-[1.15]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.8 }}
@@ -287,8 +287,8 @@ const Hero = () => {
             <span className="text-white block mb-1.5 sm:mb-2 font-black">
               Master New Skills in
             </span>
-            <div className="h-[1.4em] flex items-center overflow-hidden justify-center lg:justify-start">
-              <span className="text-[21px] sm:text-3xl md:text-4xl lg:text-[38px] xl:text-[42px] 2xl:text-[46px] bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent whitespace-nowrap inline-flex items-center font-black">
+            <div className="h-[1.4em] flex items-center overflow-hidden justify-center md:justify-start">
+              <span className="text-[20px] sm:text-2xl md:text-3xl lg:text-[38px] xl:text-[42px] 2xl:text-[46px] bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent whitespace-nowrap inline-flex items-center font-black">
                 {typewriterDisplay}
                 <span className="inline-block w-[2.5px] sm:w-[3px] h-[0.85em] bg-cyan-400 ml-1.5 rounded-full animate-pulse shrink-0" />
               </span>
@@ -296,7 +296,7 @@ const Hero = () => {
           </motion.h1>
           
           <motion.p 
-            className="text-sm sm:text-base md:text-lg text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal"
+            className="text-xs sm:text-sm md:text-base text-slate-300 max-w-2xl mx-auto md:mx-0 leading-relaxed font-normal"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.8 }}
@@ -307,13 +307,13 @@ const Hero = () => {
 
           {/* Stats Section - Driven by Real Database Data */}
           <motion.div 
-            className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-3.5"
-            initial={{ opacity: 0, y: 30 }}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3"
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.8 }}
           >
-            <div className="bg-slate-900/70 backdrop-blur-md border border-slate-800/80 rounded-xl p-3 sm:p-3.5 hover:border-blue-500/30 transition-all duration-300 group text-center lg:text-left">
-              <BookOpen className="w-5 h-5 text-blue-400 mb-1.5 group-hover:scale-110 transition-transform duration-300 mx-auto lg:mx-0" />
+            <div className="bg-slate-900/70 backdrop-blur-md border border-slate-800/80 rounded-xl p-3 sm:p-3.5 hover:border-blue-500/30 transition-all duration-300 group text-center md:text-left">
+              <BookOpen className="w-5 h-5 text-blue-400 mb-1.5 group-hover:scale-110 transition-transform duration-300 mx-auto md:mx-0" />
               <div className="text-lg sm:text-xl font-black text-white">
                 {heroStats.totalCourses > 0 ? heroStats.totalCourses : '2'}
               </div>
@@ -322,8 +322,8 @@ const Hero = () => {
               </div>
             </div>
 
-            <div className="bg-slate-900/70 backdrop-blur-md border border-slate-800/80 rounded-xl p-3 sm:p-3.5 hover:border-emerald-500/30 transition-all duration-300 group text-center lg:text-left">
-              <Users className="w-5 h-5 text-emerald-400 mb-1.5 group-hover:scale-110 transition-transform duration-300 mx-auto lg:mx-0" />
+            <div className="bg-slate-900/70 backdrop-blur-md border border-slate-800/80 rounded-xl p-3 sm:p-3.5 hover:border-emerald-500/30 transition-all duration-300 group text-center md:text-left">
+              <Users className="w-5 h-5 text-emerald-400 mb-1.5 group-hover:scale-110 transition-transform duration-300 mx-auto md:mx-0" />
               <div className="text-lg sm:text-xl font-black text-white">
                 {heroStats.totalStudents > 0 ? `${heroStats.totalStudents}` : 'Active'}
               </div>
@@ -332,8 +332,8 @@ const Hero = () => {
               </div>
             </div>
 
-            <div className="bg-slate-900/70 backdrop-blur-md border border-slate-800/80 rounded-xl p-3 sm:p-3.5 hover:border-amber-500/30 transition-all duration-300 group text-center lg:text-left">
-              <Award className="w-5 h-5 text-amber-400 mb-1.5 group-hover:scale-110 transition-transform duration-300 mx-auto lg:mx-0" />
+            <div className="bg-slate-900/70 backdrop-blur-md border border-slate-800/80 rounded-xl p-3 sm:p-3.5 hover:border-amber-500/30 transition-all duration-300 group text-center md:text-left">
+              <Award className="w-5 h-5 text-amber-400 mb-1.5 group-hover:scale-110 transition-transform duration-300 mx-auto md:mx-0" />
               <div className="text-lg sm:text-xl font-black text-white">
                 {heroStats.totalInstructors > 0 ? heroStats.totalInstructors : 1}
               </div>
@@ -342,8 +342,8 @@ const Hero = () => {
               </div>
             </div>
 
-            <div className="bg-slate-900/70 backdrop-blur-md border border-slate-800/80 rounded-xl p-3 sm:p-3.5 hover:border-purple-500/30 transition-all duration-300 group text-center lg:text-left">
-              <TrendingUp className="w-5 h-5 text-purple-400 mb-1.5 group-hover:scale-110 transition-transform duration-300 mx-auto lg:mx-0" />
+            <div className="bg-slate-900/70 backdrop-blur-md border border-slate-800/80 rounded-xl p-3 sm:p-3.5 hover:border-purple-500/30 transition-all duration-300 group text-center md:text-left">
+              <TrendingUp className="w-5 h-5 text-purple-400 mb-1.5 group-hover:scale-110 transition-transform duration-300 mx-auto md:mx-0" />
               <div className="text-lg sm:text-xl font-black text-white">
                 {heroStats.averageRating ? `${heroStats.averageRating} ★` : (heroStats.totalChapters > 0 ? `${heroStats.totalChapters} ${heroStats.totalChapters === 1 ? 'Chapter' : 'Chapters'}` : '100% Practical')}
               </div>
@@ -356,12 +356,12 @@ const Hero = () => {
           {/* Search Bar with Quick Tag Pills */}
           <motion.div
             className="space-y-3"
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.8 }}
           >
             <form 
-              className="max-w-xl mx-auto lg:mx-0 w-full"
+              className="max-w-xl mx-auto md:mx-0 w-full"
               onSubmit={handleSearch}
             >
               <div className="relative flex items-center bg-slate-900/80 backdrop-blur-md border border-slate-700/70 rounded-2xl p-1.5 hover:border-blue-500/50 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all duration-300 shadow-xl shadow-black/40">
@@ -383,7 +383,7 @@ const Hero = () => {
               </div>
             </form>
 
-            <div className="flex flex-wrap items-center gap-2 justify-center lg:justify-start text-xs">
+            <div className="flex flex-wrap items-center gap-2 justify-center md:justify-start text-xs">
               <span className="text-slate-400 font-medium text-[11px]">Popular Tracks:</span>
               {['DevOps', 'ML', 'Cloud', 'Docker', 'All Masterclasses'].map((tag) => (
                 <button
@@ -400,8 +400,8 @@ const Hero = () => {
 
           {/* CTA Buttons */}
           <motion.div 
-            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start pt-1"
-            initial={{ opacity: 0, y: 30 }}
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start pt-1"
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 0.8 }}
           >
@@ -430,32 +430,13 @@ const Hero = () => {
         {/* Hero Visual - Interactive Masterclass Spotlight (Visible on all devices!) */}
         {featuredCourses.length > 0 && (
           <motion.div 
-            className="lg:col-span-5 relative flex flex-col items-center justify-center order-2 lg:order-2 mt-8 lg:mt-0 w-full max-w-md xl:max-w-lg mx-auto"
+            className="md:col-span-5 relative flex flex-col items-center justify-center order-2 mt-8 md:mt-0 w-full max-w-md md:max-w-none mx-auto"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4, duration: 0.8 }}
           >
             {/* Background ambient glow */}
             <div className="absolute -inset-2 bg-gradient-to-r from-blue-600/20 via-indigo-600/15 to-purple-600/20 rounded-3xl blur-2xl opacity-75 pointer-events-none" />
-
-            {/* Floating Tech Skill Badges */}
-            <motion.div 
-              className="hidden sm:flex absolute -top-3.5 right-4 z-20 items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/95 border border-blue-500/40 text-[11px] font-semibold text-blue-300 shadow-xl backdrop-blur-md"
-              animate={{ y: [0, -4, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping" />
-              <span>🐳 Docker & K8s</span>
-            </motion.div>
-
-            <motion.div 
-              className="hidden sm:flex absolute -bottom-2.5 left-4 z-20 items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/95 border border-emerald-500/40 text-[11px] font-semibold text-emerald-300 shadow-xl backdrop-blur-md"
-              animate={{ y: [0, 4, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              <span>🧠 Neural Networks & ML</span>
-            </motion.div>
 
             {/* Primary Featured Course Card */}
             {(() => {
@@ -649,27 +630,6 @@ const Hero = () => {
             delay: 4
           }}
         />
-      </motion.div>
-
-      {/* Scroll Indicator */}
-      <motion.div 
-        className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 text-slate-400 text-xs sm:text-sm flex flex-col items-center gap-2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2, duration: 1 }}
-      >
-        <span className="hidden sm:inline">Explore More</span>
-        <span className="sm:hidden">More</span>
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ 
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        >
-          <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
-        </motion.div>
       </motion.div>
     </motion.div>
   );

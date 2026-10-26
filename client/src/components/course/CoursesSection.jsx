@@ -79,7 +79,7 @@ const CoursesSection = () => {
   };
 
   return (
-    <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border-t border-slate-800/40 relative">
+    <section className="pt-10 sm:pt-14 md:pt-16 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border-t border-slate-800/40 relative">
       <div className="container mx-auto max-w-7xl">
         {/* Section Header */}
         <motion.div
