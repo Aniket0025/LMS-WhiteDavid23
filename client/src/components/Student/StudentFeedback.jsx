@@ -163,8 +163,8 @@ const StudentFeedback = () => {
               </div>
             </div>
 
-            {/* Mobile slider */}
-            <div className="block md:hidden">
+            {/* Mobile slider with overflow prevention */}
+            <div className="block md:hidden overflow-hidden w-full max-w-full">
               <Slider {...sliderSettings}>
                 {realReviews.map((fb, index) => (
                   <div key={fb.id || index} className="p-2">

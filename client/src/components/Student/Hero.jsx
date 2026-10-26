@@ -271,9 +271,9 @@ const Hero = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.8 }}
         >
-          {/* Main Headline with Zero-Jank Fixed-Height Typewriter */}
+          {/* Main Headline with Zero-Jank Fixed-Height Typewriter (Responsive for all screen sizes) */}
           <motion.h1 
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-[40px] xl:text-[46px] 2xl:text-5xl font-black tracking-tight leading-[1.15]"
+            className="text-2xl sm:text-4xl md:text-5xl lg:text-[40px] xl:text-[46px] 2xl:text-5xl font-black tracking-tight leading-[1.15]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.8 }}
@@ -281,10 +281,10 @@ const Hero = () => {
             <span className="text-white block mb-1.5 sm:mb-2 font-black">
               Master New Skills in
             </span>
-            <div className="h-[1.25em] flex items-center overflow-hidden justify-center lg:justify-start">
-              <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent whitespace-nowrap inline-flex items-center">
+            <div className="h-[1.35em] flex items-center overflow-hidden justify-center lg:justify-start">
+              <span className="text-[20px] sm:text-3xl md:text-4xl lg:text-[38px] xl:text-[42px] 2xl:text-[46px] bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent whitespace-nowrap inline-flex items-center">
                 {typewriterDisplay}
-                <span className="inline-block w-[3px] h-[0.85em] bg-cyan-400 ml-1.5 rounded-full animate-pulse shrink-0" />
+                <span className="inline-block w-[2.5px] sm:w-[3px] h-[0.85em] bg-cyan-400 ml-1.5 rounded-full animate-pulse shrink-0" />
               </span>
             </div>
           </motion.h1>
