@@ -17,6 +17,7 @@ import {
   X,
   ArrowRight
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import './ProtectedPdfViewer.css';
 
 // Set worker source for pdfjs-dist
@@ -49,6 +50,57 @@ const ProtectedPdfViewer = ({
   const [showJumpModal, setShowJumpModal] = useState(false);
   const [modalPageInput, setModalPageInput] = useState(1);
 
+  // Screen Protection States (Window blur blackout, roaming watermark, screenshot flash alert)
+  const [isShieldActive, setIsShieldActive] = useState(false);
+  const [screenshotAlert, setScreenshotAlert] = useState(false);
+  const screenshotTimeoutRef = useRef(null);
+  const [driftingPos, setDriftingPos] = useState({ top: '35%', left: '30%', opacity: 0.35 });
+
+  // Dynamic roaming watermark repositioning (every 5 seconds)
+  useEffect(() => {
+    const updateDrift = () => {
+      const top = Math.floor(15 + Math.random() * 60) + '%';
+      const left = Math.floor(10 + Math.random() * 55) + '%';
+      const opacity = parseFloat((0.28 + Math.random() * 0.16).toFixed(2));
+      setDriftingPos({ top, left, opacity });
+    };
+    const interval = setInterval(updateDrift, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const triggerScreenshotAlert = useCallback(() => {
+    setScreenshotAlert(true);
+    if (screenshotTimeoutRef.current) clearTimeout(screenshotTimeoutRef.current);
+    screenshotTimeoutRef.current = setTimeout(() => {
+      setScreenshotAlert(false);
+    }, 3500);
+  }, []);
+
+  // Window Blur & Visibility Listener (Blocks Snipping Tool, OBS, background capture tools)
+  useEffect(() => {
+    const handleBlur = () => {
+      setIsShieldActive(true);
+    };
+    const handleFocus = () => {
+      setIsShieldActive(false);
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        setIsShieldActive(true);
+      }
+    };
+
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
   // Sync jump input with pageNum when not editing
   useEffect(() => {
     if (!isEditingPage) {
@@ -57,13 +109,43 @@ const ProtectedPdfViewer = ({
     setModalPageInput(pageNum);
   }, [pageNum, isEditingPage]);
 
-  // Keyboard shortcut protection (Block Ctrl+S, Ctrl+P, Ctrl+U, etc.) and page navigation
+  // Anti-Screenshot keyboard shortcut protection and page navigation
   useEffect(() => {
+    const wipeClipboard = () => {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(
+            '⚠️ Protected Content: Screenshots and screen recordings are strictly prohibited on WhiteDavid23 LMS.'
+          );
+        }
+      } catch (_) {}
+    };
+
     const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && ['s', 'S', 'p', 'P', 'u', 'U'].includes(e.key)) {
+      const isPrintScreen = e.key === 'PrintScreen' || e.keyCode === 44;
+      const isSnippingTool = (e.ctrlKey || e.metaKey) && e.shiftKey && ['s', 'S', '3', '4', '5'].includes(e.key);
+      const isPrint = (e.ctrlKey || e.metaKey) && ['p', 'P'].includes(e.key);
+      const isSave = (e.ctrlKey || e.metaKey) && ['s', 'S'].includes(e.key);
+      const isDevTools =
+        e.key === 'F12' ||
+        ((e.ctrlKey || e.metaKey) && ['u', 'U'].includes(e.key)) ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'I', 'j', 'J', 'c', 'C'].includes(e.key));
+
+      if (isPrintScreen || isSnippingTool || isPrint || isSave || isDevTools) {
         e.preventDefault();
+        e.stopPropagation();
+        wipeClipboard();
+        triggerScreenshotAlert();
+
+        const actionLabel = isPrint
+          ? 'Printing'
+          : isDevTools
+          ? 'Developer Tools'
+          : 'Screenshots and screen recording';
+        toast.error(`${actionLabel} disabled for lecture content protection.`, { id: 'pdf-sec-toast' });
         return false;
       }
+
       if (['INPUT', 'TEXTAREA'].includes(e.target?.tagName)) {
         return;
       }
@@ -85,9 +167,22 @@ const ProtectedPdfViewer = ({
         handleZoomOut();
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [numPages, pageNum]);
+
+    const handleKeyUp = (e) => {
+      if (e.key === 'PrintScreen' || e.keyCode === 44) {
+        e.preventDefault();
+        wipeClipboard();
+        triggerScreenshotAlert();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('keyup', handleKeyUp, true);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('keyup', handleKeyUp, true);
+    };
+  }, [numPages, pageNum, triggerScreenshotAlert]);
 
   // Track fullscreen changes
   useEffect(() => {
@@ -666,6 +761,65 @@ const ProtectedPdfViewer = ({
                 Protected Document • {user?.email || 'WhiteDavid23 LMS'}
               </span>
             </div>
+
+            {/* Dynamic Roaming Watermark for Screen Recording Deterrence */}
+            <div
+              className="pdf-drifting-watermark"
+              style={{
+                top: driftingPos.top,
+                left: driftingPos.left,
+                opacity: driftingPos.opacity
+              }}
+            >
+              <Lock className="w-3 h-3 text-emerald-400 shrink-0" />
+              <span>{user?.email || 'Protected Document'}</span>
+              <span className="opacity-50">•</span>
+              <span>ID: {user?._id ? String(user._id).slice(-6).toUpperCase() : 'DOC-SEC'}</span>
+            </div>
+
+            {/* Window Blur / Screen Recording Shield */}
+            {isShieldActive && (
+              <div
+                className="pdf-protection-shield"
+                onClick={() => setIsShieldActive(false)}
+                role="button"
+                tabIndex={0}
+                title="Click to resume document viewing"
+              >
+                <div className="pdf-shield-card">
+                  <div className="pdf-shield-icon-wrap">
+                    <ShieldAlert className="w-8 h-8 text-amber-400 animate-pulse" />
+                  </div>
+                  <h4 className="text-white font-bold text-sm mb-1">Document Protection Active</h4>
+                  <p className="text-xs text-slate-300 mb-3">
+                    Document view hidden while window is unfocused to prevent screen recording and snipping.
+                  </p>
+                  <button
+                    type="button"
+                    className="pdf-shield-resume-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsShieldActive(false);
+                    }}
+                  >
+                    Click to Resume
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Screenshot Detected Instant Flash Banner */}
+            {screenshotAlert && (
+              <div className="pdf-screenshot-alert">
+                <div className="pdf-alert-card">
+                  <ShieldAlert className="w-8 h-8 text-rose-400 mb-2 animate-bounce" />
+                  <h4 className="text-white font-bold text-sm mb-1">Screenshots & Screen Recording Disabled</h4>
+                  <p className="text-xs text-slate-300">
+                    Course document materials are protected by WhiteDavid23 copyright policy. Capturing screen content is prohibited.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

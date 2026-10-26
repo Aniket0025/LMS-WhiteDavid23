@@ -239,6 +239,57 @@ const CourseLearn = () => {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
+  // Page-Level Anti-Screenshot & Screen Recording shortcut protection
+  useEffect(() => {
+    const wipeClipboard = () => {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(
+            '⚠️ Protected Content: Screenshots and screen recordings are strictly prohibited on WhiteDavid23 LMS.'
+          );
+        }
+      } catch (_) {}
+    };
+
+    const handleKeyDown = (e) => {
+      const isPrintScreen = e.key === 'PrintScreen' || e.keyCode === 44;
+      const isSnippingTool = (e.ctrlKey || e.metaKey) && e.shiftKey && ['s', 'S', '3', '4', '5'].includes(e.key);
+      const isPrint = (e.ctrlKey || e.metaKey) && ['p', 'P'].includes(e.key);
+      const isSave = (e.ctrlKey || e.metaKey) && ['s', 'S'].includes(e.key);
+      const isDevTools =
+        e.key === 'F12' ||
+        ((e.ctrlKey || e.metaKey) && ['u', 'U'].includes(e.key)) ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'I', 'j', 'J', 'c', 'C'].includes(e.key));
+
+      if (isPrintScreen || isSnippingTool || isPrint || isSave || isDevTools) {
+        e.preventDefault();
+        e.stopPropagation();
+        wipeClipboard();
+        const actionLabel = isPrint
+          ? 'Printing'
+          : isDevTools
+          ? 'Developer Tools'
+          : 'Screenshots and screen recording';
+        toast.error(`${actionLabel} disabled for course lecture protection.`, { id: 'page-sec-toast' });
+        return false;
+      }
+    };
+
+    const handleKeyUp = (e) => {
+      if (e.key === 'PrintScreen' || e.keyCode === 44) {
+        e.preventDefault();
+        wipeClipboard();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('keyup', handleKeyUp, true);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('keyup', handleKeyUp, true);
+    };
+  }, []);
+
   // Verify Course Access
   useEffect(() => {
     const checkAccess = async () => {

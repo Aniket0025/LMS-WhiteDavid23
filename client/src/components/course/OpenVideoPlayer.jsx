@@ -8,8 +8,10 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize,
-  Minimize
+  Minimize,
+  ShieldAlert
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import './OpenVideoPlayer.css';
 
 const OpenVideoPlayer = ({
@@ -32,6 +34,37 @@ const OpenVideoPlayer = ({
   const [rotation, setRotation] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Screen Protection States (Window blur blackout, roaming watermark, screenshot flash alert)
+  const [isShieldActive, setIsShieldActive] = useState(false);
+  const [screenshotAlert, setScreenshotAlert] = useState(false);
+  const screenshotTimeoutRef = useRef(null);
+  const [driftingPos, setDriftingPos] = useState({ top: '30%', left: '25%', opacity: 0.35 });
+
+  // Dynamic roaming watermark repositioning (every 5 seconds)
+  useEffect(() => {
+    const updateDrift = () => {
+      const top = Math.floor(15 + Math.random() * 60) + '%';
+      const left = Math.floor(10 + Math.random() * 55) + '%';
+      const opacity = parseFloat((0.28 + Math.random() * 0.16).toFixed(2));
+      setDriftingPos({ top, left, opacity });
+    };
+    const interval = setInterval(updateDrift, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const triggerScreenshotAlert = useCallback(() => {
+    setScreenshotAlert(true);
+    if (playerInstanceRef.current) {
+      try { playerInstanceRef.current.pause(); } catch (_) {}
+    } else if (videoRef.current) {
+      try { videoRef.current.pause(); } catch (_) {}
+    }
+    if (screenshotTimeoutRef.current) clearTimeout(screenshotTimeoutRef.current);
+    screenshotTimeoutRef.current = setTimeout(() => {
+      setScreenshotAlert(false);
+    }, 3500);
+  }, []);
 
   // --- Fluid Player Initialization & Cleanup ---
   const destroyPlayer = useCallback(() => {
@@ -172,21 +205,120 @@ const OpenVideoPlayer = ({
     }
   };
 
-  // Anti-download keyboard protection
+  // Window Blur & Visibility Listener (Blocks Snipping Tool, OBS, background screen recorders)
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && ['s', 'S', 'u', 'U'].includes(e.key)) {
-        e.preventDefault();
-        return false;
+    const handleBlur = () => {
+      // If user clicked inside an iframe (e.g. YouTube or Mega embed), don't trigger shield
+      if (document.activeElement && document.activeElement.tagName === 'IFRAME') {
+        return;
       }
-      if (e.key === 'F12') {
+      setIsShieldActive(true);
+      if (playerInstanceRef.current) {
+        try { playerInstanceRef.current.pause(); } catch (_) {}
+      } else if (videoRef.current) {
+        try { videoRef.current.pause(); } catch (_) {}
+      }
+    };
+
+    const handleFocus = () => {
+      setIsShieldActive(false);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        setIsShieldActive(true);
+        if (playerInstanceRef.current) {
+          try { playerInstanceRef.current.pause(); } catch (_) {}
+        } else if (videoRef.current) {
+          try { videoRef.current.pause(); } catch (_) {}
+        }
+      }
+    };
+
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  // Block Browser Screen Recording API (navigator.mediaDevices.getDisplayMedia)
+  useEffect(() => {
+    if (typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+      const originalGetDisplayMedia = navigator.mediaDevices.getDisplayMedia;
+      navigator.mediaDevices.getDisplayMedia = async function (...args) {
+        toast.error('Screen recording is disabled for lecture content protection.', { id: 'rec-blocked' });
+        throw new DOMException('Screen recording blocked by WhiteDavid23 LMS Security Policy', 'NotAllowedError');
+      };
+      return () => {
+        navigator.mediaDevices.getDisplayMedia = originalGetDisplayMedia;
+      };
+    }
+  }, []);
+
+  // Anti-Screenshot & Screen Capture Keyboard Interceptor + Clipboard Wiper
+  useEffect(() => {
+    const wipeClipboard = () => {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(
+            '⚠️ Protected Content: Screenshots and screen recordings are strictly prohibited on WhiteDavid23 LMS.'
+          );
+        }
+      } catch (_) {}
+    };
+
+    const handleKeyDown = (e) => {
+      // 1. PrintScreen key
+      const isPrintScreen = e.key === 'PrintScreen' || e.keyCode === 44;
+      // 2. Windows Snipping Tool (Win+Shift+S) or Mac (Cmd+Shift+3/4/5)
+      const isSnippingTool = (e.ctrlKey || e.metaKey) && e.shiftKey && ['s', 'S', '3', '4', '5'].includes(e.key);
+      // 3. Print (Ctrl+P / Cmd+P)
+      const isPrint = (e.ctrlKey || e.metaKey) && ['p', 'P'].includes(e.key);
+      // 4. Save page (Ctrl+S / Cmd+S)
+      const isSave = (e.ctrlKey || e.metaKey) && ['s', 'S'].includes(e.key);
+      // 5. Inspect / DevTools (F12, Ctrl+U, Ctrl+Shift+I/J/C)
+      const isDevTools =
+        e.key === 'F12' ||
+        ((e.ctrlKey || e.metaKey) && ['u', 'U'].includes(e.key)) ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'I', 'j', 'J', 'c', 'C'].includes(e.key));
+
+      if (isPrintScreen || isSnippingTool || isPrint || isSave || isDevTools) {
         e.preventDefault();
+        e.stopPropagation();
+        wipeClipboard();
+        triggerScreenshotAlert();
+
+        const actionLabel = isPrint
+          ? 'Printing'
+          : isDevTools
+          ? 'Developer Tools'
+          : 'Screenshots and screen recording';
+        toast.error(`${actionLabel} disabled for lecture content protection.`, { id: 'sec-toast' });
         return false;
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+
+    const handleKeyUp = (e) => {
+      if (e.key === 'PrintScreen' || e.keyCode === 44) {
+        e.preventDefault();
+        e.stopPropagation();
+        wipeClipboard();
+        triggerScreenshotAlert();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('keyup', handleKeyUp, true);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('keyup', handleKeyUp, true);
+    };
+  }, [triggerScreenshotAlert]);
 
   // Fullscreen listener
   useEffect(() => {
@@ -258,6 +390,8 @@ const OpenVideoPlayer = ({
                 key={videoKey}
                 ref={videoRef}
                 playsInline
+                disablePictureInPicture
+                controlsList="nodownload noplaybackrate"
                 onContextMenu={(e) => e.preventDefault()}
               >
                 <source src={src} type="video/mp4" />
@@ -266,6 +400,65 @@ const OpenVideoPlayer = ({
             </div>
           )}
         </div>
+
+        {/* Dynamic Roaming Watermark (Deters Screen Recording & Leaks) */}
+        <div
+          className="fp-drifting-watermark"
+          style={{
+            top: driftingPos.top,
+            left: driftingPos.left,
+            opacity: driftingPos.opacity
+          }}
+        >
+          <Lock className="w-3 h-3 text-emerald-400 shrink-0" />
+          <span>{user?.email || 'Protected Student Stream'}</span>
+          <span className="fp-drift-sep">•</span>
+          <span>ID: {user?._id ? String(user._id).slice(-6).toUpperCase() : 'LMS-SEC'}</span>
+        </div>
+
+        {/* Window Blur / Screen Recording Shield (Snipping Tool & OBS blackout) */}
+        {isShieldActive && (
+          <div
+            className="fp-protection-shield"
+            onClick={() => setIsShieldActive(false)}
+            role="button"
+            tabIndex={0}
+            title="Click to resume playback"
+          >
+            <div className="fp-shield-card">
+              <div className="fp-shield-icon-wrap">
+                <ShieldAlert className="w-8 h-8 text-amber-400 animate-pulse" />
+              </div>
+              <h4 className="fp-shield-title">Screen Capture Protection Active</h4>
+              <p className="fp-shield-desc">
+                Video paused & screen hidden to prevent capture, recording, or window clipping.
+              </p>
+              <button
+                type="button"
+                className="fp-shield-resume-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsShieldActive(false);
+                }}
+              >
+                Click to Resume Playback
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Screenshot Detected Flash Alert */}
+        {screenshotAlert && (
+          <div className="fp-screenshot-alert">
+            <div className="fp-alert-card">
+              <ShieldAlert className="w-9 h-9 text-rose-400 mb-2 animate-bounce" />
+              <h4 className="fp-alert-title">Screenshots & Screen Recording Disabled</h4>
+              <p className="fp-alert-desc">
+                Course videos are encrypted and protected by LMS security policy. Capturing screen content is strictly prohibited.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Extra Toolbar — Zoom + Rotation (these features don't exist in Fluid Player) */}

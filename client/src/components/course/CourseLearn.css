@@ -163,3 +163,28 @@
   }
 }
 
+/* Print and Screen Capture Protection */
+@media print {
+  body {
+    display: none !important;
+  }
+  .course-learn-container {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
+
+.course-learn-container {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+
+/* Allow normal text selection inside student notes editor */
+.course-learn-container textarea,
+.course-learn-container input {
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+
