@@ -143,3 +143,22 @@ For lecture slide decks and reading materials:
 - Rendered exclusively using Mozilla **PDF.js** onto an HTML5 `<canvas>`.
 - **Zero Download Exposure**: Unlike native browser PDF viewers that show the Acrobat toolbar with a "Download" button, the canvas renderer exposes no raw downloadable files in the DOM.
 - Canvas has the same window-blur blackout shield and roaming watermark protection applied.
+
+---
+
+## 5. Protecting External & Cloud-Hosted Video Streams (MEGA Drive)
+
+When courses use **MEGA Drive** for high-volume video hosting, videos can be delivered in two ways:
+1. **Direct Embed Iframe** (`https://mega.nz/embed/...`)
+2. **Decrypted On-the-Fly Streaming Proxy** (`/api/video/mega-stream?url=...`)
+
+### How MEGA Drive Embeds are Protected against Screenshots & Screen Recording:
+- **Hierarchical DOM Z-Indexing**:
+  - The MEGA Drive `<iframe>` is placed inside `.fp-embed-wrapper` with `z-index: 10`.
+  - The **Dynamic Roaming Watermark** sits on top with `position: absolute; z-index: 60; pointer-events: none;`. It moves across the MEGA player every 5 seconds, displaying the student's email and ID.
+  - The **Window Blur Blackout Shield** sits on top with `position: absolute; z-index: 100;`. When a student launches Windows Snipping Tool (`Win + Shift + S`) or focuses OBS/Loom, the shield activates immediately and blacks out the entire MEGA player.
+  - The **Screenshot Alert Banner** sits on top with `position: absolute; z-index: 120;`. When `PrintScreen` is pressed, the event is intercepted, the clipboard is auto-wiped, and the alert covers the MEGA video.
+- **Decrypted Streaming Proxy (`/api/video/mega-stream`)**:
+  - Piped into the native HTML5 `<video>` tag inside Fluid Player.
+  - Enables `disablePictureInPicture`, `controlsList="nodownload noplaybackrate"`, right-click disabled, and hides the original MEGA link from the client.
+

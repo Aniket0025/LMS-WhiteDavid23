@@ -48,10 +48,11 @@ CourseConnect is a full-stack Learning Management System built with modern web t
 
 ### 2.1 Product Perspective
 The system is a standalone web application consisting of:
-- **Frontend**: React-based responsive web application
-- **Backend**: Node.js/Express RESTful API server
+- **Frontend**: React-based responsive web application with multi-layer DRM content protection
+- **Backend**: Node.js/Express RESTful API server with decrypted media streaming
 - **Database**: MongoDB for data persistence
-- **Media Storage**: Cloudinary for video and image hosting
+- **Media Storage (Dual Architecture)**: MEGA Drive (`megajs`) as primary storage with Cloudinary for fallback hosting
+- **Content Protection**: Proprietary anti-screenshot, anti-screen-recording, and dynamic roaming watermark engine
 - **Payment Processing**: Stripe integration
 - **Email Services**: Nodemailer with SMTP
 
@@ -454,6 +455,59 @@ Automated email communication for various system events.
 - Resource-level permission checking
 - Secure API endpoint protection
 - Cross-origin request validation
+
+#### 6.2.4 Digital Rights Management (DRM) & Content Protection
+- System shall prevent unauthorized copying, ripping, or distribution of educational video lectures and reading materials.
+- All course video playback shall be restricted exclusively to verified enrolled students and course authors.
+- Media elements shall prohibit browser-level downloading via `controlsList="nodownload noplaybackrate"`.
+- Media elements shall prohibit picture-in-picture popout via `disablePictureInPicture` to prevent unshielded external capture.
+- Context menus (`contextmenu`) and text/media drag events (`dragstart`) shall be disabled on all player and document viewports.
+- Webpage printing and print-to-PDF (`@media print`) shall render a 100% blacked-out/hidden view to prevent saving slides or lecture transcripts.
+
+#### 6.2.5 Anti-Screenshot & Screen Capture Defense System
+- System shall actively intercept keyboard capture shortcuts at the window event level, including:
+  - `PrintScreen` (keyCode 44)
+  - Windows Snipping Tool (`Win + Shift + S`)
+  - macOS Screenshot shortcuts (`Cmd + Shift + 3`, `Cmd + Shift + 4`, `Cmd + Shift + 5`)
+  - Linux capture combinations
+  - Browser print (`Ctrl + P` / `Cmd + P`) and save (`Ctrl + S` / `Cmd + S`)
+  - Developer Tools shortcuts (`F12`, `Ctrl + Shift + I/J/C`, `Ctrl + U`)
+- Upon intercepting a screenshot attempt, the system shall:
+  1. Call `e.preventDefault()` and `e.stopPropagation()`.
+  2. Overwrite the operating system clipboard buffer via `navigator.clipboard.writeText()` with a prominent copyright warning string.
+  3. Render an instant blackout security flash overlay (`.fp-screenshot-alert` / `.pdf-screenshot-alert`) obstructing the content.
+  4. Trigger a visible security violation notification via the UI toast system.
+
+#### 6.2.6 Anti-Screen Recording & Window Blur Protection
+- System shall detect when the browser window loses user focus or enters an inactive state via `window.onblur` or `document.visibilityState === 'hidden'`.
+- Whenever focus is transferred to an external application (such as OBS Studio, Loom, Camtasia, or the Snipping Tool selector window):
+  1. Video playback shall immediately and automatically pause.
+  2. The entire player viewport shall be covered by a frosted blackout security shield (`.fp-protection-shield` / `.pdf-protection-shield`).
+  3. The capture tool shall only record a blank screen displaying the message: *"Screen Capture Protection Active — Video paused & screen hidden to prevent capture, recording, or window clipping."*
+  4. Playback shall resume only after the student refocuses the LMS tab or explicitly clicks the resume button.
+- System shall wrap and intercept the browser's screen-sharing Web API `navigator.mediaDevices.getDisplayMedia()`, immediately throwing a `NotAllowedError` to prevent browser extension screen recorders from recording active lecture streams.
+
+#### 6.2.7 Dynamic Roaming Watermarking & Forensic Leak Tracing
+- System shall render a dynamic, tamper-resistant semi-transparent watermark overlay directly on the video viewport.
+- The watermark shall display verified student identification data:
+  - Student registered email address
+  - Student unique database identifier (`user._id`)
+  - Live system timestamp and platform verification tag
+- The watermark shall dynamically and unpredictably relocate its position across the video canvas every 4 to 6 seconds within a randomized boundary (`top: 15% - 75%`, `left: 10% - 65%`, opacity: `0.28 - 0.44`).
+- Any external camera, smartphone recording, or hardware HDMI capture card shall permanently record the student's personal identity burned into the frames, enabling immediate account tracing and administrative action.
+
+#### 6.2.8 MEGA Drive Cloud Storage Security Architecture
+- System shall integrate MEGA Drive (`megajs`) as the primary cloud storage engine for high-volume lecture videos, thumbnails, and documents.
+- MEGA Drive video integration shall enforce multi-layer security:
+  1. **Direct Embed Protection**: When streaming via MEGA iframe embeds, the player container shall wrap the iframe with the dynamic roaming watermark layer (`z-index: 60`) and the window-blur blackout shield (`z-index: 100`), ensuring that even MEGA-hosted embeds are protected against screenshots and screen recorders.
+  2. **Encrypted Streaming Proxy (`/api/video/mega-stream`)**: The backend shall provide an on-the-fly decrypted streaming proxy that decrypts the MEGA file on the server and streams it into a hardened native HTML5 video element with `disablePictureInPicture`, `controlsList="nodownload"`, and full player shielding.
+  3. **Direct Link Obfuscation**: Raw MEGA Drive file URLs and encryption keys shall never be exposed directly to unauthorized students, preventing direct file downloads.
+  4. **Automated Directory Segregation**: Assets shall be automatically categorized into segregated folders (`Videos`, `Thumbnails`, `Documents`, `Profile-Pictures`) under the secure root folder `LMS-Drive-Storage`.
+
+#### 6.2.9 Zero-Download Protected Document & PDF Security
+- Document-based lectures (PDFs, slide presentations) shall be served through an authenticated proxy endpoint (`/api/lecture/document/:lectureId?token=...`) that verifies enrollment before streaming bytes.
+- Documents shall be rendered on the client exclusively via Mozilla PDF.js directly onto an HTML5 `<canvas>`, eliminating raw PDF file exposure and disabling the browser's native PDF download toolbar.
+- The document canvas wrapper shall enforce the same dynamic roaming watermark, window blur blackout shield, and shortcut interception as the video player.
 
 ### 6.3 Reliability Requirements
 - System uptime of 99.9%
