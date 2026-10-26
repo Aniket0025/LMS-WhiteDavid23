@@ -255,7 +255,7 @@ const CourseLearn = () => {
         } else {
           setHasAccess(false);
           setError('You do not have access to this course.');
-          window.location.href = "https://whitedavid23.org/courses";
+          navigate(`/course/${courseId}`);
         }
       } catch (err) {
         console.error('Access check failed:', err);

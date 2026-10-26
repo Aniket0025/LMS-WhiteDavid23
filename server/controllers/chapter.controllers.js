@@ -20,7 +20,7 @@ export const createChapter = async (req, res) => {
     // console.log('Course educator ID:', course.educator.toString());
     // console.log('Are they equal?:', course.educator.toString() === userId.toString());
 
-    if (course.educator.toString() !== userId.toString()) {
+    if (course.educator.toString() !== userId.toString() && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
         message: "Not authorized to add chapters to this course",
@@ -113,8 +113,8 @@ export const deleteChapter = async (req, res) => {
         .json({ success: false, message: "Chapter not found" });
     }
 
-    // Check if user is the educator of this course
-    if (chapter.course.educator.toString() !== userId.toString()) {
+    // Check if user is the educator of this course or admin
+    if (chapter.course.educator.toString() !== userId.toString() && req.user.role !== 'admin') {
       return res
         .status(403)
         .json({

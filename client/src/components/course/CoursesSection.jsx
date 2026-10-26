@@ -1,38 +1,33 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, RefreshCw } from "lucide-react";
+import { ArrowRight, RefreshCw, Sparkles, BookOpen, Layers } from "lucide-react";
 import CourseCard from "./CourseCard";
 import { getAllCourses } from "../../Api/courseApi.js";
 
 const CoursesSection = () => {
   const navigate = useNavigate();
-  const [featuredCourses, setFeaturedCourses] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
 
   const fetchCourses = async () => {
     try {
-      console.log("Fetching all courses...");
       setLoading(true);
       setError(null);
       const response = await getAllCourses();
-      console.log("Courses API response:", response);
       
-      if (response.success && response.courses) {
-        // Get only first 6 courses for featured section
-        const courses = response.courses.slice(0, 6);
-        setFeaturedCourses(courses);
-        console.log("Featured courses set:", courses);
-        // Small delay to ensure state update is complete
+      if (response?.success && response.courses) {
+        setCourses(response.courses);
         setTimeout(() => setIsVisible(true), 100);
       } else {
-        throw new Error(response.message || "Failed to fetch courses");
+        throw new Error(response?.message || "Failed to fetch courses");
       }
-    } catch (error) {
-      console.error("Error fetching courses:", error);
-      setError(error.message || "Failed to load courses");
+    } catch (err) {
+      console.error("Error fetching courses:", err);
+      setError(err?.message || "Failed to load courses");
     } finally {
       setLoading(false);
     }
@@ -42,24 +37,34 @@ const CoursesSection = () => {
     fetchCourses();
   }, []);
 
+  const filteredCourses = useMemo(() => {
+    if (selectedFilter === "all") return courses;
+    if (selectedFilter === "devops") {
+      return courses.filter((c) =>
+        (c.title + " " + (c.category || "")).toLowerCase().includes("devops")
+      );
+    }
+    if (selectedFilter === "ai") {
+      return courses.filter(
+        (c) =>
+          (c.title + " " + (c.category || "")).toLowerCase().includes("ml") ||
+          (c.title + " " + (c.category || "")).toLowerCase().includes("learning") ||
+          (c.title + " " + (c.category || "")).toLowerCase().includes("ai")
+      );
+    }
+    return courses;
+  }, [courses, selectedFilter]);
+
   const fadeInUp = {
     initial: { opacity: 0, y: 30 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.6, ease: "easeOut" },
   };
 
-  const staggerChildren = {
-    animate: {
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
   const courseCardVariants = {
     hidden: { 
       opacity: 0, 
-      scale: 0.8,
+      scale: 0.9,
       y: 20 
     },
     visible: { 
@@ -67,30 +72,67 @@ const CoursesSection = () => {
       scale: 1,
       y: 0,
       transition: {
-        duration: 0.5,
+        duration: 0.4,
         ease: "easeOut"
       }
     }
   };
 
   return (
-    <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-950 to-slate-900">
-      <div className="container mx-auto">
+    <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border-t border-slate-800/40 relative">
+      <div className="container mx-auto max-w-7xl">
         {/* Section Header */}
         <motion.div
           variants={fadeInUp}
           initial="initial"
           whileInView="animate"
           viewport={{ once: true }}
-          className="text-center mb-10 sm:mb-16"
+          className="text-center mb-10 sm:mb-14"
         >
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-6">
-            Featured Courses
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-400 text-xs font-semibold mb-4">
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>Comprehensive Curriculum</span>
+          </div>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-3 tracking-tight">
+            Featured <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Masterclasses</span>
           </h2>
-          <p className="text-sm sm:text-lg md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-            Discover our most popular courses designed by industry experts to
-            help you master new skills and advance your career
+          <p className="text-sm sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            Real courses with interactive chapter navigation, downloadable guides, and production-tested workflows.
           </p>
+
+          {/* Interactive Filter Pills */}
+          <div className="flex flex-wrap items-center justify-center gap-2.5 mt-8">
+            <button
+              onClick={() => setSelectedFilter("all")}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                selectedFilter === "all"
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
+                  : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
+              }`}
+            >
+              All Masterclasses ({courses.length})
+            </button>
+            <button
+              onClick={() => setSelectedFilter("devops")}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                selectedFilter === "devops"
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
+                  : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
+              }`}
+            >
+              Cloud & DevOps
+            </button>
+            <button
+              onClick={() => setSelectedFilter("ai")}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                selectedFilter === "ai"
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
+                  : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
+              }`}
+            >
+              Machine Learning & AI
+            </button>
+          </div>
         </motion.div>
 
         {/* Courses Grid */}
@@ -101,21 +143,18 @@ const CoursesSection = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 mb-8 sm:mb-12"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto mb-12"
             >
-              {[...Array(6)].map((_, index) => (
-                <motion.div
+              {[1, 2, 3].map((index) => (
+                <div
                   key={index}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                  className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-xl p-6 animate-pulse"
+                  className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-2xl p-5 animate-pulse"
                 >
-                  <div className="bg-slate-700/50 h-48 rounded-xl mb-4"></div>
-                  <div className="bg-slate-700/50 h-4 rounded mb-3"></div>
-                  <div className="bg-slate-700/50 h-4 rounded w-3/4 mb-3"></div>
-                  <div className="bg-slate-700/50 h-3 rounded w-1/2"></div>
-                </motion.div>
+                  <div className="bg-slate-800 h-44 rounded-xl mb-4" />
+                  <div className="bg-slate-800 h-5 rounded w-3/4 mb-3" />
+                  <div className="bg-slate-800 h-4 rounded w-1/2 mb-4" />
+                  <div className="bg-slate-800 h-8 rounded w-full" />
+                </div>
               ))}
             </motion.div>
           ) : error ? (
@@ -126,30 +165,34 @@ const CoursesSection = () => {
               exit={{ opacity: 0, y: -20 }}
               className="col-span-full text-center py-12 mb-12"
             >
-              <div className="bg-red-900/20 border border-red-500/20 rounded-xl p-8 max-w-md mx-auto">
-                <p className="text-red-400 text-lg mb-4">Failed to load courses</p>
-                <p className="text-slate-400 mb-6">{error}</p>
+              <div className="bg-red-900/20 border border-red-500/20 rounded-2xl p-8 max-w-md mx-auto">
+                <p className="text-red-400 text-lg mb-2">Failed to load courses</p>
+                <p className="text-slate-400 text-xs mb-6">{error}</p>
                 <button
                   onClick={fetchCourses}
-                  disabled={loading}
-                  className="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
+                  className="inline-flex items-center px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition-colors"
                 >
-                  <RefreshCw className={`mr-2 w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                  <RefreshCw className="mr-2 w-4 h-4" />
                   Try Again
                 </button>
               </div>
             </motion.div>
-          ) : featuredCourses.length === 0 ? (
+          ) : filteredCourses.length === 0 ? (
             <motion.div
               key="empty"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="col-span-full text-center py-12 mb-12"
+              className="text-center py-12 mb-12"
             >
-              <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-8 max-w-md mx-auto">
-                <p className="text-slate-300 text-lg">No courses available</p>
-                <p className="text-slate-400 mt-2">Check back later for new courses</p>
+              <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 max-w-md mx-auto">
+                <p className="text-slate-300 text-base font-semibold">No courses match this track</p>
+                <button
+                  onClick={() => setSelectedFilter("all")}
+                  className="mt-3 text-xs text-blue-400 hover:underline"
+                >
+                  Reset filter to see all courses
+                </button>
               </div>
             </motion.div>
           ) : (
@@ -158,16 +201,21 @@ const CoursesSection = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8 mb-8 sm:mb-12"
+              className={`grid grid-cols-1 ${
+                filteredCourses.length === 1
+                  ? "max-w-md mx-auto"
+                  : filteredCourses.length === 2
+                  ? "sm:grid-cols-2 max-w-3xl mx-auto"
+                  : "sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto"
+              } gap-6 mb-12`}
             >
-              {featuredCourses.map((course, index) => (
+              {filteredCourses.map((course, index) => (
                 <motion.div
                   key={course._id}
                   variants={courseCardVariants}
                   initial="hidden"
                   animate={isVisible ? "visible" : "hidden"}
                   transition={{ delay: index * 0.1 }}
-                  whileHover={{ scale: 1.02 }}
                   className="h-full"
                 >
                   <CourseCard course={course} />
@@ -177,21 +225,20 @@ const CoursesSection = () => {
           )}
         </AnimatePresence>
 
-        {/* View All Courses Button */}
+        {/* View All Courses Action */}
         <motion.div
           variants={fadeInUp}
           initial="initial"
           whileInView="animate"
           viewport={{ once: true }}
-          transition={{ delay: 0.6 }}
           className="text-center"
         >
           <button
             onClick={() => navigate("/course")}
-            className="group inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-blue-500/25"
+            className="group inline-flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-blue-600/20 text-sm"
           >
-            <span>View All Courses</span>
-            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
+            <span>Browse Full Course Catalog</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
         </motion.div>
       </div>

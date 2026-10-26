@@ -113,7 +113,7 @@ const EducatorDashboard = () => {
         }
         
         const students = allUsers.filter(u => u.role === 'student');
-        const educators = allUsers.filter(u => u.role === 'educator');
+        const educators = allUsers.filter(u => u.role === 'educator' || u.role === 'admin');
         
         setPlatformStats({
           totalStudents: students.length,

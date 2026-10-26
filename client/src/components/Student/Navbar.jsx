@@ -43,8 +43,12 @@ const Navbar = () => {
     { name: 'Account Settings', href: '/student/account', icon: Settings },
     { name: 'Browse Courses', href: '/course', icon: Compass },
   ];
-  if (user?.role === 'educator') {
-    studentNavItems.push({ name: 'Educator Hub', href: '/educator/dashboard', icon: Sparkles });
+  if (user?.role === 'educator' || user?.role === 'admin') {
+    studentNavItems.push({ 
+      name: user?.role === 'admin' ? 'Admin Hub' : 'Educator Hub', 
+      href: '/educator/dashboard', 
+      icon: Sparkles 
+    });
   }
 
   // Refs for click outside detection
@@ -188,13 +192,13 @@ const Navbar = () => {
                   My Learning
                 </Link>
               )}
-              {isLoggedIn && user?.role === 'educator' && (
+              {isLoggedIn && (user?.role === 'educator' || user?.role === 'admin') && (
                 <Link
                   to="/educator/dashboard"
                   className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-purple-600/20 to-indigo-600/20 text-purple-300 border border-purple-500/30 hover:border-purple-400/60 transition-all ml-1.5"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Educator Hub</span>
+                  <span>{user?.role === 'admin' ? 'Admin Hub' : 'Educator Hub'}</span>
                 </Link>
               )}
             </nav>
@@ -239,14 +243,22 @@ const Navbar = () => {
                           className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover group-hover:scale-110 transition-transform duration-200 shadow-lg border-2 border-slate-700"
                         />
                       ) : (
-                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200 shadow-lg ${user?.role === 'educator'
-                          ? 'bg-gradient-to-r from-purple-600 to-pink-600'
-                          : 'bg-gradient-to-r from-blue-600 to-purple-600'
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200 shadow-lg ${
+                          user?.role === 'admin'
+                            ? 'bg-gradient-to-r from-amber-500 to-rose-600'
+                            : user?.role === 'educator'
+                            ? 'bg-gradient-to-r from-purple-600 to-pink-600'
+                            : 'bg-gradient-to-r from-blue-600 to-purple-600'
                           }`}>
                           <User className="w-6 h-6 text-white" />
                         </div>
                       )}
-                      <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-slate-950 ${user?.role === 'educator' ? 'bg-purple-500' : 'bg-green-500'
+                      <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-slate-950 ${
+                        user?.role === 'admin'
+                          ? 'bg-amber-400'
+                          : user?.role === 'educator'
+                          ? 'bg-purple-500'
+                          : 'bg-green-500'
                         }`}></div>
                     </div>
 
@@ -276,9 +288,12 @@ const Navbar = () => {
                                 className="w-12 h-12 rounded-full object-cover shadow-lg border-2 border-slate-600"
                               />
                             ) : (
-                              <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg ${user?.role === 'educator'
-                                ? 'bg-gradient-to-r from-purple-600 to-pink-600'
-                                : 'bg-gradient-to-r from-blue-600 to-purple-600'
+                              <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg ${
+                                user?.role === 'admin'
+                                  ? 'bg-gradient-to-r from-amber-500 to-rose-600'
+                                  : user?.role === 'educator'
+                                  ? 'bg-gradient-to-r from-purple-600 to-pink-600'
+                                  : 'bg-gradient-to-r from-blue-600 to-purple-600'
                                 }`}>
                                 <User className="w-6 h-6 text-white" />
                               </div>
@@ -289,8 +304,20 @@ const Navbar = () => {
                               </p>
                               <p className="text-slate-400 text-sm">{user?.email}</p>
                               <div className="flex items-center space-x-1 mt-1">
-                                <div className={`w-2 h-2 rounded-full ${user?.role === 'educator' ? 'bg-purple-500' : 'bg-blue-500'}`}></div>
-                                <span className={`text-xs font-medium capitalize ${user?.role === 'educator' ? 'text-purple-400' : 'text-blue-400'}`}>
+                                <div className={`w-2 h-2 rounded-full ${
+                                  user?.role === 'admin'
+                                    ? 'bg-amber-400'
+                                    : user?.role === 'educator'
+                                    ? 'bg-purple-500'
+                                    : 'bg-blue-500'
+                                }`}></div>
+                                <span className={`text-xs font-medium capitalize ${
+                                  user?.role === 'admin'
+                                    ? 'text-amber-400'
+                                    : user?.role === 'educator'
+                                    ? 'text-purple-400'
+                                    : 'text-blue-400'
+                                }`}>
                                   {user?.role || 'Student'}
                                 </span>
                               </div>
@@ -300,8 +327,8 @@ const Navbar = () => {
 
                         {/* Navigation Links */}
                         <div className="p-2">
-                          {user?.role === 'educator' ? (
-                            // Educator Navigation - can access both dashboards
+                          {(user?.role === 'educator' || user?.role === 'admin') ? (
+                            // Educator / Admin Navigation - can access both dashboards
                             <>
                               <Link
                                 to="/educator/dashboard"
@@ -310,8 +337,8 @@ const Navbar = () => {
                               >
                                 <BookOpen className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-purple-400" />
                                 <div>
-                                  <span className="font-medium">Educator Dashboard</span>
-                                  <p className="text-xs text-slate-500">Manage your courses</p>
+                                  <span className="font-medium">{user?.role === 'admin' ? 'Admin Dashboard' : 'Educator Dashboard'}</span>
+                                  <p className="text-xs text-slate-500">Manage courses and students</p>
                                 </div>
                               </Link>
 
@@ -412,7 +439,9 @@ const Navbar = () => {
                   />
                 ) : (
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-md ${
-                    user?.role === 'educator'
+                    user?.role === 'admin'
+                      ? 'bg-gradient-to-r from-amber-500 to-rose-600'
+                      : user?.role === 'educator'
                       ? 'bg-gradient-to-r from-purple-600 to-pink-600'
                       : 'bg-gradient-to-r from-blue-600 to-purple-600'
                   }`}>
@@ -420,7 +449,11 @@ const Navbar = () => {
                   </div>
                 )}
                 <div className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-slate-950 ${
-                  user?.role === 'educator' ? 'bg-purple-500' : 'bg-green-500'
+                  user?.role === 'admin'
+                    ? 'bg-amber-400'
+                    : user?.role === 'educator'
+                    ? 'bg-purple-500'
+                    : 'bg-green-500'
                 }`} />
               </button>
             ) : (
@@ -483,7 +516,13 @@ const Navbar = () => {
                             className="w-12 h-12 rounded-full object-cover border-2 border-slate-600 shadow-lg"
                           />
                         ) : (
-                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${user?.role === 'educator' ? 'bg-gradient-to-r from-purple-600 to-pink-600' : 'bg-gradient-to-r from-blue-600 to-purple-600'}`}>
+                          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                            user?.role === 'admin'
+                              ? 'bg-gradient-to-r from-amber-500 to-rose-600'
+                              : user?.role === 'educator'
+                              ? 'bg-gradient-to-r from-purple-600 to-pink-600'
+                              : 'bg-gradient-to-r from-blue-600 to-purple-600'
+                          }`}>
                             <User className="w-6 h-6 text-white" />
                           </div>
                         )}
@@ -491,8 +530,20 @@ const Navbar = () => {
                           <p className="text-white font-medium text-base">{user?.name || "User"}</p>
                           <p className="text-slate-400 text-sm">{user?.email}</p>
                           <div className="flex items-center space-x-1 mt-1">
-                            <div className={`w-2 h-2 rounded-full ${user?.role === 'educator' ? 'bg-purple-500' : 'bg-blue-500'}`}></div>
-                            <span className={`text-xs font-medium capitalize ${user?.role === 'educator' ? 'text-purple-400' : 'text-blue-400'}`}>
+                            <div className={`w-2 h-2 rounded-full ${
+                              user?.role === 'admin'
+                                ? 'bg-amber-400'
+                                : user?.role === 'educator'
+                                ? 'bg-purple-500'
+                                : 'bg-blue-500'
+                            }`}></div>
+                            <span className={`text-xs font-medium capitalize ${
+                              user?.role === 'admin'
+                                ? 'text-amber-400'
+                                : user?.role === 'educator'
+                                ? 'text-purple-400'
+                                : 'text-blue-400'
+                            }`}>
                               {user?.role || 'Student'}
                             </span>
                           </div>
@@ -502,8 +553,8 @@ const Navbar = () => {
 
                     {/* Navigation Links */}
                     <div className="space-y-2">
-                      {user?.role === 'educator' ? (
-                        // Educator Mobile Navigation - can access both dashboards
+                      {(user?.role === 'educator' || user?.role === 'admin') ? (
+                        // Educator / Admin Mobile Navigation - can access both dashboards
                         <>
                           <Link
                             to="/educator/dashboard"
@@ -511,7 +562,7 @@ const Navbar = () => {
                             className="flex items-center space-x-3 p-4 text-slate-300 hover:text-purple-400 hover:bg-slate-800/50 rounded-xl transition-all duration-200 group"
                           >
                             <BookOpen className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-purple-400" />
-                            <span className="font-medium text-base">Educator Dashboard</span>
+                            <span className="font-medium text-base">{user?.role === 'admin' ? 'Admin Dashboard' : 'Educator Dashboard'}</span>
                           </Link>
 
                           <Link

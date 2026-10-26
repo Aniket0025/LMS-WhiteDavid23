@@ -65,7 +65,14 @@ export const authorize = (...roles) => {
       });
     }
 
-    if (!roles.includes(req.user.role)) {
+    const userRole = req.user.role;
+    // Admins have access to all protected endpoints; Educators have access to educator and student resources
+    const isAuthorized =
+      roles.includes(userRole) ||
+      userRole === 'admin' ||
+      (roles.includes('educator') && (userRole === 'educator' || userRole === 'admin'));
+
+    if (!isAuthorized) {
       return res.status(403).json({ 
         success: false, 
         message: `Access denied. Required role: ${roles.join(' or ')}` 

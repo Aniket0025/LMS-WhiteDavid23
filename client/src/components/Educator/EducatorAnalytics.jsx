@@ -69,8 +69,8 @@ const EducatorAnalytics = () => {
       setLoading(true);
       setError('');
       
-      if (!user || user.role !== 'educator') {
-        setError('Access denied. Only educators can view analytics.');
+      if (!user || (user.role !== 'educator' && user.role !== 'admin')) {
+        setError('Access denied. Only educators and admins can view analytics.');
         return;
       }
 
@@ -171,7 +171,7 @@ const EducatorAnalytics = () => {
   };
 
   useEffect(() => {
-    if (user && user.role === 'educator') {
+    if (user && (user.role === 'educator' || user.role === 'admin')) {
       fetchAnalytics();
     }
   }, [timeRange, user]);

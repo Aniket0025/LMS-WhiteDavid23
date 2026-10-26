@@ -1,151 +1,441 @@
+import React, { useState, useRef, useEffect } from "react";
+import { 
+  Play, 
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize2,
+  FileText, 
+  BarChart3, 
+  Award, 
+  Terminal, 
+  Cpu, 
+  Cloud, 
+  CheckCircle2, 
+  Circle,
+  Sparkles, 
+  Layers,
+  ArrowRight
+} from "lucide-react";
+import { Link } from "react-router-dom";
+
 export default function Companies() {
+  const videoRef = useRef(null);
+  const progressBarRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(135);
+  const [isMuted, setIsMuted] = useState(true);
+  const [playbackRate, setPlaybackRate] = useState(1);
+
+  const playerChapters = [
+    { id: 1, title: "1. Container Fundamentals", time: 0, tag: "00:00" },
+    { id: 2, title: "2. Building Production Images", time: 35, tag: "00:35" },
+    { id: 3, title: "3. Docker Compose & Microservices", time: 75, tag: "01:15" },
+  ];
+
+  const activeChapterIndex = playerChapters.reduce((acc, ch, idx) => {
+    return currentTime >= ch.time ? idx : acc;
+  }, 0);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch(() => {
+        setIsPlaying(false);
+      });
+    }
+  }, []);
+
+  const togglePlay = () => {
+    if (!videoRef.current) return;
+    if (videoRef.current.paused) {
+      videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+    } else {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  const toggleMute = () => {
+    if (!videoRef.current) return;
+    const nextMuted = !isMuted;
+    videoRef.current.muted = nextMuted;
+    setIsMuted(nextMuted);
+  };
+
+  const togglePlaybackRate = () => {
+    if (!videoRef.current) return;
+    const rates = [1, 1.25, 1.5, 2];
+    const nextRate = rates[(rates.indexOf(playbackRate) + 1) % rates.length];
+    videoRef.current.playbackRate = nextRate;
+    setPlaybackRate(nextRate);
+  };
+
+  const handleFullscreen = () => {
+    if (!videoRef.current) return;
+    if (videoRef.current.requestFullscreen) {
+      videoRef.current.requestFullscreen();
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (!videoRef.current) return;
+    setCurrentTime(videoRef.current.currentTime);
+  };
+
+  const handleLoadedMetadata = () => {
+    if (!videoRef.current) return;
+    if (videoRef.current.duration && !isNaN(videoRef.current.duration)) {
+      setDuration(videoRef.current.duration);
+    }
+  };
+
+  const handleSeek = (e) => {
+    if (!progressBarRef.current || !videoRef.current) return;
+    const rect = progressBarRef.current.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const percentage = Math.max(0, Math.min(1, clickX / rect.width));
+    const newTime = percentage * (duration || 100);
+    videoRef.current.currentTime = newTime;
+    setCurrentTime(newTime);
+  };
+
+  const handleChapterClick = (chapterTime) => {
+    if (!videoRef.current) return;
+    videoRef.current.currentTime = chapterTime;
+    setCurrentTime(chapterTime);
+    if (videoRef.current.paused) {
+      videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+    }
+  };
+
+  const formatTime = (seconds) => {
+    if (isNaN(seconds) || seconds < 0) return "00:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const progressPercent = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
+
+  const techStack = [
+    { name: "Docker", category: "Containerization" },
+    { name: "Kubernetes", category: "Orchestration" },
+    { name: "Python", category: "Core Language" },
+    { name: "PyTorch", category: "Deep Learning" },
+    { name: "AWS Cloud", category: "Infrastructure" },
+    { name: "Linux / Bash", category: "Systems" },
+    { name: "CI/CD Pipelines", category: "Automation" },
+    { name: "Git & GitHub", category: "Version Control" },
+  ];
+
+  const features = [
+    {
+      title: "Interactive Video Learning Engine",
+      description:
+        "Seamless high-definition video streaming with instant chapter jumping, playback speed controls, and timestamp bookmarks.",
+      badge: "HD Streaming",
+      icon: Play,
+      gradient: "from-blue-500 to-indigo-600",
+      border: "border-blue-500/30",
+    },
+    {
+      title: "Comprehensive Lecture Notes & PDFs",
+      description:
+        "Downloadable cheat sheets, lecture slides, and command references available alongside every video chapter.",
+      badge: "Curated Notes",
+      icon: FileText,
+      gradient: "from-purple-500 to-pink-600",
+      border: "border-purple-500/30",
+    },
+    {
+      title: "Student Progress & Completion Tracking",
+      description:
+        "Real-time learning dashboard tracking your watched chapters, completed exercises, and active enrollments.",
+      badge: "Live Analytics",
+      icon: BarChart3,
+      gradient: "from-emerald-500 to-teal-600",
+      border: "border-emerald-500/30",
+    },
+    {
+      title: "Educator Studio & Course Management",
+      description:
+        "Dedicated instructor portal with chapter organization, video uploading, student roster, and engagement insights.",
+      badge: "Instructor Hub",
+      icon: Layers,
+      gradient: "from-amber-500 to-orange-600",
+      border: "border-amber-500/30",
+    },
+  ];
+
   return (
-    <section className="py-16 sm:py-20 bg-gradient-to-b from-slate-950 to-[#0a1128]">
-      <div className="container mx-auto px-4 sm:px-6">
-        {/* Section Header */}
-        <div className="text-center mb-12 sm:mb-16">
-          <div className="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600/20 to-blue-800/20 rounded-full border border-blue-500/30 mb-6">
-            
-          </div>
-          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
-            Powerful Features for{" "}
-            <span className="text-blue-400">Modern Learning</span>
-          </h2>
-          
+    <section className="py-16 sm:py-24 bg-gradient-to-b from-[#0a1128] via-slate-950 to-slate-950 relative overflow-hidden">
+      {/* Subtle ambient grid background */}
+      <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
+
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
+        {/* Industry Skills Ticker Header */}
+        <div className="text-center mb-8">
+          <p className="text-xs sm:text-sm font-semibold tracking-wider text-slate-400 uppercase">
+            Industry Technologies & Frameworks Covered In Our Tracks
+          </p>
         </div>
 
-        <div className="h-4 sm:h-9"></div>
-        {/* Main Content: Image Left, Features Right */}
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-          {/* Left Side - Image */}
-          <div className="relative order-2 lg:order-1">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-3xl blur-3xl transform rotate-3"></div>
-            <div className="relative">
-              <img
-                className="w-full h-auto rounded-3xl border border-blue-900/30 shadow-2xl shadow-blue-900/20 object-cover"
-                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1470&q=80"
-                alt="Students learning online together in a modern classroom setting"
-              />
-              {/* Floating elements for visual appeal */}
-              <div className="absolute -top-4 -left-4 w-8 h-8 bg-blue-500/30 rounded-full blur-sm animate-pulse"></div>
-              <div className="absolute -bottom-4 -right-4 w-12 h-12 bg-purple-500/20 rounded-full blur-sm animate-pulse delay-1000"></div>
+        {/* Tech Stack Pills */}
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 max-w-5xl mx-auto mb-16 sm:mb-24">
+          {techStack.map((tech) => (
+            <div
+              key={tech.name}
+              className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-blue-500/50 hover:bg-slate-800/80 transition-all duration-300 shadow-sm group cursor-default"
+            >
+              <div className="w-2 h-2 rounded-full bg-blue-400 group-hover:scale-125 transition-transform" />
+              <span className="text-xs sm:text-sm font-semibold text-white tracking-wide">
+                {tech.name}
+              </span>
+              <span className="text-[10px] text-slate-400 px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700/60 hidden sm:inline-block">
+                {tech.category}
+              </span>
             </div>
-          </div>
+          ))}
+        </div>
 
-          {/* Right Side - Features */}
-          <div className="space-y-6 sm:space-y-10 order-1 lg:order-2 max-w-3xl mx-auto w-full">
-            {/* Feature Card Component */}
-            {[
-              {
-                title: "Interactive Learning Dashboard",
-                description:
-                  "Track your progress with real-time analytics, personalized learning paths, and detailed performance insights that adapt to your learning style.",
-                colors: "from-blue-500 to-blue-600",
-                border: "border-blue-800/20 hover:border-blue-500/40",
-                shadow: "shadow-blue-500/30 group-hover:shadow-blue-500/50",
-                icon: (
-                  <path
-                    d="M14 18.667V24.5m4.668-8.167V24.5m4.664-12.833V24.5m2.333-21L15.578 13.587a.584.584 0 0 1-.826 0l-3.84-3.84a.583.583 0 0 0-.825 0L2.332 17.5M4.668 21v3.5m4.664-8.167V24.5"
-                    stroke="white"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                ),
-              },
-              {
-                title: "Expert-Led Courses",
-                description:
-                  "Learn from industry professionals with years of experience. Enjoy live sessions, interactive Q&A, and personalized feedback from experts.",
-                colors: "from-green-500 to-green-600",
-                border: "border-green-800/20 hover:border-green-500/40",
-                shadow: "shadow-green-500/30 group-hover:shadow-green-500/50",
-                icon: (
-                  <>
-                    <path
-                      d="M23.333 14c0 5.155-4.178 9.333-9.333 9.333S4.667 19.155 4.667 14 8.845 4.667 14 4.667 23.333 8.845 23.333 14z"
-                      stroke="white"
-                      strokeWidth="2"
-                    />
-                    <path
-                      d="M14 9.333V14l2.333 2.333"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </>
-                ),
-              },
-              {
-                title: "Flexible Learning Formats",
-                description:
-                  "Access courses anytime, anywhere. Download materials, take quizzes offline, and sync your progress seamlessly across all devices.",
-                colors: "from-purple-500 to-purple-600",
-                border: "border-purple-800/20 hover:border-purple-500/40",
-                shadow: "shadow-purple-500/30 group-hover:shadow-purple-500/50",
-                icon: (
-                  <>
-                    <path
-                      d="M4.668 25.666h16.333a2.333 2.333 0 0 0 2.334-2.333V8.166L17.5 2.333H7a2.333 2.333 0 0 0-2.333 2.333v4.667"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </>
-                ),
-              },
-              {
-                title: "Industry-Recognized Certificates",
-                description:
-                  "Earn certificates that matter in the industry. Our credentials are recognized by top employers and can significantly boost your career prospects.",
-                colors: "from-orange-500 to-orange-600",
-                border: "border-orange-800/20 hover:border-orange-500/40",
-                shadow: "shadow-orange-500/30 group-hover:shadow-orange-500/50",
-                icon: (
-                  <>
-                    <path
-                      d="M9.333 25.667V21l4.667-2.333L18.667 21v4.667"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </>
-                ),
-              },
-            ].map((feature, index) => (
-              <div
-                key={index}
-                className={`group p-4 sm:p-6 md:p-8 rounded-2xl bg-gradient-to-br from-black/10 via-black/5 to-transparent ${feature.border} transition-all duration-300 hover:shadow-lg hover:scale-[1.01]`}
+        {/* Main Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-20">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-400 text-xs font-semibold mb-4">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Modern Learning Architecture</span>
+          </div>
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">
+            Designed for Deep Technical <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Mastery</span>
+          </h2>
+          <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
+            whitedavid23 provides an end-to-end learning environment with zero friction — from distraction-free video playback to real-time student analytics.
+          </p>
+        </div>
+
+        {/* 2-Column Showcase: Interactive Mockup on Left, Feature Cards on Right */}
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          {/* Left Mockup (Simulating Real Video Experience) */}
+          <div className="lg:col-span-5 relative order-2 lg:order-1">
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/30 to-indigo-600/30 rounded-3xl blur-2xl opacity-60" />
+            <div className="relative rounded-2xl bg-slate-900/90 border border-slate-800 p-5 shadow-2xl overflow-hidden">
+              {/* Fake Window Bar */}
+              <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500/80 cursor-pointer hover:opacity-80" onClick={togglePlay} title="Stop / Play" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/80 cursor-pointer hover:opacity-80" onClick={toggleMute} title="Toggle Audio" />
+                  <div className="w-3 h-3 rounded-full bg-green-500/80 cursor-pointer hover:opacity-80" onClick={handleFullscreen} title="Fullscreen" />
+                </div>
+                <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
+                  <Terminal className="w-3.5 h-3.5 text-blue-400" />
+                  <span>whitedavid23-lms-player</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Live</span>
+                </div>
+              </div>
+
+              {/* Video Player Preview Window */}
+              <div 
+                className="relative aspect-video rounded-xl bg-slate-950 border border-slate-800 flex flex-col justify-between mb-4 overflow-hidden group select-none cursor-pointer shadow-inner"
+                onClick={togglePlay}
               >
-                <div className="flex items-start gap-4 sm:gap-6">
-                  <div
-                    className={`flex-shrink-0 p-3 sm:p-4 bg-gradient-to-br ${feature.colors} rounded-xl ${feature.shadow} transition-all duration-300`}
-                  >
-                    <svg
-                      width="28"
-                      height="28"
-                      className="sm:w-8 sm:h-8"
-                      viewBox="0 0 28 28"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
+                {/* HTML5 Video Element */}
+                <video
+                  ref={videoRef}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  playsInline
+                  muted={isMuted}
+                  loop
+                  autoPlay
+                  onTimeUpdate={handleTimeUpdate}
+                  onLoadedMetadata={handleLoadedMetadata}
+                  onPlay={() => setIsPlaying(true)}
+                  onPause={() => setIsPlaying(false)}
+                >
+                  <source src="/videos/coding-tutorial.webm" type="video/webm" />
+                  <source src="https://upload.wikimedia.org/wikipedia/commons/transcoded/a/a8/Fig-Coding-Tutorial.webm/Fig-Coding-Tutorial.webm.480p.vp9.webm" type="video/webm" />
+                </video>
+
+                {/* Ambient Cinematic Vignette */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/70 pointer-events-none" />
+
+                {/* Top Badges Overlay */}
+                <div className="relative z-10 flex items-center justify-between p-3">
+                  <span className="text-[11px] sm:text-xs font-semibold text-white px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md border border-white/10 shadow-sm flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                    DevOps Masterclass
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] sm:text-[11px] font-mono text-blue-300 bg-blue-950/70 backdrop-blur-md px-2 py-0.5 rounded border border-blue-500/30">
+                      {playerChapters[activeChapterIndex]?.title.replace(/^\d+\.\s*/, "") || "CI/CD"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleMute();
+                      }}
+                      className="p-1 rounded bg-black/60 hover:bg-slate-800 text-slate-300 hover:text-white backdrop-blur-md border border-white/10 transition-colors"
+                      title={isMuted ? "Unmute Audio" : "Mute Audio"}
                     >
-                      {feature.icon}
-                    </svg>
+                      {isMuted ? (
+                        <VolumeX className="w-3.5 h-3.5 text-amber-400" />
+                      ) : (
+                        <Volume2 className="w-3.5 h-3.5 text-blue-400" />
+                      )}
+                    </button>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-base sm:text-xl font-bold text-white mb-1.5 sm:mb-2 group-hover:opacity-90">
-                      {feature.title}
-                    </h3>
-                    <p className="text-gray-400 text-xs sm:text-base leading-relaxed">
-                      {feature.description}
-                    </p>
+                </div>
+
+                {/* Center Play / Pause Floating Button */}
+                <div className="relative z-10 flex items-center justify-center my-auto pointer-events-none">
+                  <div 
+                    className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 ${
+                      isPlaying 
+                        ? 'bg-black/40 text-white/90 backdrop-blur-md opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 border border-white/20' 
+                        : 'bg-blue-600 text-white opacity-100 scale-100 shadow-blue-500/50 ring-4 ring-blue-500/30'
+                    }`}
+                  >
+                    {isPlaying ? (
+                      <Pause className="w-6 h-6" />
+                    ) : (
+                      <Play className="w-6 h-6 ml-0.5" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Bottom Controls Bar */}
+                <div 
+                  className="relative z-10 p-3 pt-2 bg-gradient-to-t from-slate-950/95 via-slate-950/70 to-transparent"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Time + Controls Row */}
+                  <div className="flex items-center justify-between text-[11px] font-mono text-slate-300 mb-1.5 px-0.5">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={togglePlay}
+                        className="text-slate-300 hover:text-white transition-colors"
+                        title={isPlaying ? "Pause" : "Play"}
+                      >
+                        {isPlaying ? <Pause className="w-3.5 h-3.5 text-blue-400" /> : <Play className="w-3.5 h-3.5 text-white" />}
+                      </button>
+                      <span>{formatTime(currentTime)}</span>
+                      <span className="text-slate-500">/</span>
+                      <span className="text-slate-400">{formatTime(duration)}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={togglePlaybackRate}
+                        className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors"
+                        title="Playback speed"
+                      >
+                        {playbackRate}x
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleFullscreen}
+                        className="text-slate-400 hover:text-white transition-colors"
+                        title="Fullscreen"
+                      >
+                        <Maximize2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Interactive Progress Bar */}
+                  <div 
+                    ref={progressBarRef}
+                    className="w-full h-2 rounded-full bg-slate-800/80 cursor-pointer overflow-hidden relative group/bar hover:h-2.5 transition-all"
+                    onClick={handleSeek}
+                  >
+                    <div 
+                      className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transition-[width] duration-100 relative"
+                      style={{ width: `${progressPercent}%` }}
+                    >
+                      <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-white shadow-sm rounded-full" />
+                    </div>
                   </div>
                 </div>
               </div>
-            ))}
+
+              {/* Interactive Live Chapter Breakdown List */}
+              <div className="space-y-2 text-xs">
+                {playerChapters.map((chap, idx) => {
+                  const isActive = activeChapterIndex === idx;
+                  const isCompleted = activeChapterIndex > idx;
+                  return (
+                    <button
+                      key={chap.id}
+                      type="button"
+                      onClick={() => handleChapterClick(chap.time)}
+                      className={`w-full text-left p-2.5 rounded-lg border transition-all flex items-center justify-between cursor-pointer ${
+                        isActive
+                          ? 'bg-blue-950/60 border-blue-500/50 shadow-sm shadow-blue-500/10'
+                          : isCompleted
+                          ? 'bg-slate-900/50 border-slate-800 hover:border-slate-700 text-slate-300'
+                          : 'bg-slate-900/30 border-slate-800/60 hover:border-slate-700/80 text-slate-400'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {isCompleted ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                        ) : isActive ? (
+                          <Play className="w-3.5 h-3.5 text-blue-400 fill-blue-400 animate-pulse shrink-0" />
+                        ) : (
+                          <Circle className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                        )}
+                        <span className={`font-medium ${isActive ? 'text-white font-semibold' : ''}`}>
+                          {chap.title}
+                        </span>
+                      </div>
+                      <span className={`text-[11px] font-mono ${
+                        isActive 
+                          ? 'text-blue-400 font-semibold' 
+                          : isCompleted 
+                          ? 'text-slate-400' 
+                          : 'text-slate-500'
+                      }`}>
+                        {isActive ? 'Playing' : isCompleted ? 'Completed' : chap.tag}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Features Grid */}
+          <div className="lg:col-span-7 grid sm:grid-cols-2 gap-4 sm:gap-6 order-1 lg:order-2">
+            {features.map((feat) => {
+              const Icon = feat.icon;
+              return (
+                <div
+                  key={feat.title}
+                  className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-sm border border-slate-800 hover:border-slate-700 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 group"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`p-3 rounded-xl bg-gradient-to-br ${feat.gradient} text-white shadow-md group-hover:scale-105 transition-transform`}>
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span className="text-[11px] font-semibold text-slate-400 px-2 py-0.5 rounded-full bg-slate-800/80 border border-slate-700/60">
+                      {feat.badge}
+                    </span>
+                  </div>
+                  <h3 className="text-base font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                    {feat.title}
+                  </h3>
+                  <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                    {feat.description}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

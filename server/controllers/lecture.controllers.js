@@ -29,7 +29,7 @@ export const createLecture = async (req, res) => {
     // Check course & educator
     const course = await Course.findById(courseId);
     if (!course) return res.status(404).json({ success: false, message: "Course not found" });
-    if (course.educator.toString() !== userId.toString()) {
+    if (course.educator.toString() !== userId.toString() && req.user.role !== 'admin') {
       return res.status(403).json({ success: false, message: "Not authorized to add lectures" });
     }
 
@@ -206,8 +206,8 @@ export const deleteLecture = async (req, res) => {
         .json({ success: false, message: "Lecture not found" });
     }
 
-    // Check if user is the educator of this course
-    if (lecture.course.educator.toString() !== userId.toString()) {
+    // Check if user is the educator of this course or admin
+    if (lecture.course.educator.toString() !== userId.toString() && req.user.role !== 'admin') {
       return res
         .status(403)
         .json({
@@ -250,8 +250,8 @@ export const reorderLectures = async (req, res) => {
         .json({ success: false, message: "Chapter not found" });
     }
 
-    // Check if user is the educator of this course
-    if (chapter.course.educator.toString() !== userId.toString()) {
+    // Check if user is the educator of this course or admin
+    if (chapter.course.educator.toString() !== userId.toString() && req.user.role !== 'admin') {
       return res
         .status(403)
         .json({
@@ -312,8 +312,9 @@ export const getLectureWithAccess = async (req, res) => {
 
     const isEnrolled = user.enrolledCourse && user.enrolledCourse.some(id => (id._id || id).toString() === courseId.toString());
     const isEducator = lecture.chapter.course.educator.toString() === userId.toString();
+    const isAdmin = req.user.role === 'admin';
 
-    if (!isEnrolled && !isEducator) {
+    if (!isEnrolled && !isEducator && !isAdmin) {
       return res.status(403).json({
         success: false,
         message: "Access denied. Please purchase this course to view lectures."
@@ -359,7 +360,8 @@ export const proxyDocument = async (req, res) => {
 
     const isEnrolled = user.enrolledCourse && user.enrolledCourse.some(id => (id._id || id).toString() === courseId.toString());
     const isEducator = lecture.chapter.course.educator.toString() === userId.toString();
-    if (!isEnrolled && !isEducator) {
+    const isAdmin = req.user.role === 'admin';
+    if (!isEnrolled && !isEducator && !isAdmin) {
       return res.status(403).json({ success: false, message: "Access denied" });
     }
 

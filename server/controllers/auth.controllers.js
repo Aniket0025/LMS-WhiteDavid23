@@ -227,21 +227,45 @@ export const resendOTP = async (req, res) => {
 };
 
 export const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, phone } = req.body;
   if (!name || !email || !password) {
-    return res.json({ success: false, message: "Please fill all the fields" });
+    return res.json({ success: false, message: "Please fill all the required fields" });
   }
 
   try {
     const existingUser = await User.findOne({ email });
 
-    if (existingUser) {
-      return res.json({ success: false, message: "User already exists" });
+    if (existingUser && existingUser.isVerified) {
+      return res.json({ success: false, message: "User already exists with this email" });
     }
 
     const hashpassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashpassword, isVerified: true });
-    await user.save();
+    let user;
+
+    if (existingUser && !existingUser.isVerified) {
+      // Update unverified user from previous OTP attempts to verified
+      user = await User.findByIdAndUpdate(
+        existingUser._id,
+        {
+          name,
+          password: hashpassword,
+          phone: phone || existingUser.phone || "",
+          isVerified: true,
+          otp: undefined,
+          otpExpiry: undefined,
+        },
+        { new: true }
+      );
+    } else {
+      user = new User({
+        name,
+        email,
+        password: hashpassword,
+        phone: phone || "",
+        isVerified: true
+      });
+      await user.save();
+    }
     
     const token = jwt.sign(
       { 
@@ -257,12 +281,20 @@ export const register = async (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
     });
-    res
-      .status(201)
-      .json({ success: true, message: "User registered successfully", token: token });
+    res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      token: token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
   } catch (error) {
+    console.error("Registration error:", error.message);
     res.status(500).json({ success: false, message: "Internal Server Error" });
-    console.log(error.message);
   }
 };
 
@@ -296,56 +328,12 @@ export const login = async (req, res) => {
       return res.json({ success: false, message: "Invalid Password.." });
     }
 
-    // Check if user is verified
+    // Auto-verify user if not already verified (registration OTP removed)
     if (!user.isVerified) {
-      // Generate OTP
-      const otp = generateOTP();
-      const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-      // Update user with new OTP details
-      user.otp = otp;
-      user.otpExpiry = otpExpiry;
+      user.isVerified = true;
+      user.otp = undefined;
+      user.otpExpiry = undefined;
       await user.save();
-
-      // Send OTP email
-      const emailResult = await sendOTPEmail(user.email, otp, user.name);
-      if (!emailResult.success) {
-        const isResendSandboxError = emailResult.error && (
-          emailResult.error.includes("550") || 
-          emailResult.error.toLowerCase().includes("testing emails") ||
-          emailResult.error.toLowerCase().includes("verify a domain")
-        );
-
-        if (isResendSandboxError && process.env.NODE_ENV !== 'production') {
-          console.log(`\n======================================================`);
-          console.log(`⚠️  RESEND SANDBOX RESTRICTION: Could not send email to ${user.email}`);
-          console.log(`👉 But we are in DEVELOPMENT mode!`);
-          console.log(`🔑 Verification OTP is: ${otp}`);
-          console.log(`======================================================\n`);
-
-          return res.json({
-            success: false,
-            message: "[Sandbox Mode] Email is not verified. Verification code printed to server console.",
-            requiresVerification: true,
-            userId: user._id,
-            email: user.email,
-            isSandbox: true
-          });
-        }
-
-        return res.json({ 
-          success: false, 
-          message: "Email is not verified. Failed to send verification code." 
-        });
-      }
-
-      return res.json({
-        success: false,
-        message: "Email is not verified. A verification code has been sent to your email.",
-        requiresVerification: true,
-        userId: user._id,
-        email: user.email
-      });
     }
 
     const token = jwt.sign(

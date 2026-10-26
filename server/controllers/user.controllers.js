@@ -284,11 +284,11 @@ export const userPurchaseCourse = async (req, res) => {
       });
     }
 
-    // Allow both students and educators to purchase courses
-    if (user.role !== 'student' && user.role !== 'educator') {
+    // Allow students, educators, and admins to purchase courses
+    if (user.role !== 'student' && user.role !== 'educator' && user.role !== 'admin') {
       return res.status(403).json({
         success: false,
-        message: "Only students and educators can purchase courses"
+        message: "Only students, educators and admins can purchase courses"
       });
     }
 
@@ -826,7 +826,7 @@ export const getUserStats = async (req, res) => {
 // get all students and educators
 export const getAllStudentsAndEducators = async (req, res) => {
   try {
-    const users = await User.find({ role: { $in: ['student', 'educator'] } }).populate('enrolledCourse', 'title');
+    const users = await User.find({ role: { $in: ['student', 'educator', 'admin'] } }).populate('enrolledCourse', 'title');
     res.status(200).json({
       success: true,
       data: users
@@ -852,10 +852,10 @@ export const educatorAddStudent = async (req, res) => {
     let user = await User.findOne({ email });
 
     if (user) {
-      if (user.role === 'educator') {
+      if (user.role === 'educator' || user.role === 'admin') {
         return res.status(400).json({
           success: false,
-          message: "User with this email is an educator and cannot be assigned student courses"
+          message: "User with this email is an educator/admin and cannot be assigned student courses"
         });
       }
 

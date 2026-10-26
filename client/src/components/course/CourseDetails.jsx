@@ -144,23 +144,6 @@ const CourseDetails = () => {
     }
   }, [courseId]);
 
-  useEffect(() => {
-    if (authLoading) return;
-    if (!isLoggedIn) {
-      navigate('/login');
-      return;
-    }
-    if (user && user.role === 'student' && courseId) {
-      const isEnrolled = user.enrolledCourse && user.enrolledCourse.some(c => {
-        const id = c._id || c;
-        return id.toString() === courseId.toString();
-      });
-      if (!isEnrolled) {
-        console.log("Student not enrolled in course. Redirecting to assign page...");
-        window.location.href = "https://whitedavid23.org/courses";
-      }
-    }
-  }, [user, isLoggedIn, authLoading, courseId, navigate]);
 
   useEffect(() => {
     checkPurchaseStatus();
@@ -277,7 +260,7 @@ const CourseDetails = () => {
         {/* Back Button to Student Dashboard / Search */}
         <div className="mb-2 sm:mb-4">
           <button
-            onClick={() => navigate(!isLoggedIn ? '/search' : user?.role === 'educator' ? '/educator/dashboard' : '/student/dashboard')}
+            onClick={() => navigate(!isLoggedIn ? '/search' : (user?.role === 'educator' || user?.role === 'admin') ? '/educator/dashboard' : '/student/dashboard')}
             className="inline-flex items-center space-x-2 px-3.5 py-2 bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 hover:text-white rounded-xl border border-slate-700/80 text-xs sm:text-sm font-semibold transition-all shadow-md group"
           >
             <ArrowLeft className="w-4 h-4 text-blue-400 group-hover:-translate-x-1 transition-transform" />

@@ -35,8 +35,8 @@ const StudentLayout = () => {
     );
   }
 
-  // Check if user has student role or is an educator (educators can access student features)
-  if (!user?.role || (user.role !== 'student' && user.role !== 'educator')) {
+  // Check if user has student role or is an educator/admin (educators and admins can access student features)
+  if (!user?.role || (user.role !== 'student' && user.role !== 'educator' && user.role !== 'admin')) {
     console.log('StudentLayout: Access denied. User:', user);
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 flex items-center justify-center pt-24">
@@ -81,9 +81,9 @@ const StudentLayout = () => {
     }
   ];
 
-  if (user?.role === 'educator') {
+  if (user?.role === 'educator' || user?.role === 'admin') {
     studentNavItems.push({
-      name: 'Educator Hub',
+      name: user?.role === 'admin' ? 'Admin Hub' : 'Educator Hub',
       href: '/educator/dashboard',
       icon: Sparkles
     });

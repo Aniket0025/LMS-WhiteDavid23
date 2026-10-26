@@ -21,10 +21,10 @@ export const createCourse = async (req, res) => {
     const { userId } = req.user;
 
     const educator = await User.findById(userId);
-    if (!educator || educator.role !== "educator") {
+    if (!educator || (educator.role !== "educator" && educator.role !== "admin")) {
       return res
         .status(403)
-        .json({ success: false, message: "Only educators can create courses" });
+        .json({ success: false, message: "Only educators and administrators can create courses" });
     }
 
     // Create the course
@@ -52,6 +52,10 @@ export const getAllCourses = async (req, res) => {
     const courses = await Course.find({ isPublished: true })
       .populate("educator", "name email avatar")
       .populate("chapters")
+      .populate({
+        path: "ratings.user",
+        select: "name avatar"
+      })
       .sort({ createdAt: -1 });
     
     res.status(200).json({ success: true, courses });
@@ -80,8 +84,8 @@ export const deleteCourse = async (req, res) => {
     // console.log('Course educator toString():', course.educator.toString());
     // console.log('Are they equal?:', course.educator.toString() === userId.toString());
 
-    // Check if user is the educator of this course
-    if (course.educator.toString() !== userId.toString()) {
+    // Check if user is the educator of this course or admin
+    if (course.educator.toString() !== userId.toString() && req.user.role !== 'admin') {
       return res.status(403).json({ 
         success: false, 
         message: "You are not authorized to delete this course" 
@@ -114,12 +118,12 @@ export const enrollInCourse = async (req, res) => {
         .json({ success: false, message: "Course not found" });
     }
 
-    if (user.role !== "student" && user.role !== "educator") {
+    if (user.role !== "student" && user.role !== "educator" && user.role !== "admin") {
       return res
         .status(403)
         .json({
           success: false,
-          message: "Only students can enroll in courses",
+          message: "Only students, educators and admins can enroll in courses",
         });
     }
 
@@ -158,9 +162,10 @@ export const enrollInCourse = async (req, res) => {
 // get course by educator
 export const getCourseEducator = async (req, res) => {
   try {
-    const { userId } = req.user;
+    const { userId, role } = req.user;
 
-    const courses = await Course.find({ educator: userId })
+    const query = role === 'admin' ? {} : { educator: userId };
+    const courses = await Course.find(query)
       .populate("educator", "name email avatar")
       .populate("chapters")
       .sort({ createdAt: -1 });
@@ -217,7 +222,7 @@ export const togglePublishCourse = async (req, res) => {
     // console.log('Course educator ID:', course.educator.toString());
     // console.log('User role:', req.user.role);
 
-    if (course.educator.toString() !== userId.toString()) {
+    if (course.educator.toString() !== userId.toString() && req.user.role !== 'admin') {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
 
@@ -303,8 +308,8 @@ export const updateCourse = async (req, res) => {
       return res.status(404).json({ success: false, message: "Course not found" });
     }
 
-    // Check if user is the educator of this course
-    if (course.educator.toString() !== userId.toString()) {
+    // Check if user is the educator of this course or admin
+    if (course.educator.toString() !== userId.toString() && req.user.role !== 'admin') {
       return res.status(403).json({ 
         success: false, 
         message: "You are not authorized to update this course" 
@@ -510,7 +515,7 @@ export const searchCourses = async(req,res)=>{
 // Get educator analytics
 export const getEducatorAnalytics = async (req, res) => {
   try {
-    const { userId } = req.user;
+    const { userId, role } = req.user;
     const { timeRange = '30d' } = req.query;
 
     // Calculate date range
@@ -532,8 +537,9 @@ export const getEducatorAnalytics = async (req, res) => {
         startDate.setDate(startDate.getDate() - 30);
     }
 
-    // Get educator's courses with ratings
-    const courses = await Course.find({ educator: userId })
+    // Get educator's or all courses for admin with ratings
+    const courseQuery = role === 'admin' ? {} : { educator: userId };
+    const courses = await Course.find(courseQuery)
       .populate("chapters")
       .populate("ratings.user", "name")
       .select('_id title price isPublished createdAt enrolledStudents ratings');

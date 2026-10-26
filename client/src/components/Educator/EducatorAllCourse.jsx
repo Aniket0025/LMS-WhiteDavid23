@@ -126,7 +126,7 @@ const EducatorAllCourse = () => {
         
         // Filter users by role
         const students = allUsers.filter(user => user.role === 'student');
-        const educators = allUsers.filter(user => user.role === 'educator');
+        const educators = allUsers.filter(user => user.role === 'educator' || user.role === 'admin');
         
         setPlatformStats({
           totalStudents: students.length,

@@ -67,7 +67,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Navigate to="/login" replace />} />
+                  <Route path="/signup" element={<Signup />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/forgot-password/verify-otp" element={<ForgotPasswordOTP />} />
                   <Route path="/reset-password" element={<ResetPassword />} />

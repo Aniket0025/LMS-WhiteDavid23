@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
   Mail,
   Lock,
@@ -376,8 +376,14 @@ const Login = () => {
 
           {/* Sign Up Link */}
           <div className="mt-6 text-center">
-            <p className="text-slate-400 text-xs italic">
-              Student accounts are provisioned by educators. If you do not have an account, please contact your training coordinator.
+            <p className="text-slate-400 text-sm">
+              Don't have an account?{" "}
+              <Link
+                to="/signup"
+                className="font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                Sign up
+              </Link>
             </p>
           </div>
         </motion.div>
