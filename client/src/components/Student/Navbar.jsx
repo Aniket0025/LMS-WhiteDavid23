@@ -18,7 +18,9 @@ import {
   GraduationCap,
   Compass,
   Home as HomeIcon,
-  Info
+  Info,
+  Smartphone,
+  Download
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { logoutUser } from "../../Api/authApi";
@@ -26,6 +28,7 @@ import { logoutUser } from "../../Api/authApi";
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [canInstallPWA, setCanInstallPWA] = useState(false);
   const { isLoggedIn, logout, user } = useAuth();
   const location = useLocation();
 
@@ -92,6 +95,22 @@ const Navbar = () => {
     setIsMenuOpen(false);
     setShowProfileDropdown(false);
   }, [location.pathname]);
+
+  // Track PWA install availability
+  useEffect(() => {
+    const handleInstallChange = (e) => {
+      setCanInstallPWA(e.detail?.canInstall ?? false);
+    };
+
+    if (window.__pwaDeferredPrompt) {
+      setCanInstallPWA(true);
+    }
+
+    window.addEventListener('pwa-can-install-changed', handleInstallChange);
+    return () => {
+      window.removeEventListener('pwa-can-install-changed', handleInstallChange);
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -227,6 +246,18 @@ const Navbar = () => {
             >
               <Search className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
             </Link>
+
+            {/* PWA Install Quick Action */}
+            {canInstallPWA && (
+              <button
+                onClick={() => window.promptPWAInstall?.()}
+                className="hidden lg:inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/30 hover:border-blue-400/60 transition-all shadow-sm active:scale-95"
+                title="Install whitedavid23 App"
+              >
+                <Download className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                <span>Install App</span>
+              </button>
+            )}
 
             {/* Auth Section */}
             {isLoggedIn ? (
@@ -383,7 +414,22 @@ const Navbar = () => {
                             </div>
                           </Link>
 
-
+                          {/* Install App Profile Dropdown Option */}
+                          {canInstallPWA && (
+                            <button
+                              onClick={() => {
+                                setShowProfileDropdown(false);
+                                window.promptPWAInstall?.();
+                              }}
+                              className="flex items-center space-x-3 p-4 text-blue-300 hover:text-blue-200 hover:bg-blue-900/20 rounded-xl transition-all duration-200 w-full text-left group"
+                            >
+                              <Smartphone className="w-6 h-6 group-hover:scale-110 transition-transform duration-200 text-blue-400" />
+                              <div>
+                                <span className="font-medium">Install whitedavid23 App</span>
+                                <p className="text-xs text-slate-400">Add to home screen for offline use</p>
+                              </div>
+                            </button>
+                          )}
 
                           <hr className="border-slate-700/50 my-3" />
 
@@ -600,6 +646,23 @@ const Navbar = () => {
                     <Info className="w-5 h-5 text-purple-400 shrink-0" />
                     <span className="text-sm font-medium">About whitedavid23</span>
                   </Link>
+
+                  {/* Mobile Menu PWA Install Action */}
+                  {canInstallPWA && (
+                    <button
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        window.promptPWAInstall?.();
+                      }}
+                      className="flex items-center space-x-3 px-3.5 py-3 rounded-xl bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-blue-300 border border-blue-500/30 hover:border-blue-400/60 transition-all w-full text-left shadow-sm my-1"
+                    >
+                      <Smartphone className="w-5 h-5 text-blue-400 shrink-0" />
+                      <div>
+                        <span className="text-sm font-bold block">Install whitedavid23 App</span>
+                        <span className="text-[11px] text-slate-400">Offline courses & faster playback</span>
+                      </div>
+                    </button>
+                  )}
                 </div>
 
                 {/* 3. Account / Workspace Section */}

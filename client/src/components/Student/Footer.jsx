@@ -54,6 +54,16 @@ const Footer = () => {
               <li>
                 <Link to="/about" className="hover:text-blue-400 transition-colors">About whitedavid23</Link>
               </li>
+              <li>
+                <button 
+                  type="button"
+                  onClick={() => window.promptPWAInstall ? window.promptPWAInstall() : alert("To install whitedavid23 on your device, tap 'Share' or menu in your browser and select 'Add to Home Screen'.")} 
+                  className="hover:text-blue-400 transition-colors text-left inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>Install Web App</span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">PWA</span>
+                </button>
+              </li>
             </ul>
           </div>
 

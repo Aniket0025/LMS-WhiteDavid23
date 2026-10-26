@@ -4,6 +4,9 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Student/Navbar.jsx';
 import Home from './pages/Home.jsx';
+import PWAInstallPrompt from './components/common/PWAInstallPrompt.jsx';
+import PWAOfflineIndicator from './components/common/PWAOfflineIndicator.jsx';
+import PWAUpdateToast from './components/common/PWAUpdateToast.jsx';
 import './index.css';
 
 // Code-split routes to dramatically reduce initial bundle size and speed up page load
@@ -73,6 +76,12 @@ function App() {
             },
           }}
         />
+
+        {/* PWA Enhancements: Real-time offline detection, smart install prompt, and seamless updates */}
+        <PWAOfflineIndicator />
+        <PWAInstallPrompt />
+        <PWAUpdateToast />
+
         <Suspense fallback={<PageFallback />}>
           <Routes>
             {/* Learning classroom route without navbar */}
